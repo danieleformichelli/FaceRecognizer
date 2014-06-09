@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="hello_world">Hello Loriana!</string>
+    <string name="app_name">FaceRecognizer</string>
+    <string name="title_section1">Sezione 1</string>
+    <string name="title_section2">Sezione 2</string>
+    <string name="title_section3">Sezione 3</string>
     <string name="action_settings">Impostazioni</string>
 
 </resources>
