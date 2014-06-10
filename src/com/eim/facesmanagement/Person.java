@@ -10,7 +10,8 @@ import android.util.Pair;
  * zero or more pairs (photo, features)
  * 
  */
-public class Person implements Comparable<Person> {
+public class Person implements Comparable<Person>  {
+	
 	String name;
 	List<Pair<String, Object>> photos;
 
