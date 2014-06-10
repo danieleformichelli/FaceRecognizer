@@ -14,7 +14,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="com.eim.facerecognition.FaceRecognizerMainActivity"
+            android:name="com.eim.utilities.FaceRecognizerMainActivity"
             android:label="@string/app_name"
             android:screenOrientation="landscape" >
             <intent-filter>

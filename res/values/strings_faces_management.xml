@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="add_person">Add person</string>
+	<string name="no_people">There are no people in the database</string>
+</resources>

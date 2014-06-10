@@ -1,4 +1,4 @@
-package com.eim.facerecognition;
+package com.eim.utilities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,36 +9,40 @@ import org.opencv.android.OpenCVLoader;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
 import android.os.Bundle;
-import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
 
+import com.eim.facerecognition.FaceRecognitionFragment;
 import com.eim.facesmanagement.FacesManagementFragment;
-import com.eim.utilities.SettingsFragment;
 import com.eim.R;
 
 public class FaceRecognizerMainActivity extends Activity {
 	private static final String TAG = "FaceRecognizerMainActivity";
+
+	int currentPosition;
 
 	SectionsPagerAdapter mSectionsPagerAdapter;
 	FaceRecognitionFragment mFaceRecognitionFragment;
 	FacesManagementFragment mFacesManagementFragment;
 	SettingsFragment mSettingsFragment;
 
+	List<Fragment> sections;
 	ViewPager mViewPager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_face_recognizer_main);
-		
+
+		// Instantiate the fragments
 		mFaceRecognitionFragment = new FaceRecognitionFragment();
 		mFacesManagementFragment = new FacesManagementFragment();
 		mSettingsFragment = new SettingsFragment();
 
-		List<Fragment> sections = new ArrayList<Fragment>();
+		// Create the sections of the adapter
+		sections = new ArrayList<Fragment>();
 		sections.add(mFaceRecognitionFragment);
 		sections.add(mFacesManagementFragment);
 		sections.add(mSettingsFragment);
@@ -51,53 +55,24 @@ public class FaceRecognizerMainActivity extends Activity {
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
+		mViewPager.setOnPageChangeListener(mOnPageChangeListener);
+
+		currentPosition = 0;
 	}
 
-	/**
-	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-	 * one of the sections/tabs/pages.
-	 */
-	public class SectionsPagerAdapter extends FragmentPagerAdapter {
-		List<Fragment> sections;
-
-		public SectionsPagerAdapter(FragmentManager fm, List<Fragment> sections) {
-			super(fm);
-
-			this.sections = sections;
-		}
-
+	OnPageChangeListener mOnPageChangeListener = new ViewPager.SimpleOnPageChangeListener() {
 		@Override
-		public Fragment getItem(int position) {
-			if (sections == null)
-				throw new IllegalStateException(
-						"Cannot call getItem if sections is null");
+		public void onPageSelected(int position) {
+			boolean swipeDirection = position - currentPosition > 0;
 
-			if (sections.size() < position + 1)
-				throw new IllegalStateException("Index out of bound: position "
-						+ position + ", size " + sections.size());
+			((Swipeable) sections.get(currentPosition))
+					.swipeOut(swipeDirection);
 
-			return sections.get(position);
+			((Swipeable) sections.get(position)).swipeIn(swipeDirection);
+
+			currentPosition = position;
 		}
-
-		@Override
-		public int getCount() {
-			if (sections == null)
-				throw new IllegalStateException(
-						"Cannot call getItem if sections is null");
-
-			return sections.size();
-		}
-
-		@Override
-		public CharSequence getPageTitle(int position) {
-
-			if (sections == null)
-				throw new IllegalStateException(
-						"Cannot call getItem if sections is null");
-
-			return sections.get(position).toString();
-		}
-	}
+	};
 
 	/**
 	 * OpenCV initialization

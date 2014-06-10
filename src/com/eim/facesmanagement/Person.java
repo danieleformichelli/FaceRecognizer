@@ -6,11 +6,11 @@ import java.util.List;
 import android.util.Pair;
 
 /**
- * This class represent a person to be recognized.
- * Each person has a name and zero or more pairs (photo, features)
- *
+ * This class represent a person to be recognized. Each person has a name and
+ * zero or more pairs (photo, features)
+ * 
  */
-public class Person {
+public class Person implements Comparable<Person> {
 	String name;
 	List<Pair<String, Object>> photos;
 
@@ -43,7 +43,7 @@ public class Person {
 				if (photo.first != null && photo.second != null)
 					this.photos.add(photo);
 	}
-	
+
 	public void addPhoto(Pair<String, Object> photo) {
 		if (photo != null && photo.first != null && photo.second != null)
 			this.photos.add(photo);
@@ -51,6 +51,11 @@ public class Person {
 
 	public void removePhoto(Pair<String, Object> photo) {
 		photos.remove(photo);
+	}
+
+	@Override
+	public int compareTo(Person another) {
+		return name.compareTo(another.getName());
 	}
 
 }

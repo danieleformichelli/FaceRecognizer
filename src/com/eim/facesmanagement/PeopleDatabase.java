@@ -1,5 +1,11 @@
 package com.eim.facesmanagement;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PeopleDatabase {
-	// TODO
+	public List<Person> getPeople() {
+		// TODO
+		return new ArrayList<Person>();
+	}
 }
