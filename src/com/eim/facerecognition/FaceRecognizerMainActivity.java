@@ -1,4 +1,4 @@
-package com.eim.facerecognizer;
+package com.eim.facerecognition;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,24 +15,14 @@ import android.support.v13.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
 
-import com.eim.facerecognizer.fragments.FaceDetectionFragment;
-import com.eim.facerecognizer.fragments.FaceRecognitionFragment;
-import com.eim.facerecognizer.fragments.FacesManagementFragment;
-import com.eim.facerecognizer.fragments.SettingsFragment;
-import com.formichelli.facerecognizer.R;
+import com.eim.facesmanagement.FacesManagementFragment;
+import com.eim.utilities.SettingsFragment;
+import com.eim.R;
 
 public class FaceRecognizerMainActivity extends Activity {
 	private static final String TAG = "FaceRecognizerMainActivity";
 
-	/**
-	 * The {@link android.support.v4.view.PagerAdapter} that will provide
-	 * fragments for each of the sections. We use a {@link FragmentPagerAdapter}
-	 * derivative, which will keep every loaded fragment in memory. If this
-	 * becomes too memory intensive, it may be best to switch to a
-	 * {@link android.support.v13.app.FragmentStatePagerAdapter}.
-	 */
 	SectionsPagerAdapter mSectionsPagerAdapter;
-	FaceDetectionFragment mFaceDetectionFragment;
 	FaceRecognitionFragment mFaceRecognitionFragment;
 	FacesManagementFragment mFacesManagementFragment;
 	SettingsFragment mSettingsFragment;
@@ -43,14 +33,12 @@ public class FaceRecognizerMainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_face_recognizer_main);
-
-		mFaceDetectionFragment = new FaceDetectionFragment();
+		
 		mFaceRecognitionFragment = new FaceRecognitionFragment();
 		mFacesManagementFragment = new FacesManagementFragment();
 		mSettingsFragment = new SettingsFragment();
 
 		List<Fragment> sections = new ArrayList<Fragment>();
-		sections.add(mFaceDetectionFragment);
 		sections.add(mFaceRecognitionFragment);
 		sections.add(mFacesManagementFragment);
 		sections.add(mSettingsFragment);

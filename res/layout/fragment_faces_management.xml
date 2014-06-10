@@ -6,7 +6,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.eim.facerecognizer.FaceRecognizerMainActivity$FacesManagementFragment" >
+    tools:context="com.eim.facerecognition.FaceRecognizerMainActivity$FacesManagementFragment" >
 
     <TextView
         android:id="@+id/section_label"

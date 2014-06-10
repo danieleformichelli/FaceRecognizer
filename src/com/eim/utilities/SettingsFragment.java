@@ -1,10 +1,10 @@
-package com.eim.facerecognizer.fragments;
+package com.eim.utilities;
 
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 
-import com.eim.facerecognizer.FaceRecognizerMainActivity;
-import com.formichelli.facerecognizer.R;
+import com.eim.facerecognition.FaceRecognizerMainActivity;
+import com.eim.R;
 
 public class SettingsFragment extends PreferenceFragment {
 	private static final String TAG = "SettingsFragment";

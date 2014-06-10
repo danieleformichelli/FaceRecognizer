@@ -1,4 +1,4 @@
-package com.eim.facerecognizer.fragments;
+package com.eim.facesmanagement;
 
 import android.os.Bundle;
 import android.app.Fragment;
@@ -6,8 +6,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.eim.facerecognizer.FaceRecognizerMainActivity;
-import com.formichelli.facerecognizer.R;
+import com.eim.facerecognition.FaceRecognizerMainActivity;
+import com.eim.R;
 
 public class FacesManagementFragment extends Fragment {
 	private static final String TAG = "FacesManagementFragment";

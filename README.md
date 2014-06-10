@@ -11,20 +11,20 @@ Attività che mostra il video della fotocamera, ci sovrappone l'etichetta/quadra
 
 Da qui si può navigare verso l'attività di training **FaceDetectionFragment** e verso la **SettingsFragment**.
 
-### FaceDetectionFragment
+### FaceDetectionActivity
 
 Chiama l'attività android per fare la foto. Se non ci sono facce nella foto, richiedere un'altra foto all'utente.
 
 Una volta fatta la foto, l'utente sceglie una faccia tra quelle trovate. (filtra i false positive)
 
-Poi vengono estratte le features e vengono ritornate al chiamante (insieme ad altre cose utili: thumbnail etc..)
+Poi vengono estratte le features e vengono ritornate al chiamante (insieme ad altre cose utili: thumbnail etc..). Questa activity verrà avviata dal FacesManagementFragment con startActivityForResult()
 
 ### FacesManagementFragment
 
 Lista coi nomi delle facce riconosciute, possibiltà di aggiungere (vedi **FaceDetectionFragment**) o rimuovere facce/nomi.
-	
+
 ### SettingsFragment
-	
+
 Attività per i settaggi. Per ora contiene:
 
 - eventuali parametri del detection e del recognition
@@ -33,10 +33,10 @@ Attività per i settaggi. Per ora contiene:
 ### FacesContentProvider (o FaceDB)
 
 Database delle facce. Deve poter gestire le seguenti "tabelle":
-	
+
 	People: < person_id, nome, [eventiali_dati_di_un_nome] >
 	Faces: < face_id, person_id, thumbnail, features >
-	
+
 Note
 ----
 
