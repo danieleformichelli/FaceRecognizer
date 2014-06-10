@@ -17,15 +17,13 @@ import android.widget.TextView;
 import com.eim.R;
 
 /**
- * ExpandableAdapter that shows issues titles and when expanded shows issue
- * details
+ * ExpandableAdapter that shows the people in the database
  */
 public class PeopleExpandableAdapter extends BaseExpandableListAdapter {
 	private Context context;
 	List<Person> objects;
 	int groupResource, childResource;
-	OnClickListener deletePersonOnClickListener, editPersonNameOnClickListener, deletePhotoOnClickListener,
-			addPhotoOnClickListener;
+	PeopleAdapterListener peopleAdapterListener;;
 
 	/**
 	 * 
@@ -47,22 +45,17 @@ public class PeopleExpandableAdapter extends BaseExpandableListAdapter {
 	 */
 	public PeopleExpandableAdapter(Activity context, int groupResource,
 			int childResource, List<Person> objects,
-			OnClickListener deletePersonOnClickListener,
-			OnClickListener editPersonNameOnClickListener,
-			OnClickListener deletePhotoOnClickListener,
-			OnClickListener addPhotoOnClickListener) {
+			PeopleAdapterListener peopleAdapterListener) {
 
 		this.context = context;
+
 		this.groupResource = groupResource;
 		this.childResource = childResource;
+
 		this.objects = new ArrayList<Person>();
 		replaceItems(objects);
 
-		this.deletePersonOnClickListener = deletePersonOnClickListener;
-		this.editPersonNameOnClickListener = editPersonNameOnClickListener;
-		this.deletePhotoOnClickListener = deletePhotoOnClickListener;
-		this.addPhotoOnClickListener = addPhotoOnClickListener;
-
+		this.peopleAdapterListener = peopleAdapterListener;
 	}
 
 	@Override
@@ -74,7 +67,8 @@ public class PeopleExpandableAdapter extends BaseExpandableListAdapter {
 
 		Person object = objects.get(groupPosition);
 
-		TextView name = (TextView) item.findViewById(R.id.person_list_item_label);
+		TextView name = (TextView) item
+				.findViewById(R.id.person_list_item_label);
 		name.setText(object.getName());
 		name.setTag(object);
 
@@ -85,10 +79,11 @@ public class PeopleExpandableAdapter extends BaseExpandableListAdapter {
 			name.setCompoundDrawablesWithIntrinsicBounds(
 					R.drawable.action_expand, 0, 0, 0);
 
-		ImageView edit = (ImageView) item.findViewById(R.id.person_list_item_edit_button);
+		ImageView edit = (ImageView) item
+				.findViewById(R.id.person_list_item_edit_button);
 		edit.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
 		edit.setOnClickListener(editPersonNameOnClickListener);
-		
+
 		return item;
 	}
 
@@ -158,4 +153,11 @@ public class PeopleExpandableAdapter extends BaseExpandableListAdapter {
 
 		notifyDataSetChanged();
 	}
+
+	private OnClickListener editPersonNameOnClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+		}
+	};
 }

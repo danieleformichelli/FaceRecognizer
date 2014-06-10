@@ -7,27 +7,27 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class PeopleDBOpenHelper extends SQLiteOpenHelper {
 	
-	private static final String DB_NAME = "face.db";
+	private static final String DB_NAME = "faces.db";
 	private static final int VERSION = 1;
 
-	private static final String DB_CREATE_PERSON = "create table " 
-			 + FacesContent.People.TABLE + "(" 
-			 + FacesContent.People._ID + " INTEGER PRIMARY KEY, " 
-			 + FacesContent.People.NAME + " TEXT UNIQUE " 
+	private static final String DB_CREATE_PEOPLE = "create table " 
+			 + FacesContract.People.TABLE + "(" 
+			 + FacesContract.People._ID + " INTEGER PRIMARY KEY, " 
+			 + FacesContract.People.NAME + " TEXT UNIQUE " 
 			 +")";
 	
 	private static final String DB_CREATE_FACES = "create table " 
-			 + FacesContent.Faces.TABLE + "(" 
-			 + FacesContent.Faces._ID + " INTEGER PRIMARY KEY, " 
-			 + FacesContent.Faces.PERSON_ID+ " TEXT UNIQUE "
-			 + FacesContent.Faces.THUMBNAIL + "TEXT"
-			 + FacesContent.Faces.FEATURES + "TEXT"
-			 + "FOREIGN KEY(" + FacesContent.Faces.PERSON_ID + ") REFERENCES " 
-			 + FacesContent.Faces.TABLE + "(" + FacesContent.People._ID + ")"
+			 + FacesContract.Faces.TABLE + "(" 
+			 + FacesContract.Faces._ID + " INTEGER PRIMARY KEY, " 
+			 + FacesContract.Faces.PERSON_ID+ " TEXT UNIQUE "
+			 + FacesContract.Faces.THUMBNAIL + "TEXT"
+			 + FacesContract.Faces.FEATURES + "TEXT"
+			 + "FOREIGN KEY(" + FacesContract.Faces.PERSON_ID + ") REFERENCES " 
+			 + FacesContract.Faces.TABLE + "(" + FacesContract.People._ID + ")"
 			 + ")";
 
-	public PeopleDBOpenHelper() {
-		//TODO: costruttore
+	public PeopleDBOpenHelper(Context context) {
+		super(context, DB_NAME, null, VERSION);
 	}
 	
 	public PeopleDBOpenHelper(Context context, String name,
@@ -39,15 +39,15 @@ public class PeopleDBOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onCreate(SQLiteDatabase db) {
-		db.execSQL(DB_CREATE_PERSON);
+		db.execSQL(DB_CREATE_PEOPLE);
 		db.execSQL(DB_CREATE_FACES);
 	}
 
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		db.execSQL("DROP TABLE IF EXIST " + FacesContent.Faces.TABLE);
-		db.execSQL("DROP TABLE IF EXIST " + FacesContent.People.TABLE);
+		db.execSQL("DROP TABLE IF EXIST " + FacesContract.Faces.TABLE);
+		db.execSQL("DROP TABLE IF EXIST " + FacesContract.People.TABLE);
 		onCreate(db);
 	}
 	

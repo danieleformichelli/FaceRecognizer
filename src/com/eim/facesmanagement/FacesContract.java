@@ -2,7 +2,7 @@ package com.eim.facesmanagement;
 
 import android.provider.BaseColumns;
 
-public class FacesContent {
+public class FacesContract {
 	public static abstract class People implements BaseColumns {
 		public static final String TABLE = "people";
 		public static final String NAME = "name";

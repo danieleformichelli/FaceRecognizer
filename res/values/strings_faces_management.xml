@@ -2,5 +2,11 @@
 <resources>
 
     <string name="add_person">Add person</string>
-	<string name="no_people">There are no people in the database</string>
+    <string name="no_people">There are no people in the database</string>
+    <string name="alert_dialog_insert_person">Insert person name</string>
+    <string name="alert_dialog_edit_person">Edit person name</string>
+    <string name="alert_dialog_person_name_label">Name: </string>
+    <string name="alert_dialog_ok">Ok</string>
+    <string name="alert_dialog_cancel">Cancel</string>
+
 </resources>

@@ -38,26 +38,20 @@ public class PhotoGallery extends HorizontalScrollView {
 
 	public PhotoGallery(Context context) {
 		super(context);
+		Log.e(TAG, context.toString());
 		initView();
 	}
 
 	public PhotoGallery(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		readAttributes(attrs);
+		Log.e(TAG, context.toString());
 		initView();
 	}
 
 	public PhotoGallery(Context context, AttributeSet attrs, int defStyle) {
-		this(context, attrs);
-		readAttributes(attrs);
+		super(context, attrs, defStyle);
+		Log.e(TAG, context.toString());
 		initView();
-	}
-
-	private void readAttributes(AttributeSet attrs) {
-		// TypedArray a = getContext().getTheme().obtainStyledAttributes(attrs,
-		// com.eim.R.styleable.PhotoGallery, 0, 0);
-		//
-		// locked = a.getBoolean(R.styleable.PhotoGallery_locked, false);
 	}
 
 	private void initView() {

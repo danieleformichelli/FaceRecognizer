@@ -1,13 +1,17 @@
 package com.eim.facesmanagement;
 
+import java.util.List;
+
 import android.os.Bundle;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
+import android.widget.TextView;
 
 import com.eim.utilities.FaceRecognizerMainActivity;
 import com.eim.utilities.Swipeable;
@@ -19,17 +23,11 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 	FaceRecognizerMainActivity activity;
 	ExpandableListView peopleList;
 	PeopleExpandableAdapter peopleAdapter;
+	TextView addPerson;
 
 	PeopleDatabase peopleDatabase;
+	List<Person> people;
 
-	private OnClickListener deletePerson;
-
-	private OnClickListener editPersonName;
-
-	private OnClickListener deletePhoto;
-
-	private OnClickListener addPhoto;
-	
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -42,24 +40,72 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 		super.onActivityCreated(savedInstanceState);
 
 		activity = (FaceRecognizerMainActivity) getActivity();
-		
-		peopleDatabase = new PeopleDatabase();
-		peopleList = (ExpandableListView) activity.findViewById(R.id.faces_management_people_list);
-		peopleAdapter = new PeopleExpandableAdapter(activity, R.id.person_list_item_label, R.id.person_view, peopleDatabase.getPeople(), deletePerson, editPersonName, deletePhoto, addPhoto);
+
+		peopleDatabase = new PeopleDatabase(activity);
+		people = peopleDatabase.getPeople();
+
+		addPerson = (TextView) activity
+				.findViewById(R.id.faces_management_add_person);
+		addPerson.setOnClickListener(addPersonListener);
+		peopleList = (ExpandableListView) activity
+				.findViewById(R.id.faces_management_people_list);
+		peopleAdapter = new PeopleExpandableAdapter(activity,
+				R.id.person_list_item_label, R.id.person_view, people,
+				peopleAdapterListener);
+	}
+
+	private PeopleAdapterListener peopleAdapterListener = new PeopleAdapterListener() {
+
+		@Override
+		public void onPersonAdded(String name) {
+			peopleDatabase.addPerson(name);
+		}
+
+		@Override
+		public void onPersonEdited(String oldName, String newName) {
+			// peopleDatabase.editPersonName(oldName, newName);
+		}
+
+		@Override
+		public void onPersonRemoved(String name) {
+			// peopleDatabase.removePerson(name);
+		}
+
+		@Override
+		public void onPhotoAdded(String name, String photo) {
+			// peopleDatabase.addPhoto(name, photo);
+
+		}
+
+		@Override
+		public void onPhotoRemoved(String photo) {
+			// peopleDatabase.removePhoto(photo);
+		}
+	};
+
+	@Override
+	public void swipeOut(boolean toRight) {
+		Log.e(TAG, "swiped out to " + (toRight ? "right" : "left"));
 	}
 
 	@Override
-	public String toString() {
-		return TAG;
+	public void swipeIn(boolean fromRight) {
+		Log.e(TAG, "swiped in from " + (fromRight ? "right" : "left"));
 	}
 
-	@Override
-	public void swipeOut(boolean right) {
-		Log.i(TAG, "swiped out");
-	}
+	OnClickListener addPersonListener = new OnClickListener() {
 
-	@Override
-	public void swipeIn(boolean right) {
-		Log.i(TAG, "swiped in");
-	}
+		@Override
+		public void onClick(View v) {
+			new InsertNameDialog(addPersonOkListener, null).show(
+					getFragmentManager(), TAG);
+		}
+
+		DialogInterface.OnClickListener addPersonOkListener = new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int which) {
+				// peopleDatabase.addPerson(name);
+			}
+		};
+	};
 }

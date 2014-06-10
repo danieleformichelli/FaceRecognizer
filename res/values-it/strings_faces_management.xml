@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="add_person">Aggiungi persona</string>
+    <string name="no_people">Non ci sono persone nel database</string>
+    <string name="alert_dialog_insert_person">Inserisci il nome</string>
+    <string name="alert_dialog_person_name_label">Nome: </string>
+    <string name="alert_dialog_ok">Ok</string>
+    <string name="alert_dialog_cancel">Annulla</string>
+
+</resources>
