@@ -9,6 +9,7 @@ import org.opencv.android.OpenCVLoader;
 
 import android.app.Activity;
 import android.app.Fragment;
+
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -87,6 +88,7 @@ public class FaceRecognizerMainActivity extends Activity {
 						switch (status) {
 						case LoaderCallbackInterface.SUCCESS:
 							Log.i(TAG, "OpenCV loaded successfully");
+							mFaceRecognitionFragment.onOpenCVLoaded();
 							break;
 						default:
 							Log.i(TAG, "OpenCV connection error: " + status);
@@ -94,5 +96,9 @@ public class FaceRecognizerMainActivity extends Activity {
 						}
 					}
 				});
+	}
+	
+	public interface OpenCVLoadedCallback {
+		void onOpenCVLoaded();
 	}
 }
