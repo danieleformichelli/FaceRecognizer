@@ -69,7 +69,7 @@ public class FaceRecognizerMainActivity extends Activity {
 			((Swipeable) sections.get(currentPosition))
 					.swipeOut(swipeDirection);
 
-			((Swipeable) sections.get(position)).swipeIn(swipeDirection);
+			((Swipeable) sections.get(position)).swipeIn(!swipeDirection);
 
 			currentPosition = position;
 		}
