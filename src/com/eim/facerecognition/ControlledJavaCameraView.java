@@ -10,7 +10,6 @@ import android.hardware.Camera.Size;
 import android.util.AttributeSet;
 
 public class ControlledJavaCameraView extends JavaCameraView {
-	private static final String TAG = "ControlledJavaCameraView";
 
     public ControlledJavaCameraView(Context context, AttributeSet attrs) {
         super(context, attrs);
