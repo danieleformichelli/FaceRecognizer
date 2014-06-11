@@ -11,7 +11,7 @@ public class FacesContract {
 	public static abstract class Faces implements BaseColumns {
 		public static final String TABLE = "faces";
 		public static final String PERSON_ID = "person_id";
-		public static final String THUMBNAIL = "thumbnail";
+		public static final String PHOTO_URL = "photo_url";
 		public static final String FEATURES = "features";
 	}
 }

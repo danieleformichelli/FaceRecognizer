@@ -19,26 +19,41 @@ public class PeopleDatabase {
 		pdboh = new PeopleDBOpenHelper(context);
 	}
 	
-	public void editperson(String oldName, String newName) {
+	public void editPerson(String oldName, String newName) {
+		SQLiteDatabase db = pdboh.getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(FacesContract.People.NAME, newName);
+		db.update(FacesContract.People.TABLE, values, FacesContract.People.NAME + " = '" + oldName + "'", null);
 	}
 	
 	public void removePerson(String name) {
-		
+		SQLiteDatabase db = pdboh.getWritableDatabase();
+		String whereClause = FacesContract.Faces.PERSON_ID + " = '" + name + "'";
+		db.delete(FacesContract.Faces.TABLE, whereClause, null);
+		whereClause = FacesContract.People._ID + "= '" + name +"'";
+		db.delete(FacesContract.People.TABLE, whereClause, null);
 	}
 	
 	public void addPerson(String name) {
 		SQLiteDatabase db = pdboh.getWritableDatabase();
 		ContentValues values = new ContentValues();
 		values.put(FacesContract.People.NAME, name);
-		long r = db.insert(FacesContract.People.TABLE, null, values);
+		db.insert(FacesContract.People.TABLE, null, values);
 	}
 	
-	public void addPhoto(String name, String photoUrl) {
-		
+	public void addPhoto(String name, String photoUrl, String features) {
+		SQLiteDatabase db = pdboh.getWritableDatabase();
+		ContentValues values = new ContentValues();
+		values.put(FacesContract.Faces.PERSON_ID, name);
+		values.put(FacesContract.Faces.PHOTO_URL, photoUrl);
+		values.put(FacesContract.Faces.FEATURES, features);
+		db.insert(FacesContract.Faces.TABLE, null, values);
 	}
 	
-	public void removePhoto(String photoUrl) {
-		
+	public void removePhoto(String name, String photoUrl) {
+		SQLiteDatabase db = pdboh.getWritableDatabase();
+		String whereClause = FacesContract.Faces.PHOTO_URL + " = '" + photoUrl + "' AND " + FacesContract.Faces.PERSON_ID + " = '" + name + "'";
+		db.delete(FacesContract.Faces.TABLE, whereClause, null);
 	}
 	
 	public List<Person> getPeople() {

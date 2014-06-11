@@ -19,9 +19,9 @@ public class PeopleDBOpenHelper extends SQLiteOpenHelper {
 	private static final String DB_CREATE_FACES = "create table " 
 			 + FacesContract.Faces.TABLE + "(" 
 			 + FacesContract.Faces._ID + " INTEGER PRIMARY KEY, " 
-			 + FacesContract.Faces.PERSON_ID+ " TEXT UNIQUE "
-			 + FacesContract.Faces.THUMBNAIL + "TEXT"
-			 + FacesContract.Faces.FEATURES + "TEXT"
+			 + FacesContract.Faces.PERSON_ID + " TEXT UNIQUE "
+			 + FacesContract.Faces.PHOTO_URL + " TEXT "
+			 + FacesContract.Faces.FEATURES + " TEXT "
 			 + "FOREIGN KEY(" + FacesContract.Faces.PERSON_ID + ") REFERENCES " 
 			 + FacesContract.Faces.TABLE + "(" + FacesContract.People._ID + ")"
 			 + ")";
