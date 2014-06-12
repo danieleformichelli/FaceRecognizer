@@ -26,7 +26,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 	private static final String TAG = "FacesManagementFragment";
 	private static final int FACE_DETECTION_AND_EXTRACTION = 1;
 
-	FaceRecognizerMainActivity activity;
+	Activity activity;
 	ExpandableListView peopleList;
 	PeopleAdapter peopleAdapter;
 	TextView addPerson, noPeopleMessage;

@@ -1,14 +1,13 @@
 package com.eim.facerecognition;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
+import org.opencv.android.LoaderCallbackInterface;
+import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -18,10 +17,9 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-import org.opencv.objdetect.CascadeClassifier;
 
+import android.app.Activity;
 import android.app.Fragment;
-import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -33,28 +31,14 @@ import android.view.WindowManager;
 
 import com.eim.R;
 import com.eim.facedetection.FaceDetector;
-import com.eim.utilities.FaceRecognizerMainActivity;
 import com.eim.utilities.Swipeable;
 
 public class FaceRecognitionFragment extends Fragment implements Swipeable,
-		CvCameraViewListener2, FaceRecognizerMainActivity.OpenCVLoadedCallback {
-
-	public class LabelledRect {
-		public LabelledRect(Rect rect, String text, Object thumbnail) {
-			super();
-			this.rect = rect;
-			this.text = text;
-			this.thumbnail = thumbnail;
-		}
-
-		public Rect rect;
-		public String text;
-		public Object thumbnail;
-	}
-
+		CvCameraViewListener2 {
 	private static final String TAG = "FaceRecognitionFragment";
-
 	private static final Scalar FACE_RECT_COLOR = new Scalar(255, 192, 100, 255);
+	
+	Activity activity;
 
 	private ControlledJavaCameraView mCameraView;
 
@@ -88,8 +72,10 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
+		
+		activity = getActivity();
 		// XXX da gestire in uscita?
-		getActivity().getWindow().addFlags(
+		activity.getWindow().addFlags(
 				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		setupFaceDetection();
@@ -115,22 +101,36 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mCameraView.enableView();
 	}
 
+	@Override
 	public void onResume() {
 		super.onResume();
+			OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, activity,
+					new BaseLoaderCallback(activity) {
+						@Override
+						public void onManagerConnected(int status) {
+							switch (status) {
+							case LoaderCallbackInterface.SUCCESS:
+								Log.i(TAG, "OpenCV loaded successfully");
+								onOpenCVLoaded();
+								break;
+							default:
+								Log.i(TAG, "OpenCV connection error: " + status);
+								super.onManagerConnected(status);
+							}
+						}
+					});
 		if (mOpenCVLoaded)
 			mCameraView.enableView();
 	}
 
 	@Override
 	public void onPause() {
-
 		if (mCameraView != null)
 			mCameraView.disableView();
 
 		super.onPause();
 	}
 
-	@Override
 	public void onOpenCVLoaded() {
 		mOpenCVLoaded = true;
 		if (mCameraView != null)
@@ -245,5 +245,18 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	private void setupFaceDetection() {
 		mFaceDetector = new FaceDetector(getActivity());
+	}
+	
+	public class LabelledRect {
+		public LabelledRect(Rect rect, String text, Object thumbnail) {
+			super();
+			this.rect = rect;
+			this.text = text;
+			this.thumbnail = thumbnail;
+		}
+
+		public Rect rect;
+		public String text;
+		public Object thumbnail;
 	}
 }
