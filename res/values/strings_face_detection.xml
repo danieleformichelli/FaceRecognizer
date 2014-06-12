@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="face_detection_add_photo_title">Add photo</string>
+    <string name="face_detection_retry_add_photo_title">No face found. Try again!</string>
+	<string name="face_detection_choose_face">Choose the face you want to recognize</string>
+	
+    <string-array name="face_detection_add_photo_options">
+        <item>Take from camera</item>
+        <item>Pick from gallery</item>
+    </string-array>
+
 </resources>
