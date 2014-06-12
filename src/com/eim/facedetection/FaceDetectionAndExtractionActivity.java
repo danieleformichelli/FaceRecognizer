@@ -54,13 +54,13 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 
 	private FaceDetector mFaceDetector;
 
-	private String mLabelName = "Tizio";
+	private String mLabelName = "Unknown";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		//mLabelName = getIntent().getExtras().getString(PERSON_NAME);
+		mLabelName = getIntent().getExtras().getString(PERSON_NAME);
 	}
 
 	/**
