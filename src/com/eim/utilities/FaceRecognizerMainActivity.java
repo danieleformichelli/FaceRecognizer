@@ -38,13 +38,13 @@ public class FaceRecognizerMainActivity extends Activity {
 		setContentView(R.layout.activity_face_recognizer_main);
 
 		// Instantiate the fragments
-		mFaceRecognitionFragment = new FaceRecognitionFragment();
+//		mFaceRecognitionFragment = new FaceRecognitionFragment();
 		mFacesManagementFragment = new FacesManagementFragment();
 		mSettingsFragment = new SettingsFragment();
 
 		// Create the sections of the adapter
 		sections = new ArrayList<Fragment>();
-		sections.add(mFaceRecognitionFragment);
+//		sections.add(mFaceRecognitionFragment);
 		sections.add(mFacesManagementFragment);
 		sections.add(mSettingsFragment);
 
@@ -88,7 +88,7 @@ public class FaceRecognizerMainActivity extends Activity {
 						switch (status) {
 						case LoaderCallbackInterface.SUCCESS:
 							Log.i(TAG, "OpenCV loaded successfully");
-							mFaceRecognitionFragment.onOpenCVLoaded();
+//							mFaceRecognitionFragment.onOpenCVLoaded();
 							break;
 						default:
 							Log.i(TAG, "OpenCV connection error: " + status);

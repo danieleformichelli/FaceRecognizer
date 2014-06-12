@@ -36,13 +36,15 @@ public interface PeopleAdapterListener {
 	 * @param photo
 	 *            url of the photo
 	 */
-	public void onPhotoAdded(String name, String photo);
+	public void onPhotoAdded(String name, String photo, String features);
 
 	/**
 	 * A photo has been deleted
 	 * 
+	 * @param name
+	 *            name of the person
 	 * @param photo
 	 *            url of the photo
 	 */
-	public void onPhotoRemoved(String photo);
+	void onPhotoRemoved(String name, String photo);
 }
