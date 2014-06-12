@@ -15,8 +15,6 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
-import org.opencv.core.Size;
-import org.opencv.objdetect.CascadeClassifier;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -36,7 +34,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.eim.R;
 
@@ -48,12 +45,8 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 
 	private File mSceneFile;
 	private Mat mScene;
-
-	private File mCascadeFile;
-	private CascadeClassifier mJavaDetector;
-
-	private long mAbsoluteFaceSize = 0;
-	private double mRelativeFaceSize = 0.2;
+	
+	private FaceDetector mFaceDetector;
 
 	private String mLabelName = "Tizio";
 
@@ -228,77 +221,25 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 	}
 
 	private void initDetector() {
-
-		try {
-			// load cascade file from application resources
-			InputStream is = getResources().openRawResource(
-					R.raw.lbpcascade_frontalface);
-			File cascadeDir = this.getDir("cascade", Context.MODE_PRIVATE);
-			mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
-			FileOutputStream os = new FileOutputStream(mCascadeFile);
-
-			byte[] buffer = new byte[4096];
-			int bytesRead;
-			while ((bytesRead = is.read(buffer)) != -1) {
-				os.write(buffer, 0, bytesRead);
-			}
-			is.close();
-			os.close();
-
-			mJavaDetector = new CascadeClassifier(
-					mCascadeFile.getAbsolutePath());
-			if (mJavaDetector.empty()) {
-				Log.e(TAG, "Failed to load cascade classifier");
-				mJavaDetector = null;
-			} else
-				Log.i(TAG,
-						"Loaded cascade classifier from "
-								+ mCascadeFile.getAbsolutePath());
-
-			// mNativeDetector = new
-			// DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0);
-			cascadeDir.delete();
-
-		} catch (IOException e) {
-			e.printStackTrace();
-			Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
-		}
-
+		
+		mFaceDetector = new FaceDetector(this);
+		
 		Bitmap sceneBitmap = BitmapFactory.decodeFile(mSceneFile
 				.getAbsolutePath());
-
 		mScene = new Mat();
 		Utils.bitmapToMat(sceneBitmap, mScene);
 		sceneBitmap = null; // free bitmap memory
-
-		int height = mScene.rows();
-		if (Math.round(height * mRelativeFaceSize) > 0)
-			mAbsoluteFaceSize = Math.round(height * mRelativeFaceSize);
-
-		// mNativeDetector.setMinFaceSize(mAbsoluteFaceSize);
+		
 	}
 
 	private Bitmap[] detectFaces() {
-		if (mJavaDetector == null)
+		if (mFaceDetector == null)
 			initDetector();
 
 		MatOfRect faces = new MatOfRect();
 
-		if (true) {
-			if (mJavaDetector != null)
-				mJavaDetector.detectMultiScale(mScene, faces, 1.1, 2,
-						2, // TODO: objdetect.CV_HAAR_SCALE_IMAGE
-						new Size(mAbsoluteFaceSize, mAbsoluteFaceSize),
-						new Size());
-		}
-		// else if (mDetectorType == NATIVE_DETECTOR) {
-		// if (mNativeDetector != null)
-		// mNativeDetector.detect(mGray, faces);
-		// }
-		// else {
-		// Log.e(TAG, "Detection method is not selected!");
-		// }
-		Rect[] faceRegions = faces.toArray();
+		Rect[] faceRegions = mFaceDetector.detect(mScene, faces);
+		
 		Bitmap[] detectedFaces = new Bitmap[faceRegions.length];
 
 		Mat subRegion = new Mat();

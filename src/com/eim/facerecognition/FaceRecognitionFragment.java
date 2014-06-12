@@ -32,6 +32,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 
 import com.eim.R;
+import com.eim.facedetection.FaceDetector;
 import com.eim.utilities.FaceRecognizerMainActivity;
 import com.eim.utilities.Swipeable;
 
@@ -59,17 +60,13 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	private boolean mOpenCVLoaded = false;
 
-	private File mCascadeFile;
-	private CascadeClassifier mJavaDetector;
-
 	private Mat mGray;
 	private Mat mRgba;
 
-	private long mAbsoluteFaceSize = 0;
-	private double mRelativeFaceSize = 0.3;
-
 	private Mat mTestThumbnail;
 	private int mThumbnailSize = 25;
+
+	private FaceDetector mFaceDetector;
 
 	/**
 	 * Called when the fragment is first created.
@@ -148,6 +145,21 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		 */
 		mGray = new Mat();
 		mRgba = new Mat();
+		
+		// TEST THUMBNAIL LOADING
+		Bitmap thumb = BitmapFactory.decodeResource(getResources(), R.drawable.barbetta);
+		Mat thumbnail = new Mat();
+		Mat transparentThumbnail = new Mat();
+		Utils.bitmapToMat(thumb, thumbnail);
+		mTestThumbnail = new Mat();
+					
+		double absoluteFaceSize = height * mFaceDetector.getRelativeFaceSize();
+		mThumbnailSize = (int) (absoluteFaceSize  * 0.6);
+		Core.subtract(thumbnail, new Scalar(0,0,0,100), transparentThumbnail);
+					
+		Imgproc.resize(transparentThumbnail, mTestThumbnail, new Size(mThumbnailSize, mThumbnailSize));
+		thumbnail.release();
+		transparentThumbnail.release();
 	}
 
 	@Override
@@ -162,46 +174,9 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mRgba = inputFrame.rgba();
 		mGray = inputFrame.gray();
 
-		if (mAbsoluteFaceSize == 0) {
-			int height = mGray.rows();
-			if (Math.round(height * mRelativeFaceSize) > 0) {
-				mAbsoluteFaceSize = Math.round(height * mRelativeFaceSize);
-			}
-			// mNativeDetector.setMinFaceSize(mAbsoluteFaceSize);
-			
-			// TEST THUMBNAIL LOADING
-			Bitmap thumb = BitmapFactory.decodeResource(getResources(), R.drawable.barbetta);
-			Mat thumbnail = new Mat();
-			Mat transparentThumbnail = new Mat();
-			Utils.bitmapToMat(thumb, thumbnail);
-			mTestThumbnail = new Mat();
-						
-			mThumbnailSize = (int) (mAbsoluteFaceSize * 0.6);
-			Core.subtract(thumbnail, new Scalar(0,0,0,100), transparentThumbnail);
-						
-			Imgproc.resize(transparentThumbnail, mTestThumbnail, new Size(mThumbnailSize, mThumbnailSize));
-			thumbnail.release();
-			transparentThumbnail.release();
-		}
-
 		MatOfRect faces = new MatOfRect();
 
-		if (true) {
-			if (mJavaDetector != null)
-				mJavaDetector.detectMultiScale(mGray, faces, 1.1, 2,
-						2, // TODO: objdetect.CV_HAAR_SCALE_IMAGE
-						new Size(mAbsoluteFaceSize, mAbsoluteFaceSize),
-						new Size());
-		}
-		// else if (mDetectorType == NATIVE_DETECTOR) {
-		// if (mNativeDetector != null)
-		// mNativeDetector.detect(mGray, faces);
-		// }
-		// else {
-		// Log.e(TAG, "Detection method is not selected!");
-		// }
-
-		Rect[] facesArray = faces.toArray();
+		Rect[] facesArray = mFaceDetector.detect(mGray, faces);
 
 		List<LabelledRect> labelledFaces = recognizeFaces(facesArray);
 
@@ -269,40 +244,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	}
 
 	private void setupFaceDetection() {
-		try {
-			// load cascade file from application resources
-			InputStream is = getResources().openRawResource(
-					R.raw.lbpcascade_frontalface);
-			File cascadeDir = getActivity().getDir("cascade",
-					Context.MODE_PRIVATE);
-			mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
-			FileOutputStream os = new FileOutputStream(mCascadeFile);
-
-			byte[] buffer = new byte[4096];
-			int bytesRead;
-			while ((bytesRead = is.read(buffer)) != -1) {
-				os.write(buffer, 0, bytesRead);
-			}
-			is.close();
-			os.close();
-
-			mJavaDetector = new CascadeClassifier(
-					mCascadeFile.getAbsolutePath());
-			if (mJavaDetector.empty()) {
-				Log.e(TAG, "Failed to load cascade classifier");
-				mJavaDetector = null;
-			} else
-				Log.i(TAG,
-						"Loaded cascade classifier from "
-								+ mCascadeFile.getAbsolutePath());
-
-			// mNativeDetector = new
-			// DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0);
-			cascadeDir.delete();
-
-		} catch (IOException e) {
-			e.printStackTrace();
-			Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
-		}
+		mFaceDetector = new FaceDetector(getActivity());
 	}
 }
