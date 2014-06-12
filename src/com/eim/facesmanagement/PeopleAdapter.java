@@ -5,9 +5,12 @@ import java.util.Collections;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Bitmap;
+import android.os.Bundle;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,17 +21,20 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.eim.R;
+import com.eim.facesmanagement.peopledb.Person;
+import com.eim.facesmanagement.peopledb.Photo;
 
 /**
  * ExpandableAdapter that shows the people in the database
  */
 public class PeopleAdapter extends BaseExpandableListAdapter {
-	private static final String TAG = "PeopleExpandableAdapter";
+	private static final String TAG = "PeopleAdapter";
 
 	private Activity context;
 	List<Person> people;
 	int groupResource, childResource;
-	PeopleAdapterListener peopleAdapterListener;;
+	PeopleAdapterListener peopleAdapterListener;
+	PhotoGalleryListener photoGalleryListener;
 
 	/**
 	 * 
@@ -50,7 +56,8 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 	 */
 	public PeopleAdapter(Activity context, int groupResource,
 			int childResource, List<Person> people,
-			PeopleAdapterListener peopleAdapterListener) {
+			PeopleAdapterListener peopleAdapterListener,
+			PhotoGalleryListener photoGalleryListener) {
 
 		this.context = context;
 
@@ -61,6 +68,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		replacePeople(people);
 
 		this.peopleAdapterListener = peopleAdapterListener;
+		this.photoGalleryListener = photoGalleryListener;
 	}
 
 	@Override
@@ -90,7 +98,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		ImageView edit = (ImageView) convertView
 				.findViewById(R.id.person_list_item_edit_button);
 		edit.setVisibility(isExpanded ? View.VISIBLE : View.GONE);
-		edit.setOnClickListener(editPersonNameOnClickListener);
+		edit.setOnClickListener(editPersonOnClickListener);
 		edit.setTag(person.getName());
 
 		return convertView;
@@ -99,20 +107,25 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 	@Override
 	public View getChildView(int groupPosition, int childPosition,
 			boolean isLastChild, View convertView, ViewGroup parent) {
+		PhotoGallery gallery;
 
 		if (convertView == null) {
 			LayoutInflater inflater = (LayoutInflater) context
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			convertView = (ViewGroup) inflater.inflate(childResource, parent,
 					false);
+			gallery = (PhotoGallery) convertView
+					.findViewById(R.id.person_view_gallery);
+			gallery.setPhotoGalleryListener(photoGalleryListener);
+		} else {
+			gallery = (PhotoGallery) convertView
+					.findViewById(R.id.person_view_gallery);
+			gallery.removeAllPhotos();
 		}
 
-		PhotoGallery gallery = (PhotoGallery) convertView
-				.findViewById(R.id.person_view_gallery);
-		gallery.removeAllPhotos();
-
-		for (Bitmap bitmap : people.get(groupPosition).getBitmaps())
-			gallery.addPhoto(bitmap);
+		gallery.setTag(people.get(groupPosition).getName());
+		for (Photo photo : people.get(groupPosition).getPhotos())
+			gallery.addPhoto(photo);
 
 		return convertView;
 	}
@@ -233,27 +246,68 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		notifyDataSetChanged();
 	}
 
-	private OnClickListener editPersonNameOnClickListener = new OnClickListener() {
-		InsertNameDialog insertNameDialog;
+	private OnClickListener editPersonOnClickListener = new OnClickListener() {
+		EditPersonDialog editPersonDialog;
 
 		@Override
 		public void onClick(View v) {
-			insertNameDialog = new InsertNameDialog((String) v.getTag(),
-					addPersonOkListener, null);
-			insertNameDialog.show(context.getFragmentManager(), TAG);
+			editPersonDialog = new EditPersonDialog((String) v.getTag(),
+					editPersonListener, editPersonListener, editPersonListener);
+			editPersonDialog.show(context.getFragmentManager(), TAG);
 		}
 
-		DialogInterface.OnClickListener addPersonOkListener = new DialogInterface.OnClickListener() {
+		DialogInterface.OnClickListener editPersonListener = new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				peopleAdapterListener.onPersonEdited(
-						insertNameDialog.getOldName(),
-						insertNameDialog.getName());
+				switch (which) {
+				case DialogInterface.BUTTON_POSITIVE:
+					peopleAdapterListener.editPerson(
+							editPersonDialog.getOldName(),
+							editPersonDialog.getName());
+					break;
+
+				case DialogInterface.BUTTON_NEUTRAL:
+					askForPersonDeletion(editPersonDialog.getOldName());
+					break;
+				default:
+					break;
+				}
 			}
 		};
+
+		private void askForPersonDeletion(final String name) {
+			new DialogFragment() {
+				@Override
+				public Dialog onCreateDialog(Bundle savedInstanceState) {
+					return new AlertDialog.Builder(context)
+							.setIcon(
+									context.getResources().getDrawable(
+											R.drawable.action_delete))
+							.setTitle(
+									context.getString(R.string.alert_dialog_delete_person_title))
+							.setMessage(
+									String.format(
+											context.getString(R.string.alert_dialog_delete_person_text),
+											name))
+							.setPositiveButton(
+									context.getString(R.string.alert_dialog_yes),
+									positiveClick)
+							.setNegativeButton(
+									context.getString(R.string.alert_dialog_no),
+									null).create();
+				}
+
+				DialogInterface.OnClickListener positiveClick = new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						peopleAdapterListener.removePerson(name);
+					}
+				};
+			}.show(context.getFragmentManager(), TAG);
+		}
 	};
 
-	public boolean removePhoto(String name, String photo) {
+	public boolean removePhoto(String name, Photo photo) {
 		Pair<Integer, Integer> indexes = getPhotoIndex(name, photo);
 
 		// person doesn't exist or photo doesn't exist
@@ -265,7 +319,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		return true;
 	}
 
-	public boolean addPhoto(String name, String photo, Object features) {
+	public boolean addPhoto(String name, Photo photo) {
 		Pair<Integer, Integer> indexes = getPhotoIndex(name, photo);
 
 		// person doesn't exist or photo already exists
@@ -273,7 +327,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 			return false;
 
 		people.get(indexes.first).getPhotos()
-				.add(new Photo(photo, null, features));
+				.add(photo);
 		notifyDataSetChanged();
 		return true;
 	}
@@ -289,7 +343,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		return -1;
 	}
 
-	private Pair<Integer, Integer> getPhotoIndex(String name, String photo) {
+	private Pair<Integer, Integer> getPhotoIndex(String name, Photo photo) {
 		int personIndex = getPersonIndex(name);
 
 		// person doesn't exist
@@ -297,9 +351,10 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 			return new Pair<Integer, Integer>(-1, -1);
 
 		List<Photo> photos = people.get(personIndex).getPhotos();
-
+		String photoUrl = photo.getUrl();
+		
 		for (int i = 0, l = photos.size(); i < l; i++)
-			if (photos.get(i).getUrl().compareTo(photo) == 0)
+			if (photos.get(i).getUrl().compareTo(photoUrl) == 0)
 				return new Pair<Integer, Integer>(personIndex, i);
 
 		return new Pair<Integer, Integer>(personIndex, -1);

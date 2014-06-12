@@ -3,6 +3,8 @@ package com.eim.facesmanagement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.eim.facesmanagement.peopledb.Person;
+
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;

@@ -1,9 +1,7 @@
-package com.eim.facesmanagement;
+package com.eim.facesmanagement.peopledb;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import android.graphics.Bitmap;
 
 /**
  * This class represent a person to be recognized. Each person has a name and
@@ -38,41 +36,16 @@ public class Person implements Comparable<Person>  {
 		return photos;
 	}
 
-	public List<String> getUrls() {
-		List<String> urls = new ArrayList<String>();
-		for (Photo photo: photos)
-			urls.add(photo.getUrl());
-		
-		return urls;
-	}
-
-	public List<Bitmap> getBitmaps() {
-		List<Bitmap> bitmaps = new ArrayList<Bitmap>();
-		for (Photo photo: photos)
-			bitmaps.add(photo.getBitmap());
-		
-		return bitmaps;
-	}
-
-	public List<Object> getFeatures() {
-		List<Object> features = new ArrayList<Object>();
-		for (Photo photo: photos)
-			features.add(photo.getFeatures());
-		
-		return features;
-	}
-
 	public void setPhotos(List<Photo> photos) {
-		this.photos.clear();
 
-		if (photos != null)
-			for (Photo photo : photos)
-				if (photo.getUrl() != null && photo.getFeatures() != null)
-					this.photos.add(photo);
+		if (photos == null)
+			this.photos.clear();
+		else
+			this.photos = photos;
 	}
 
 	public void addPhoto(Photo photo) {
-		if (photo != null && photo.getUrl() != null && photo.getFeatures() != null)
+		if (photo != null)
 			this.photos.add(photo);
 	}
 

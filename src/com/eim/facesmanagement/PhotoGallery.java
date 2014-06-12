@@ -1,33 +1,28 @@
 package com.eim.facesmanagement;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.eim.R;
-import com.eim.facedetection.FaceDetectionAndExtractionActivity;
+import com.eim.facesmanagement.peopledb.Photo;
 
 /**
  * A Gallery is an horizontal LinearLayout that can contain zero or more photos
  * and allows to add or delete them.
  */
 public class PhotoGallery extends GridView implements PhotoSelectionListener {
-	private static final String TAG = "PhotoGallery";
 	private static final int colCount = 5;
-	public static final int FACE_DETECTION_AND_EXTRACTION = 1;
 
 	ImageView addDeletePhoto;
 	PhotoAdapter galleryAdapter;
+	PhotoGalleryListener photoGalleryListener;
 	int photoCount;
-	Bitmap add, delete;
+	Photo add, delete;
 	Context context;
 	boolean addOrDelete;
 
@@ -50,10 +45,10 @@ public class PhotoGallery extends GridView implements PhotoSelectionListener {
 		this.context = context;
 		setNumColumns(colCount);
 
-		add = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.action_add_photo);
-		delete = BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.action_delete);
+		add = new Photo(null, BitmapFactory.decodeResource(context.getResources(),
+				R.drawable.action_add_photo));
+		delete = new Photo(null, BitmapFactory.decodeResource(context.getResources(),
+				R.drawable.action_delete));
 
 		galleryAdapter = new PhotoAdapter(context, null, this);
 		addPhoto(add);
@@ -63,6 +58,10 @@ public class PhotoGallery extends GridView implements PhotoSelectionListener {
 		photoCount = 0;
 
 		showAddPhoto();
+	}
+	
+	public void setPhotoGalleryListener(PhotoGalleryListener photoGalleryListener) {
+		this.photoGalleryListener = photoGalleryListener;
 	}
 
 	private void showAddPhoto() {
@@ -84,12 +83,15 @@ public class PhotoGallery extends GridView implements PhotoSelectionListener {
 	 * @return view of the added image
 	 */
 	public void addPhoto(String path) {
-		addPhoto(BitmapFactory.decodeFile(path));
+		addPhoto(new Photo(path, BitmapFactory.decodeFile(path)));
 	}
 
-	public void addPhoto(Bitmap photo) {
-		photoCount++;
+	public void addPhoto(Photo photo) {
+		if (photo.getBitmap() == null)
+			photo.setBitmap(BitmapFactory.decodeFile(photo.getUrl()));
+		
 		galleryAdapter.addPhoto(photo);
+		photoCount++;
 	}
 
 	/**
@@ -125,12 +127,6 @@ public class PhotoGallery extends GridView implements PhotoSelectionListener {
 			removePhoto();
 	}
 
-	void addPhoto() {
-		Intent intent = new Intent(context,
-				FaceDetectionAndExtractionActivity.class);
-		((Activity) context).startActivityForResult(intent,
-				FACE_DETECTION_AND_EXTRACTION);
-	}
 
 	OnItemClickListener galleryOnItemClickListener = new OnItemClickListener() {
 		@Override
@@ -138,9 +134,9 @@ public class PhotoGallery extends GridView implements PhotoSelectionListener {
 				long id) {
 			if (position == 0) {
 				if (addOrDelete)
-					addPhoto();
+					photoGalleryListener.addPhoto(PhotoGallery.this);
 				else
-					removeSelectedPhotos();
+					photoGalleryListener.removeSelectedPhotos(PhotoGallery.this);
 
 				return;
 			}
@@ -149,19 +145,6 @@ public class PhotoGallery extends GridView implements PhotoSelectionListener {
 					!galleryAdapter.isSelected(position));
 		}
 	};
-
-	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (resultCode != Activity.RESULT_OK)
-			return;
-
-		Log.e(TAG, "onActivityResult: " + requestCode + ", " + resultCode);
-
-		switch (requestCode) {
-		case FACE_DETECTION_AND_EXTRACTION:
-			// TODO
-			break;
-		}
-	}
 
 	@Override
 	public void photosSelectionChanged(boolean selected) {

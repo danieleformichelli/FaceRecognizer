@@ -1,5 +1,7 @@
 package com.eim.facesmanagement;
 
+import com.eim.facesmanagement.peopledb.Photo;
+
 public interface PeopleAdapterListener {
 
 	/**
@@ -8,7 +10,7 @@ public interface PeopleAdapterListener {
 	 * @param name
 	 *            name of the added person
 	 */
-	public void onPersonAdded(String name);
+	public void addPerson(String name);
 
 	/**
 	 * The name of a person has been edited
@@ -18,7 +20,7 @@ public interface PeopleAdapterListener {
 	 * @param newName
 	 *            new name of the person
 	 */
-	public void onPersonEdited(String oldName, String newName);
+	public void editPerson(String oldName, String newName);
 
 	/**
 	 * A person has been removed from the list
@@ -26,7 +28,7 @@ public interface PeopleAdapterListener {
 	 * @param name
 	 *            name of the removed person
 	 */
-	public void onPersonRemoved(String name);
+	public void removePerson(String name);
 
 	/**
 	 * A photo has been added to a person
@@ -36,7 +38,7 @@ public interface PeopleAdapterListener {
 	 * @param photo
 	 *            url of the photo
 	 */
-	public void onPhotoAdded(String name, String photo, String features);
+	public void addPhoto(String name, Photo photo);
 
 	/**
 	 * A photo has been deleted
@@ -46,5 +48,5 @@ public interface PeopleAdapterListener {
 	 * @param photo
 	 *            url of the photo
 	 */
-	void onPhotoRemoved(String name, String photo);
+	public void removePhoto(String name, Photo photo);
 }

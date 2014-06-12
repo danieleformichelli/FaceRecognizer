@@ -3,8 +3,10 @@ package com.eim.facesmanagement;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.eim.facesmanagement.peopledb.Photo;
+import com.eim.utilities.SquareImageView;
+
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -12,16 +14,16 @@ import android.widget.GridView;
 
 public class PhotoAdapter extends BaseAdapter {
 	Context context;
-	List<Bitmap> photos;
+	List<Photo> photos;
 	List<Boolean> selected;
 	PhotoSelectionListener photoSelectionListener;
 	int selectedColor, notSelectedColor;
 
-	public PhotoAdapter(Context context, List<Bitmap> photos,
+	public PhotoAdapter(Context context, List<Photo> photos,
 			PhotoSelectionListener photoSelectionListener) {
 		this.context = context;
 
-		this.photos = new ArrayList<Bitmap>();
+		this.photos = new ArrayList<Photo>();
 		selected = new ArrayList<Boolean>();
 		this.photoSelectionListener = photoSelectionListener;
 
@@ -33,7 +35,7 @@ public class PhotoAdapter extends BaseAdapter {
 				android.R.color.transparent);
 	}
 
-	public void replacePhotos(List<Bitmap> photos) {
+	public void replacePhotos(List<Photo> photos) {
 		this.photos.clear();
 		selected.clear();
 		photoSelectionListener.photosSelectionChanged(false);
@@ -41,7 +43,7 @@ public class PhotoAdapter extends BaseAdapter {
 		if (photos == null)
 			return;
 
-		for (Bitmap photo : photos)
+		for (Photo photo : photos)
 			if (photo != null) {
 				this.photos.add(photo);
 				selected.add(false);
@@ -50,7 +52,7 @@ public class PhotoAdapter extends BaseAdapter {
 		notifyDataSetChanged();
 	}
 
-	public void addPhoto(Bitmap photo) {
+	public void addPhoto(Photo photo) {
 		if (photo == null)
 			return;
 
@@ -85,7 +87,7 @@ public class PhotoAdapter extends BaseAdapter {
 		return false;
 	}
 
-	public void replacePhoto(int position, Bitmap photo) {
+	public void replacePhoto(int position, Photo photo) {
 		if (photo == null)
 			return;
 
@@ -118,7 +120,7 @@ public class PhotoAdapter extends BaseAdapter {
 		return photos.size();
 	}
 
-	public Bitmap getItem(int position) {
+	public Photo getItem(int position) {
 		return photos.get(position);
 	}
 
@@ -137,7 +139,7 @@ public class PhotoAdapter extends BaseAdapter {
 		} else
 			imageView = (SquareImageView) convertView;
 
-		imageView.setImageBitmap(photos.get(position));
+		imageView.setImageBitmap(photos.get(position).getBitmap());
 		imageView.setBackgroundColor(selected.get(position) ? selectedColor
 				: notSelectedColor);
 
@@ -147,6 +149,9 @@ public class PhotoAdapter extends BaseAdapter {
 	public void removeSelectedPhotos() {
 		List<Integer> toBeDeleted = new ArrayList<Integer>();
 
+		if (selected.size() == 0)
+			return;
+		
 		for (int i = selected.size() - 1; i >= 0; i--)
 			if (selected.get(i))
 				toBeDeleted.add(i);

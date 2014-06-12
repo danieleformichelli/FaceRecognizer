@@ -5,12 +5,15 @@
     <string name="no_people">There are no people in the database</string>
     <string name="alert_dialog_delete_person_title">Confirm deletion</string>
     <string name="alert_dialog_delete_person_text">Are you sure you want to delete %s?</string>
+    <string name="alert_dialog_exit_title">Confirm exit</string>
+    <string name="alert_dialog_exit_text">Are you sure you want to exit?</string>
     <string name="alert_dialog_insert_person">Insert person name</string>
     <string name="alert_dialog_person_name_label">Name:</string>
     <string name="alert_dialog_yes">Yes</string>
     <string name="alert_dialog_no">No</string>
     <string name="alert_dialog_ok">Ok</string>
     <string name="alert_dialog_cancel">Cancel</string>
+    <string name="alert_dialog_delete">Delete</string>
     <string name="error_person_name_not_valid">The name cannot be empty</string>
     <string name="error_person_already_present">The name you inserted is already present</string>
 

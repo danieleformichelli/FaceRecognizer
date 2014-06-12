@@ -1,4 +1,4 @@
-package com.eim.facesmanagement;
+package com.eim.utilities;
 
 import android.content.Context;
 import android.util.AttributeSet;

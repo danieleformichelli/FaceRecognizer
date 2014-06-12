@@ -2,29 +2,29 @@ package com.eim.facesmanagement;
 
 import java.util.List;
 
-import android.os.Bundle;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.eim.R;
+import com.eim.facedetection.FaceDetectionAndExtractionActivity;
+import com.eim.facesmanagement.peopledb.Person;
+import com.eim.facesmanagement.peopledb.Photo;
 import com.eim.utilities.FaceRecognizerMainActivity;
 import com.eim.utilities.Swipeable;
-import com.eim.R;
 
-public class FacesManagementFragment extends Fragment implements
-		PeopleAdapterListener, Swipeable {
+public class FacesManagementFragment extends Fragment implements Swipeable {
 	private static final String TAG = "FacesManagementFragment";
+	private static final int FACE_DETECTION_AND_EXTRACTION = 1;
 
 	FaceRecognizerMainActivity activity;
 	ExpandableListView peopleList;
@@ -60,66 +60,14 @@ public class FacesManagementFragment extends Fragment implements
 
 		peopleList = (ExpandableListView) layout
 				.findViewById(R.id.faces_management_people_list);
-		peopleList.setOnItemLongClickListener(onItemLongClickListener);
 		peopleAdapter = new PeopleAdapter(activity, R.layout.person_list_item,
-				R.layout.person_view, peopleDatabase.getPeople(), this);
+				R.layout.person_view, peopleDatabase.getPeople(),
+				peopleAdapterListener, photoGalleryListener);
 
 		peopleList.setAdapter(peopleAdapter);
 		if (peopleAdapter.getGroupCount() == 0)
 			noPeopleMessage.setVisibility(View.VISIBLE);
 
-	}
-
-	@Override
-	public void onPersonAdded(String name) {
-		if (name == null || name.length() == 0) {
-			Toast.makeText(activity,
-					activity.getString(R.string.error_person_name_not_valid),
-					Toast.LENGTH_SHORT).show();
-			return;
-		}
-
-		if (peopleAdapter.addPerson(new Person(name, null)) == false) {
-			Toast.makeText(activity,
-					activity.getString(R.string.error_person_already_present),
-					Toast.LENGTH_SHORT).show();
-		} else {
-			if (peopleAdapter.getGroupCount() != 0)
-				noPeopleMessage.setVisibility(View.GONE);
-			// peopleDatabase.addPerson(name);
-		}
-	}
-
-	@Override
-	public void onPersonEdited(String oldName, String newName) {
-		if (peopleAdapter.editPerson(oldName, newName) == false) {
-			Toast.makeText(activity,
-					activity.getString(R.string.error_person_already_present),
-					Toast.LENGTH_SHORT).show();
-			return;
-		}
-		// peopleDatabase.editPerson(oldName, newName);
-	}
-
-	@Override
-	public void onPersonRemoved(String name) {
-		peopleAdapter.removePerson(name);
-		if (peopleAdapter.getGroupCount() == 0)
-			noPeopleMessage.setVisibility(View.VISIBLE);
-
-		// peopleDatabase.removePerson(name);
-	}
-
-	@Override
-	public void onPhotoAdded(String name, String photo, String features) {
-		peopleAdapter.addPhoto(name, photo, features);
-		// peopleDatabase.addPhoto(name, photo, features);
-	}
-
-	@Override
-	public void onPhotoRemoved(String name, String photo) {
-		peopleAdapter.removePhoto(name, photo);
-		// peopleDatabase.removePhoto(name, photo);
 	}
 
 	@Override
@@ -131,70 +79,125 @@ public class FacesManagementFragment extends Fragment implements
 	}
 
 	OnClickListener addPersonListener = new OnClickListener() {
-		InsertNameDialog insertNameDialog;
+		EditPersonDialog insertNameDialog;
 
 		@Override
 		public void onClick(View v) {
-			insertNameDialog = new InsertNameDialog("", addPersonOkListener,
-					null);
+			insertNameDialog = new EditPersonDialog("", addPersonListener,
+					null, addPersonListener);
 			insertNameDialog.show(getFragmentManager(), TAG);
 		}
 
-		DialogInterface.OnClickListener addPersonOkListener = new DialogInterface.OnClickListener() {
+		DialogInterface.OnClickListener addPersonListener = new DialogInterface.OnClickListener() {
 			@Override
 			public void onClick(DialogInterface dialog, int which) {
-				onPersonAdded(insertNameDialog.getName());
+				switch (which) {
+				case DialogInterface.BUTTON_POSITIVE:
+					peopleAdapterListener.addPerson(insertNameDialog.getName());
+					break;
+				default:
+					break;
+				}
 			}
 		};
 	};
 
-	OnItemLongClickListener onItemLongClickListener = new OnItemLongClickListener() {
-		@Override
-		public boolean onItemLongClick(AdapterView<?> parent, View view,
-				int position, long id) {
-			int itemType = ExpandableListView.getPackedPositionType(id);
+	PeopleAdapterListener peopleAdapterListener = new PeopleAdapterListener() {
 
-			if (itemType == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
-				final int personPosition = ExpandableListView
-						.getPackedPositionGroup(id);
-				final String name = ((Person) peopleAdapter
-						.getGroup(personPosition)).getName();
-				askForPersonDeletion(name);
-				return true;
+		@Override
+		public void addPerson(String name) {
+			if (name == null || name.length() == 0) {
+				Toast.makeText(
+						activity,
+						activity.getString(R.string.error_person_name_not_valid),
+						Toast.LENGTH_SHORT).show();
+				return;
 			}
 
-			return false;
+			if (peopleAdapter.addPerson(new Person(name, null)) == false) {
+				Toast.makeText(
+						activity,
+						activity.getString(R.string.error_person_already_present),
+						Toast.LENGTH_SHORT).show();
+			} else {
+				if (peopleAdapter.getGroupCount() != 0)
+					noPeopleMessage.setVisibility(View.GONE);
+				// peopleDatabase.addPerson(name);
+			}
 		}
 
-		private void askForPersonDeletion(final String name) {
-			new DialogFragment() {
-				@Override
-				public Dialog onCreateDialog(Bundle savedInstanceState) {
-					return new AlertDialog.Builder(activity)
-							.setIcon(
-									activity.getResources().getDrawable(
-											R.drawable.action_delete))
-							.setTitle(
-									activity.getString(R.string.alert_dialog_delete_person_title))
-							.setMessage(
-									String.format(
-											activity.getString(R.string.alert_dialog_delete_person_text),
-											name))
-							.setPositiveButton(
-									activity.getString(R.string.alert_dialog_yes),
-									positiveClick)
-							.setNegativeButton(
-									activity.getString(R.string.alert_dialog_no),
-									null).create();
-				}
+		@Override
+		public void editPerson(String oldName, String newName) {
+			if (peopleAdapter.editPerson(oldName, newName) == false) {
+				Toast.makeText(
+						activity,
+						activity.getString(R.string.error_person_already_present),
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
+			// peopleDatabase.editPerson(oldName, newName);
+		}
 
-				DialogInterface.OnClickListener positiveClick = new DialogInterface.OnClickListener() {
-					@Override
-					public void onClick(DialogInterface dialog, int which) {
-						FacesManagementFragment.this.onPersonRemoved(name);
-					}
-				};
-			}.show(getFragmentManager(), TAG);
+		@Override
+		public void removePerson(String name) {
+			peopleAdapter.removePerson(name);
+			if (peopleAdapter.getGroupCount() == 0)
+				noPeopleMessage.setVisibility(View.VISIBLE);
+
+			// peopleDatabase.removePerson(name);
+		}
+
+		@Override
+		public void addPhoto(String name, Photo photo) {
+			peopleAdapter.addPhoto(name, photo);
+			// peopleDatabase.addPhoto(name, photo);
+		}
+
+		@Override
+		public void removePhoto(String name, Photo photo) {
+			peopleAdapter.removePhoto(name, photo);
+			// peopleDatabase.removePhoto(name, photo);
 		}
 	};
+
+	PhotoGalleryListener photoGalleryListener = new PhotoGalleryListener() {
+
+		@Override
+		public void addPhoto(PhotoGallery gallery) {
+			Intent intent = new Intent(activity,
+					FaceDetectionAndExtractionActivity.class);
+			intent.putExtra(FaceDetectionAndExtractionActivity.PERSON_NAME,
+					(String) gallery.getTag());
+			startActivityForResult(intent,
+					FACE_DETECTION_AND_EXTRACTION);
+		}
+
+		@Override
+		public void removeSelectedPhotos(PhotoGallery gallery) {
+			PhotoAdapter galleryAdapter = (PhotoAdapter) gallery.getAdapter();
+			for (int i = 0, l = galleryAdapter.getCount(); i < l; i++)
+				if (galleryAdapter.isSelected(i))
+					peopleAdapterListener.removePhoto(
+							(String) gallery.getTag(),
+							galleryAdapter.getItem(i));
+		}
+
+	};
+
+	public void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (resultCode != Activity.RESULT_OK)
+			return;
+
+		switch (requestCode) {
+		case FACE_DETECTION_AND_EXTRACTION:
+			String personName = data.getExtras().getString(
+					FaceDetectionAndExtractionActivity.PERSON_NAME);
+			String photoPath = data.getExtras().getString(
+					FaceDetectionAndExtractionActivity.PHOTO_PATH);
+			
+			peopleAdapterListener.addPhoto(personName, new Photo(photoPath,
+					null));
+			break;
+		}
+	}
 }
