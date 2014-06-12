@@ -7,6 +7,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -43,9 +46,12 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 	protected static final int REQUEST_TAKE_PHOTO = 1;
 	protected static final int REQUEST_PICK_PHOTO = 2;
 
+	public static final String PERSON_NAME = "personName";
+	public static final String PHOTO_PATH = "photoPath";
+
 	private File mSceneFile;
 	private Mat mScene;
-	
+
 	private FaceDetector mFaceDetector;
 
 	private String mLabelName = "Tizio";
@@ -54,7 +60,7 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		// mLabelName = getIntent().getExtras().getString(CONSTANT);
+		//mLabelName = getIntent().getExtras().getString(PERSON_NAME);
 	}
 
 	/**
@@ -175,8 +181,34 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 		}
 	}
 
-	private void processFace(Bitmap bitmap) {
-		Log.i(TAG, "I've got a face!");
+	private void processFace(Bitmap bmp) {
+
+		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
+				.format(new Date());
+		String imageFileName = mLabelName + timeStamp + ".png";
+
+		FileOutputStream out;
+
+		String filename = getExternalFilesDir(null).getAbsolutePath()
+				+ "/" + imageFileName;
+		try {
+			out = new FileOutputStream(filename);
+			bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
+			out.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		Intent returnIntent = new Intent();
+		returnIntent.putExtra(PERSON_NAME, mLabelName);
+		returnIntent.putExtra(PHOTO_PATH, filename);
+		
+		Log.i(TAG, filename);
+		
+		mSceneFile.delete();
+		
+		setResult(Activity.RESULT_OK, returnIntent);
+		finish();
 	}
 
 	private void displayFaceChooser(final Bitmap[] detectedFaces) {
@@ -197,11 +229,11 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 	}
 
 	private void copyPickedPhoto(Intent data) {
-		File src = new File(data.getData().getPath());
-		File dst = mSceneFile;
-
 		try {
-			InputStream in = new FileInputStream(src);
+			File dst = mSceneFile;
+			
+			InputStream in = getContentResolver()
+					.openInputStream(data.getData());
 			OutputStream out = new FileOutputStream(dst);
 
 			byte[] buf = new byte[4096];
@@ -221,15 +253,15 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 	}
 
 	private void initDetector() {
-		
+
 		mFaceDetector = new FaceDetector(this);
-		
+
 		Bitmap sceneBitmap = BitmapFactory.decodeFile(mSceneFile
 				.getAbsolutePath());
 		mScene = new Mat();
 		Utils.bitmapToMat(sceneBitmap, mScene);
 		sceneBitmap = null; // free bitmap memory
-		
+
 	}
 
 	private Bitmap[] detectFaces() {
@@ -239,7 +271,7 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 		MatOfRect faces = new MatOfRect();
 
 		Rect[] faceRegions = mFaceDetector.detect(mScene, faces);
-		
+
 		Bitmap[] detectedFaces = new Bitmap[faceRegions.length];
 
 		Mat subRegion = new Mat();
