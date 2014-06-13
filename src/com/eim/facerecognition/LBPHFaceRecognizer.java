@@ -2,11 +2,19 @@ package com.eim.facerecognition;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
+import org.opencv.android.Utils;
 import org.opencv.contrib.FaceRecognizer;
 import org.opencv.core.Mat;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.util.SparseArray;
+
+import com.eim.facesmanagement.peopledb.Person;
+import com.eim.facesmanagement.peopledb.Photo;
  
 public class LBPHFaceRecognizer extends FaceRecognizer {
  
@@ -40,15 +48,51 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 		return instance;
     }
     
-    public void incrementalTrain(Mat newFace, int label) {
+    /**
+     * Train the recognizer with a new face.
+     * @param newFace the new face
+     * @param label the id of the person related to the new face
+     */
+    public void incrementalTrain(String newFacePath, int label) {
     	ArrayList<Mat> newFaces = new ArrayList<Mat>();
     	Mat labels = new Mat();
+    	Mat newFaceMat = new Mat();
     	
-    	newFaces.add(newFace);
+    	Bitmap newFace = BitmapFactory.decodeFile(newFacePath);
+    	
+    	Utils.bitmapToMat(newFace, newFaceMat);
+    	
+    	newFaces.add(newFaceMat);
     	labels.put(0, 0, new int[] { label });
     	
     	update(newFaces, labels);
+    	save(mModelPath);
+    }
+    
+    public void train(SparseArray<Person> dataset) {
     	
+    	List<Mat> faces = new ArrayList<Mat>();
+    	Mat labels = new Mat();
+    	int counter = 0;
+    	
+    	for(int i = 0; i < dataset.size(); i++){
+    	    int label = dataset.keyAt(i);
+    	    Person pe = dataset.valueAt(i);
+    	    
+    	    for (Photo ph: pe.getPhotos()) {
+    	    	Mat m = new Mat();
+    	    	
+    	    	Bitmap b = ph.getBitmap();
+    	    	if (b == null)
+    	    		b = BitmapFactory.decodeFile(ph.getUrl());
+    	    	
+    	    	Utils.bitmapToMat(b, m);
+    	    	faces.add(m);
+    	    	labels.put(counter++, 0, label);
+    	    }
+    	}
+    	
+    	train(faces, labels);
     	save(mModelPath);
     }
 }
