@@ -37,20 +37,24 @@ public class FaceDetector {
 	
 	private void initDetector() {
 		try {
-			// load cascade file from application resources
-			InputStream is = mContext.getResources().openRawResource(
-					R.raw.lbpcascade_frontalface);
 			File cascadeDir = mContext.getDir("cascade", Context.MODE_PRIVATE);
 			mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
-			FileOutputStream os = new FileOutputStream(mCascadeFile);
+			
+			if (! mCascadeFile.exists()) {
+				// load cascade file from application resources
+				InputStream is = mContext.getResources().openRawResource(
+						R.raw.lbpcascade_frontalface);
 
-			byte[] buffer = new byte[4096];
-			int bytesRead;
-			while ((bytesRead = is.read(buffer)) != -1) {
-				os.write(buffer, 0, bytesRead);
+				FileOutputStream os = new FileOutputStream(mCascadeFile);
+
+				byte[] buffer = new byte[4096];
+				int bytesRead;
+				while ((bytesRead = is.read(buffer)) != -1) {
+					os.write(buffer, 0, bytesRead);
+				}
+				is.close();
+				os.close();
 			}
-			is.close();
-			os.close();
 
 			mJavaDetector = new CascadeClassifier(
 					mCascadeFile.getAbsolutePath());
@@ -64,7 +68,7 @@ public class FaceDetector {
 
 			// mNativeDetector = new
 			// DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0);
-			cascadeDir.delete();
+			// cascadeDir.delete();
 
 		} catch (IOException e) {
 			e.printStackTrace();
