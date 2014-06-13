@@ -125,11 +125,16 @@ public class PeopleDatabase {
 			if (!c.isNull(photoIdIndex)) {
 				long photoId = c.getLong(photoIdIndex);
 				String photoUrl = c.getString(photoUrlIndex);
-				
+
 				currentPerson.addPhoto(photoId, new Photo(photoUrl));
 			}
 		}
 
 		return people;
+	}
+
+	public void clear() {
+		db.delete(FacesContract.People.TABLE, null, null);
+		db.delete(FacesContract.Faces.TABLE, null, null);
 	}
 }
