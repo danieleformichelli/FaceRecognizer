@@ -1,5 +1,6 @@
 package com.eim.facerecognition;
 
+import java.io.File;
 import java.util.ArrayList;
 
 import org.opencv.contrib.FaceRecognizer;
@@ -33,7 +34,8 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
     	if (instance == null) {
     		instance = new LBPHFaceRecognizer();
     		mModelPath = c.getExternalFilesDir(null).getAbsolutePath() + "/" + MODEL_FILE_NAME;
-    		instance.load(mModelPath);
+    		if (new File(mModelPath).exists())
+    			instance.load(mModelPath);
     	}
 		return instance;
     }

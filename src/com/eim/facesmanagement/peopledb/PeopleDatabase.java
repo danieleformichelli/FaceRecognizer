@@ -67,6 +67,33 @@ public class PeopleDatabase {
 		db.close();
 	}
 
+	public Person getPerson(int id) {
+		Person selectedPerson = null;
+		SQLiteDatabase db = pdboh.getReadableDatabase();
+		String query = "SELECT " + FacesContract.People.NAME + ", "
+				+ FacesContract.Faces.PHOTO_URL + " FROM "
+				+ FacesContract.People.TABLE + " LEFT JOIN "
+				+ FacesContract.Faces.TABLE + " WHERE "
+				+ FacesContract.People._ID + " = ?";
+
+		Cursor c = db.rawQuery(query, new String[] { String.valueOf(id) });
+
+		while (!c.isAfterLast()) {
+			if (c.isFirst()) {
+				String name = c.getString(c
+						.getColumnIndex(FacesContract.People.NAME));
+				selectedPerson = new Person(name, null);
+			}
+
+			String photoUrl = c.getString(c
+					.getColumnIndex(FacesContract.Faces.PHOTO_URL));
+
+			selectedPerson.addPhoto(new Photo(photoUrl));
+		}
+
+		return selectedPerson;
+	}
+
 	public List<Person> getPeople() {
 		Person currentPerson = null;
 		List<Person> people = new ArrayList<Person>();

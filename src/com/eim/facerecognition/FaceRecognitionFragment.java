@@ -31,6 +31,8 @@ import android.view.WindowManager;
 
 import com.eim.R;
 import com.eim.facedetection.FaceDetector;
+import com.eim.facesmanagement.peopledb.PeopleDatabase;
+import com.eim.facesmanagement.peopledb.Person;
 import com.eim.utilities.Swipeable;
 
 public class FaceRecognitionFragment extends Fragment implements Swipeable,
@@ -53,6 +55,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	private FaceDetector mFaceDetector;
 	private FaceRecognizer mFaceRecognizer;
+	private PeopleDatabase mPeopleDatabase;
 
 	/**
 	 * Called when the fragment is first created.
@@ -244,7 +247,9 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 			mFaceRecognizer.predict(face, predictedLabel, confidence);
 			if (confidence[0] > CONFIDENCE_THRESHOLD) {
 				// LabelledRect l = getInfoFromLabel(prediction.first);
-				recognizedPeople.add(new LabelledRect(faceRect, "Tizio", null));
+				
+				Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
+				recognizedPeople.add(new LabelledRect(faceRect, guess.getName(), guess.getPhotos().get(0)));
 			}
 		}
 
@@ -253,7 +258,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	private void setupFaceDetection() {
 		mFaceDetector = new FaceDetector(getActivity());
-		mFaceRecognizer = new LBPHFaceRecognizer();
+		mFaceRecognizer = LBPHFaceRecognizer.getInstance(activity);
+		mPeopleDatabase = new PeopleDatabase(activity);
 	}
 	
 	public class LabelledRect {
