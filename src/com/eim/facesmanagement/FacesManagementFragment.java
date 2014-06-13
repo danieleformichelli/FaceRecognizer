@@ -16,6 +16,8 @@ import android.widget.Toast;
 import com.eim.R;
 import com.eim.facedetection.FaceDetectionActivity;
 import com.eim.facerecognition.LBPHFaceRecognizer;
+import com.eim.facesmanagement.PeopleAdapter.PeopleAdapterListener;
+import com.eim.facesmanagement.PhotoGallery.PhotoGalleryListener;
 import com.eim.facesmanagement.peopledb.PeopleDatabase;
 import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;

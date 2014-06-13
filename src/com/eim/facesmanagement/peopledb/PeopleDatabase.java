@@ -8,19 +8,26 @@ import android.util.LongSparseArray;
 
 public class PeopleDatabase {
 	static PeopleDatabase instance;
+	static SQLiteDatabase db;
+
 	Context context;
-	SQLiteDatabase db;
 
 	public static PeopleDatabase getInstance(Context c) {
-		if (instance == null)
+		if (instance == null) {
 			instance = new PeopleDatabase(c);
+			db = new PeopleDBOpenHelper(c).getWritableDatabase();
+			Runtime.getRuntime().addShutdownHook(new Thread() {
+				public void run() {
+					db.close();
+				}
+			});
+		}
 
 		return instance;
 	}
 
 	private PeopleDatabase(Context context) {
 		this.context = context;
-		db = new PeopleDBOpenHelper(context).getWritableDatabase();
 	}
 
 	public void editPersonName(long id, String newName) {
@@ -78,8 +85,10 @@ public class PeopleDatabase {
 		int photoIdIndex = c.getColumnIndex("PHOTO_ID");
 		int photoUrlIndex = c.getColumnIndex(FacesContract.Faces.PHOTO_URL);
 
-		if (c.moveToNext())
+		if (c.moveToNext()) {
+			c.close();
 			return null;
+		}
 
 		selectedPerson = new Person(c.getString(personNameIndex), null);
 
@@ -90,6 +99,7 @@ public class PeopleDatabase {
 			selectedPerson.addPhoto(photoId, new Photo(photoUrl));
 		} while (c.moveToNext());
 
+		c.close();
 		return selectedPerson;
 	}
 
@@ -130,6 +140,7 @@ public class PeopleDatabase {
 			}
 		}
 
+		c.close();
 		return people;
 	}
 
