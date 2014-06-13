@@ -3,6 +3,8 @@ package com.eim.facesmanagement.peopledb;
 import android.provider.BaseColumns;
 
 public class FacesContract {
+	public static final String DB_NAME = "faces.db";
+	
 	public static abstract class People implements BaseColumns {
 		public static final String TABLE = "people";
 		public static final String NAME = "name";

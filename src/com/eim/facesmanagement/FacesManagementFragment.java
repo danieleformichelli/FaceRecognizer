@@ -124,7 +124,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 			} else {
 				if (peopleAdapter.getGroupCount() != 0)
 					noPeopleMessage.setVisibility(View.GONE);
-				// peopleDatabase.addPerson(name);
+				
+				peopleDatabase.addPerson(name);
 			}
 		}
 
@@ -137,7 +138,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
-			// peopleDatabase.editPerson(oldName, newName);
+			
+			peopleDatabase.editPerson(oldName, newName);
 		}
 
 		@Override
@@ -146,19 +148,19 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 			if (peopleAdapter.getGroupCount() == 0)
 				noPeopleMessage.setVisibility(View.VISIBLE);
 
-			// peopleDatabase.removePerson(name);
+			peopleDatabase.removePerson(name);
 		}
 
 		@Override
 		public void addPhoto(String name, Photo photo) {
 			peopleAdapter.addPhoto(name, photo);
-			// peopleDatabase.addPhoto(name, photo);
+			peopleDatabase.addPhoto(name, photo.getUrl());
 		}
 
 		@Override
 		public void removePhoto(String name, Photo photo) {
 			peopleAdapter.removePhoto(name, photo);
-			// peopleDatabase.removePhoto(name, photo);
+			peopleDatabase.removePhoto(photo.getUrl());
 		}
 	};
 
@@ -166,12 +168,10 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 
 		@Override
 		public void addPhoto(PhotoGallery gallery) {
-			Intent intent = new Intent(activity,
-					FaceDetectionActivity.class);
+			Intent intent = new Intent(activity, FaceDetectionActivity.class);
 			intent.putExtra(FaceDetectionActivity.PERSON_NAME,
 					(String) gallery.getTag());
-			startActivityForResult(intent,
-					FACE_DETECTION_AND_EXTRACTION);
+			startActivityForResult(intent, FACE_DETECTION_AND_EXTRACTION);
 		}
 
 		@Override
@@ -196,7 +196,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 					FaceDetectionActivity.PERSON_NAME);
 			String photoPath = data.getExtras().getString(
 					FaceDetectionActivity.PHOTO_PATH);
-			
+
 			peopleAdapterListener.addPhoto(personName, new Photo(photoPath,
 					null));
 			break;
