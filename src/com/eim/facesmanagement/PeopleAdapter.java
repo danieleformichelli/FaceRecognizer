@@ -171,6 +171,10 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 	public long getChildId(int groupPosition, int childPosition) {
 		return childPosition;
 	}
+	
+	public LongSparseArray<Person> getPeople() {
+		return people;
+	}
 
 	public Person getPersonById(long id) {
 		return people.get(id);

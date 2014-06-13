@@ -51,7 +51,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 
 		mActivity = (FaceRecognizerMainActivity) getActivity();
 
-		// mFaceRecognizer = LBPHFaceRecognizer.getInstance(mActivity);
+		mFaceRecognizer = LBPHFaceRecognizer.getInstance(mActivity);
 		mPeopleDatabase = PeopleDatabase.getInstance(mActivity);
 
 		addPerson = (TextView) mainLayout
@@ -158,6 +158,9 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 				noPeopleMessage.setVisibility(View.VISIBLE);
 
 			mPeopleDatabase.removePerson(id);
+
+			// A person has been removed: retrain the entire network
+			mFaceRecognizer.train(mPeopleAdapter.getPeople());
 		}
 
 		@Override
@@ -167,13 +170,18 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 			android.util.Log.e(TAG, personId + ", " + photoId);
 
 			mPeopleAdapter.addPhoto(personId, photoId, photo);
-			// mFaceRecognizer.trainIncremental(id, photo.getUrl());
+
+			// A person has been removed: incrementally train the network
+			mFaceRecognizer.incrementalTrain(photo.getUrl(), personId);
 		}
 
 		@Override
 		public void removePhoto(long personId, long photoId) {
 			mPeopleAdapter.removePhoto(personId, photoId);
 			mPeopleDatabase.removePhoto(photoId);
+
+			// A photo has been removed: retrain the entire network
+			mFaceRecognizer.train(mPeopleAdapter.getPeople());
 		}
 	};
 
