@@ -9,6 +9,7 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
+import org.opencv.contrib.FaceRecognizer;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -36,8 +37,9 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		CvCameraViewListener2 {
 	private static final String TAG = "FaceRecognitionFragment";
 	private static final Scalar FACE_RECT_COLOR = new Scalar(255, 192, 100, 255);
+	private static final Double CONFIDENCE_THRESHOLD = 0.0;
 	
-	Activity activity;
+	private Activity activity;
 
 	private ControlledJavaCameraView mCameraView;
 
@@ -50,6 +52,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private int mThumbnailSize = 25;
 
 	private FaceDetector mFaceDetector;
+	private FaceRecognizer mFaceRecognizer;
 
 	/**
 	 * Called when the fragment is first created.
@@ -234,14 +237,23 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 		List<LabelledRect> recognizedPeople = new ArrayList<LabelledRect>();
 
-		for (Rect faceRect : facesArray)
-			recognizedPeople.add(new LabelledRect(faceRect, "Tizio", null));
+		for (Rect faceRect : facesArray) {
+			Mat face = mGray.submat(faceRect); 
+			int[] predictedLabel = new int[1];
+			double[] confidence = new double[1];
+			mFaceRecognizer.predict(face, predictedLabel, confidence);
+			if (confidence[0] > CONFIDENCE_THRESHOLD) {
+				// LabelledRect l = getInfoFromLabel(prediction.first);
+				recognizedPeople.add(new LabelledRect(faceRect, "Tizio", null));
+			}
+		}
 
 		return recognizedPeople;
 	}
 
 	private void setupFaceDetection() {
 		mFaceDetector = new FaceDetector(getActivity());
+		mFaceRecognizer = new LBPHFaceRecognizer();
 	}
 	
 	public class LabelledRect {
