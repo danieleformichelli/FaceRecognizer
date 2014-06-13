@@ -46,20 +46,22 @@ public class Person implements Comparable<Person> {
 
 	public void addPhoto(Photo photo) {
 		if (photo != null)
-			this.photos.add(photo);
+			photos.add(photo);
 	}
 
-	public void removePhoto(Integer photoIndex) {
+	public void removePhoto(int photoIndex) {
+		if (photoIndex < 0 || photoIndex >= photos.size())
+			throw new IndexOutOfBoundsException("Index out of bound: Index "
+					+ photoIndex + ", Size " + photos.size());
 		photos.remove(photoIndex);
 	}
 
-	public void removePhoto(Photo photo) {
-		photos.remove(photo);
+	public boolean removePhoto(Photo photo) {
+		return photos.remove(photo);
 	}
 
 	@Override
 	public int compareTo(Person another) {
 		return name.compareTo(another.getName());
 	}
-
 }

@@ -176,7 +176,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 		@Override
 		public void removeSelectedPhotos(PhotoGallery gallery) {
 			PhotoAdapter galleryAdapter = (PhotoAdapter) gallery.getAdapter();
-			for (int i = 0, l = galleryAdapter.getCount(); i < l; i++)
+			for (int i = 1, l = galleryAdapter.getCount(); i < l; i++)
 				if (galleryAdapter.isSelected(i))
 					peopleAdapterListener.removePhoto(
 							(String) gallery.getTag(),
