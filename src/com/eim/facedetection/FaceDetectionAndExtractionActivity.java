@@ -1,7 +1,6 @@
 package com.eim.facedetection;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -55,12 +54,19 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 	private FaceDetector mFaceDetector;
 
 	private String mLabelName = "Unknown";
+	
+	private boolean mAlreadyStarted = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
-		mLabelName = getIntent().getExtras().getString(PERSON_NAME);
+		Intent i = getIntent();
+		Bundle extras = i.getExtras();
+		if (extras == null)
+			finish();
+
+		mLabelName = extras.getString(PERSON_NAME);
 	}
 
 	/**
@@ -69,6 +75,11 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
+		
+		if (mAlreadyStarted)
+			return;
+		
+		mAlreadyStarted = true;		
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, this,
 				new BaseLoaderCallback(this) {
 					@Override
@@ -189,8 +200,8 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 
 		FileOutputStream out;
 
-		String filename = getExternalFilesDir(null).getAbsolutePath()
-				+ "/" + imageFileName;
+		String filename = getExternalFilesDir(null).getAbsolutePath() + "/"
+				+ imageFileName;
 		try {
 			out = new FileOutputStream(filename);
 			bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
@@ -198,15 +209,15 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		Intent returnIntent = new Intent();
 		returnIntent.putExtra(PERSON_NAME, mLabelName);
 		returnIntent.putExtra(PHOTO_PATH, filename);
-		
+
 		Log.i(TAG, filename);
-		
+
 		mSceneFile.delete();
-		
+
 		setResult(Activity.RESULT_OK, returnIntent);
 		finish();
 	}
@@ -231,9 +242,9 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 	private void copyPickedPhoto(Intent data) {
 		try {
 			File dst = mSceneFile;
-			
-			InputStream in = getContentResolver()
-					.openInputStream(data.getData());
+
+			InputStream in = getContentResolver().openInputStream(
+					data.getData());
 			OutputStream out = new FileOutputStream(dst);
 
 			byte[] buf = new byte[4096];
