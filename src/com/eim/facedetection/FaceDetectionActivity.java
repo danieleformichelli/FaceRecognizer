@@ -22,6 +22,8 @@ import org.opencv.core.Rect;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -55,6 +57,8 @@ public class FaceDetectionActivity extends Activity {
 	private String mLabelName = "Unknown";
 
 	private boolean mAlreadyStarted = false;
+	
+	private interface GenericCancelListener extends OnCancelListener, OnDismissListener {}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -113,6 +117,20 @@ public class FaceDetectionActivity extends Activity {
 
 		String[] dialogOptions = this.getResources().getStringArray(
 				R.array.face_detection_add_photo_options);
+		
+		GenericCancelListener dialogCancelListener = new GenericCancelListener() {
+			
+			void exitWithError() {
+				setResult(Activity.RESULT_CANCELED);
+				finish();
+			}
+			
+			@Override
+			public void onCancel(DialogInterface dialog) { exitWithError(); }
+
+			@Override
+			public void onDismiss(DialogInterface arg0) { exitWithError(); }; 
+		};
 
 		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
 			@Override
@@ -162,7 +180,10 @@ public class FaceDetectionActivity extends Activity {
 		};
 
 		new AlertDialog.Builder(this).setTitle(dialogTitle)
-				.setItems(dialogOptions, dialogClickListener).show();
+				.setItems(dialogOptions, dialogClickListener)
+				.setOnCancelListener(dialogCancelListener)
+				/*.setOnDismissListener(dialogCancelListener)*/
+				.show();
 
 	}
 
