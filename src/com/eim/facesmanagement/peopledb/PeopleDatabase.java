@@ -62,32 +62,33 @@ public class PeopleDatabase {
 	}
 
 	public Person getPerson(long id) {
-		Person selectedPerson = null;
+		Person selectedPerson;
+
 		String query = "SELECT " + FacesContract.Faces.TABLE + "."
-				+ FacesContract.Faces._ID + ", " + FacesContract.People.NAME
-				+ ", " + FacesContract.Faces.PHOTO_URL + " FROM "
+				+ FacesContract.Faces._ID + " AS PHOTO_ID, "
+				+ FacesContract.People.NAME + ", "
+				+ FacesContract.Faces.PHOTO_URL + " FROM "
 				+ FacesContract.People.TABLE + " LEFT JOIN "
 				+ FacesContract.Faces.TABLE + " WHERE "
 				+ FacesContract.People._ID + " = ?";
 		String[] whereArgs = new String[] { String.valueOf(id) };
 
 		Cursor c = db.rawQuery(query, whereArgs);
+		int personNameIndex = c.getColumnIndex(FacesContract.People.NAME);
+		int photoIdIndex = c.getColumnIndex("PHOTO_ID");
+		int photoUrlIndex = c.getColumnIndex(FacesContract.Faces.PHOTO_URL);
 
-		if (!c.isAfterLast()) {
-			String name = c.getString(c
-					.getColumnIndex(FacesContract.People.NAME));
-			selectedPerson = new Person(name, null);
+		if (c.moveToNext())
+			return null;
 
-			while (!c.isAfterLast()) {
-				long photoId = c.getLong(c
-						.getColumnIndex(FacesContract.Faces.TABLE + "."
-								+ FacesContract.Faces._ID));
-				String photoUrl = c.getString(c
-						.getColumnIndex(FacesContract.Faces.PHOTO_URL));
+		selectedPerson = new Person(c.getString(personNameIndex), null);
 
-				selectedPerson.addPhoto(photoId, new Photo(photoUrl));
-			}
-		}
+		do {
+			long photoId = c.getLong(photoIdIndex);
+			String photoUrl = c.getString(photoUrlIndex);
+
+			selectedPerson.addPhoto(photoId, new Photo(photoUrl));
+		} while (c.moveToNext());
 
 		return selectedPerson;
 	}
@@ -97,7 +98,7 @@ public class PeopleDatabase {
 		Person currentPerson = null;
 		LongSparseArray<Person> people = new LongSparseArray<Person>();
 
-		String query = "SELECT " + FacesContract.People.TABLE + "."
+		final String query = "SELECT " + FacesContract.People.TABLE + "."
 				+ FacesContract.People._ID + " AS PERSON_ID, "
 				+ FacesContract.People.NAME + ", " + FacesContract.Faces.TABLE
 				+ "." + FacesContract.Faces._ID + " AS PHOTO_ID, "
@@ -105,14 +106,16 @@ public class PeopleDatabase {
 				+ FacesContract.People.TABLE + " LEFT JOIN "
 				+ FacesContract.Faces.TABLE + " ORDER BY PERSON_ID";
 		Cursor c = db.rawQuery(query, null);
+		int personIdIndex = c.getColumnIndex("PERSON_ID");
+		int personNameIndex = c.getColumnIndex(FacesContract.People.NAME);
+		int photoIdIndex = c.getColumnIndex("PHOTO_ID");
+		int photoUrlIndex = c.getColumnIndex(FacesContract.Faces.PHOTO_URL);
 
-		while (!c.isAfterLast()) {
-			long personId = c.getLong(c.getColumnIndex("PERSON_ID"));
-			String name = c.getString(c
-					.getColumnIndex(FacesContract.People.NAME));
-			long photoId = c.getLong(c.getColumnIndex("PHOTO_ID"));
-			String photoUrl = c.getString(c
-					.getColumnIndex(FacesContract.Faces.PHOTO_URL));
+		while (c.moveToNext()) {
+			long personId = c.getLong(personIdIndex);
+			String name = c.getString(personNameIndex);
+			long photoId = c.getLong(photoIdIndex);
+			String photoUrl = c.getString(photoUrlIndex);
 
 			// add a new Person if it is the first time we found it
 			if (personId != currentId) {

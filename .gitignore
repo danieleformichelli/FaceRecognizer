@@ -1,2 +1,4 @@
 bin/
 gen/
+libs/armeabi-v7a/
+obj/
