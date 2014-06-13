@@ -5,12 +5,29 @@ import android.graphics.Bitmap;
 public class Photo {
 	String url;
 	Bitmap bitmap;
-	
+
 	public Photo(String url, Bitmap bitmap) {
 		if (url == null && bitmap == null)
-			throw new IllegalArgumentException("url and bitmap cannot be both null");
+			throw new IllegalArgumentException(
+					"url and bitmap cannot be both null");
 
 		this.url = url;
+		this.bitmap = bitmap;
+	}
+
+	public Photo(String url) {
+		if (url == null)
+			throw new IllegalArgumentException(
+					"url and bitmap cannot be both null");
+
+		this.url = url;
+	}
+
+	public Photo(Bitmap bitmap) {
+		if (bitmap == null)
+			throw new IllegalArgumentException(
+					"url and bitmap cannot be both null");
+
 		this.bitmap = bitmap;
 	}
 
@@ -20,8 +37,9 @@ public class Photo {
 
 	public void setUrl(String url) {
 		if (url == null && bitmap == null)
-			throw new IllegalArgumentException("url and bitmap cannot be both null");
-		
+			throw new IllegalArgumentException(
+					"url and bitmap cannot be both null");
+
 		this.url = url;
 	}
 
@@ -31,8 +49,9 @@ public class Photo {
 
 	public void setBitmap(Bitmap bitmap) {
 		if (url == null && bitmap == null)
-			throw new IllegalArgumentException("url and bitmap cannot be both null");
-		
+			throw new IllegalArgumentException(
+					"url and bitmap cannot be both null");
+
 		this.bitmap = bitmap;
 	}
 

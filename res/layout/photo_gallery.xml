@@ -1,8 +1,3 @@
 <GridView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    class="com.eim.facesmanagement.PhotoGallery"
-    android:horizontalSpacing="5dp"
-    android:numColumns="5"
-    android:verticalSpacing="5dp" />
+    class="com.eim.facesmanagement.PhotoGallery" />

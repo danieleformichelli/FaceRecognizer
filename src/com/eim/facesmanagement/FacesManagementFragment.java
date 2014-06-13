@@ -16,10 +16,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eim.R;
-import com.eim.facedetection.FaceDetectionAndExtractionActivity;
+import com.eim.facedetection.FaceDetectionActivity;
 import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;
 import com.eim.utilities.FaceRecognizerMainActivity;
+import com.eim.utilities.PhotoAdapter;
 import com.eim.utilities.Swipeable;
 
 public class FacesManagementFragment extends Fragment implements Swipeable {
@@ -165,8 +166,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 		@Override
 		public void addPhoto(PhotoGallery gallery) {
 			Intent intent = new Intent(activity,
-					FaceDetectionAndExtractionActivity.class);
-			intent.putExtra(FaceDetectionAndExtractionActivity.PERSON_NAME,
+					FaceDetectionActivity.class);
+			intent.putExtra(FaceDetectionActivity.PERSON_NAME,
 					(String) gallery.getTag());
 			startActivityForResult(intent,
 					FACE_DETECTION_AND_EXTRACTION);
@@ -191,9 +192,9 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 		switch (requestCode) {
 		case FACE_DETECTION_AND_EXTRACTION:
 			String personName = data.getExtras().getString(
-					FaceDetectionAndExtractionActivity.PERSON_NAME);
+					FaceDetectionActivity.PERSON_NAME);
 			String photoPath = data.getExtras().getString(
-					FaceDetectionAndExtractionActivity.PHOTO_PATH);
+					FaceDetectionActivity.PHOTO_PATH);
 			
 			peopleAdapterListener.addPhoto(personName, new Photo(photoPath,
 					null));

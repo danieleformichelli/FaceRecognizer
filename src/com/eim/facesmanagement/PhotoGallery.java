@@ -5,17 +5,19 @@ import android.graphics.BitmapFactory;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.eim.R;
 import com.eim.facesmanagement.peopledb.Photo;
+import com.eim.utilities.NoScrollGridView;
+import com.eim.utilities.PhotoAdapter;
 
 /**
  * A Gallery is an horizontal LinearLayout that can contain zero or more photos
  * and allows to add or delete them.
  */
-public class PhotoGallery extends GridView implements PhotoSelectionListener {
+public class PhotoGallery extends NoScrollGridView implements
+		PhotoSelectionListener {
 	private static final int colCount = 5;
 
 	ImageView addDeletePhoto;
@@ -45,10 +47,10 @@ public class PhotoGallery extends GridView implements PhotoSelectionListener {
 		this.context = context;
 		setNumColumns(colCount);
 
-		add = new Photo(null, BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.action_add_photo));
-		delete = new Photo(null, BitmapFactory.decodeResource(context.getResources(),
-				R.drawable.action_delete));
+		add = new Photo(null, BitmapFactory.decodeResource(
+				context.getResources(), R.drawable.action_add_photo));
+		delete = new Photo(null, BitmapFactory.decodeResource(
+				context.getResources(), R.drawable.action_delete));
 
 		galleryAdapter = new PhotoAdapter(context, null, this);
 		addPhoto(add);
@@ -59,8 +61,9 @@ public class PhotoGallery extends GridView implements PhotoSelectionListener {
 
 		showAddPhoto();
 	}
-	
-	public void setPhotoGalleryListener(PhotoGalleryListener photoGalleryListener) {
+
+	public void setPhotoGalleryListener(
+			PhotoGalleryListener photoGalleryListener) {
 		this.photoGalleryListener = photoGalleryListener;
 	}
 
@@ -89,7 +92,7 @@ public class PhotoGallery extends GridView implements PhotoSelectionListener {
 	public void addPhoto(Photo photo) {
 		if (photo.getBitmap() == null)
 			photo.setBitmap(BitmapFactory.decodeFile(photo.getUrl()));
-		
+
 		galleryAdapter.addPhoto(photo);
 		photoCount++;
 	}
@@ -127,7 +130,6 @@ public class PhotoGallery extends GridView implements PhotoSelectionListener {
 			removePhoto();
 	}
 
-
 	OnItemClickListener galleryOnItemClickListener = new OnItemClickListener() {
 		@Override
 		public void onItemClick(AdapterView<?> parent, View view, int position,
@@ -136,7 +138,8 @@ public class PhotoGallery extends GridView implements PhotoSelectionListener {
 				if (addOrDelete)
 					photoGalleryListener.addPhoto(PhotoGallery.this);
 				else
-					photoGalleryListener.removeSelectedPhotos(PhotoGallery.this);
+					photoGalleryListener
+							.removeSelectedPhotos(PhotoGallery.this);
 
 				return;
 			}
@@ -150,7 +153,7 @@ public class PhotoGallery extends GridView implements PhotoSelectionListener {
 	public void photosSelectionChanged(boolean selected) {
 		if (galleryAdapter == null)
 			return;
-		
+
 		if (selected && galleryAdapter.getItem(0) == add)
 			showDeletePhoto();
 		else if (!selected && galleryAdapter.getItem(0) == delete)

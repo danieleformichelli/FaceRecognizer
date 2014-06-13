@@ -11,6 +11,8 @@
     <com.eim.facesmanagement.PhotoGallery
         android:id="@+id/person_view_gallery"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:horizontalSpacing="10dp"
+        android:verticalSpacing="10dp" />
 
 </LinearLayout>

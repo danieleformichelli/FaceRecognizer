@@ -8,8 +8,8 @@ import java.util.List;
  * zero or more pairs (photo, features)
  * 
  */
-public class Person implements Comparable<Person>  {
-	
+public class Person implements Comparable<Person> {
+
 	String name;
 	List<Photo> photos;
 
@@ -47,6 +47,10 @@ public class Person implements Comparable<Person>  {
 	public void addPhoto(Photo photo) {
 		if (photo != null)
 			this.photos.add(photo);
+	}
+
+	public void removePhoto(Integer photoIndex) {
+		photos.remove(photoIndex);
 	}
 
 	public void removePhoto(Photo photo) {

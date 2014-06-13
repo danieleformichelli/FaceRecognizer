@@ -7,7 +7,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import org.opencv.android.BaseLoaderCallback;
@@ -20,7 +22,6 @@ import org.opencv.core.Rect;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -30,16 +31,15 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.BaseAdapter;
 import android.widget.GridView;
-import android.widget.ImageView;
 
 import com.eim.R;
+import com.eim.facesmanagement.peopledb.Photo;
+import com.eim.utilities.PhotoAdapter;
 
-public class FaceDetectionAndExtractionActivity extends Activity {
+public class FaceDetectionActivity extends Activity {
 	private static final String TAG = "FaceDetectionAndExtractionActivity";
 
 	protected static final int REQUEST_TAKE_PHOTO = 1;
@@ -54,7 +54,7 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 	private FaceDetector mFaceDetector;
 
 	private String mLabelName = "Unknown";
-	
+
 	private boolean mAlreadyStarted = false;
 
 	@Override
@@ -75,11 +75,11 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 	@Override
 	public void onResume() {
 		super.onResume();
-		
+
 		if (mAlreadyStarted)
 			return;
-		
-		mAlreadyStarted = true;		
+
+		mAlreadyStarted = true;
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, this,
 				new BaseLoaderCallback(this) {
 					@Override
@@ -119,7 +119,7 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 			@Override
 			public void onClick(DialogInterface dialog, int item) {
 
-				FaceDetectionAndExtractionActivity activity = FaceDetectionAndExtractionActivity.this;
+				FaceDetectionActivity activity = FaceDetectionActivity.this;
 
 				try {
 					File outputDir = activity.getExternalFilesDir(null);
@@ -157,6 +157,7 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 					activity.startActivityForResult(Intent.createChooser(
 							pickImageIntent, "Select Image"),
 							REQUEST_PICK_PHOTO);
+					break;
 				}
 			}
 		};
@@ -167,8 +168,10 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 	}
 
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
-		if (resultCode != Activity.RESULT_OK)
+		if (resultCode != Activity.RESULT_OK) {
+			showChooserDialog();
 			return;
+		}
 
 		switch (requestCode) {
 		case REQUEST_PICK_PHOTO:
@@ -176,6 +179,7 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 		case REQUEST_TAKE_PHOTO:
 
 			Bitmap[] detectedFaces = detectFaces();
+//			mSceneFile.delete();
 
 			if (detectedFaces.length == 0) {
 				showChooserDialog(true);
@@ -190,22 +194,23 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 			processFace(detectedFaces[0]);
 			break;
 		}
+
 	}
 
 	private void processFace(Bitmap bmp) {
-
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
 				.format(new Date());
 		String imageFileName = mLabelName + timeStamp + ".png";
 
-		FileOutputStream out;
-
 		String filename = getExternalFilesDir(null).getAbsolutePath() + "/"
 				+ imageFileName;
+
 		try {
+			FileOutputStream out;
 			out = new FileOutputStream(filename);
 			bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
 			out.close();
+			Log.i(TAG, "Face saved to " + filename);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -214,19 +219,19 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 		returnIntent.putExtra(PERSON_NAME, mLabelName);
 		returnIntent.putExtra(PHOTO_PATH, filename);
 
-		Log.i(TAG, filename);
-
-		mSceneFile.delete();
-
 		setResult(Activity.RESULT_OK, returnIntent);
 		finish();
 	}
 
 	private void displayFaceChooser(final Bitmap[] detectedFaces) {
 
-		setContentView(R.layout.activity_face_detection_and_extraction);
+		setContentView(R.layout.activity_face_detection);
 
-		ThumbnailAdapter adapter = new ThumbnailAdapter(this, detectedFaces);
+		List<Photo> faces = new ArrayList<Photo>();
+		for (Bitmap bitmap: detectedFaces)
+			faces.add(new Photo(bitmap));
+		
+		PhotoAdapter adapter = new PhotoAdapter(this, faces, null);
 
 		GridView grid = (GridView) this.findViewById(R.id.face_chooser_grid);
 		grid.setAdapter(adapter);
@@ -295,44 +300,5 @@ public class FaceDetectionAndExtractionActivity extends Activity {
 		}
 
 		return detectedFaces;
-	}
-
-	public class ThumbnailAdapter extends BaseAdapter {
-		private Context context;
-		private Bitmap[] thumbnails;
-
-		public ThumbnailAdapter(Context c, Bitmap[] thumbs) {
-			context = c;
-			thumbnails = thumbs;
-		}
-
-		// ---returns the number of images---
-		public int getCount() {
-			return thumbnails.length;
-		}
-
-		// ---returns the ID of an item---
-		public Object getItem(int position) {
-			return position;
-		}
-
-		public long getItemId(int position) {
-			return position;
-		}
-
-		// ---returns an ImageView view---
-		public View getView(int position, View convertView, ViewGroup parent) {
-			ImageView imageView;
-			if (convertView == null) {
-				imageView = new ImageView(context);
-				imageView.setLayoutParams(new GridView.LayoutParams(300, 300));
-				imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-				imageView.setPadding(5, 5, 5, 5);
-			} else {
-				imageView = (ImageView) convertView;
-			}
-			imageView.setImageBitmap(thumbnails[position]);
-			return imageView;
-		}
 	}
 }

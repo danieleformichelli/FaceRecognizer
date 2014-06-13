@@ -14,8 +14,6 @@ import com.eim.facerecognition.FaceRecognitionFragment;
 import com.eim.facesmanagement.FacesManagementFragment;
 
 public class FaceRecognizerMainActivity extends Activity {
-	private static final String TAG = "FaceRecognizerMainActivity";
-
 	int currentPosition;
 
 	SectionsPagerAdapter mSectionsPagerAdapter;

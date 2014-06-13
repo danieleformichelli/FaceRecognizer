@@ -314,7 +314,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		if (indexes.first == -1 || indexes.second == -1)
 			return false;
 
-		people.get(indexes.first).getPhotos().remove(indexes.second);
+		people.get(indexes.first).removePhoto(indexes.second);
 		notifyDataSetChanged();
 		return true;
 	}
@@ -326,8 +326,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		if (indexes.first == -1 || indexes.second != -1)
 			return false;
 
-		people.get(indexes.first).getPhotos()
-				.add(photo);
+		people.get(indexes.first).addPhoto(photo);
 		notifyDataSetChanged();
 		return true;
 	}

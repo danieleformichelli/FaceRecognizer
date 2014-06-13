@@ -2,6 +2,7 @@ package com.eim.utilities;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.widget.AbsListView.LayoutParams;
 import android.widget.GridView;
 import android.widget.ImageView;
 
@@ -35,6 +36,13 @@ public class SquareImageView extends ImageView {
 	}
 
 	public void setSize(int size) {
-        setLayoutParams(new GridView.LayoutParams(size, size));
+		GridView.LayoutParams params = (LayoutParams) this.getLayoutParams();
+		
+		if (params != null)
+			params.width = size;
+		else
+			params = new GridView.LayoutParams(size, size);
+		
+		setLayoutParams(params);
 	}
 }

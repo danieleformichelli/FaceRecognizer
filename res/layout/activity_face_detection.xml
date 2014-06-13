@@ -1,0 +1,27 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/face_chooser_label"
+        style="?android:listSeparatorTextViewStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="@string/face_detection_choose_face"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <GridView
+        android:id="@+id/face_chooser_grid"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:horizontalSpacing="10dp"
+        android:numColumns="5"
+        android:padding="10dp"
+        android:verticalSpacing="10dp" />
+
+</LinearLayout>
