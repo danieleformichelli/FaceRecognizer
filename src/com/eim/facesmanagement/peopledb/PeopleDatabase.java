@@ -73,17 +73,15 @@ public class PeopleDatabase {
 		SQLiteDatabase db = pdboh.getReadableDatabase();
 		String query = "SELECT " + FacesContract.People.NAME + ", "
 				+ FacesContract.Faces.PHOTO_URL + " FROM "
-				+ FacesContract.Faces.TABLE + ", " + FacesContract.People.TABLE
-				+ " WHERE " + FacesContract.People.TABLE + "."
-				+ FacesContract.People._ID + " = "
-				+ FacesContract.Faces.PERSON_ID + " ORDER BY "
+				+ FacesContract.People.TABLE + " LEFT JOIN "
+				+ FacesContract.Faces.TABLE + " ORDER BY "
 				+ FacesContract.People.NAME;
 		Cursor c = db.rawQuery(query, null);
 		while (!c.isAfterLast()) {
 			String name = c.getString(c
 					.getColumnIndex(FacesContract.People.NAME));
 			String photoUrl = c.getString(c
-					.getColumnIndex(FacesContract.People.NAME));
+					.getColumnIndex(FacesContract.Faces.PHOTO_URL));
 
 			// add a new Person if it is the first time we found it
 			if (name.compareTo(currentPerson.getName()) != 0) {
