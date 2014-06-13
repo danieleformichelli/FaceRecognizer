@@ -17,7 +17,6 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfRect;
 import org.opencv.core.Rect;
 
 import android.app.Activity;
@@ -284,9 +283,7 @@ public class FaceDetectionActivity extends Activity {
 		if (mFaceDetector == null)
 			initDetector();
 
-		MatOfRect faces = new MatOfRect();
-
-		Rect[] faceRegions = mFaceDetector.detect(mScene, faces);
+		Rect[] faceRegions = mFaceDetector.detect(mScene);
 
 		Bitmap[] detectedFaces = new Bitmap[faceRegions.length];
 

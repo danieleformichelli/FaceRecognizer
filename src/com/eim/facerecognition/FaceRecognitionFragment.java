@@ -11,7 +11,6 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -174,9 +173,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mRgba = inputFrame.rgba();
 		mGray = inputFrame.gray();
 
-		MatOfRect faces = new MatOfRect();
-
-		Rect[] facesArray = mFaceDetector.detect(mGray, faces);
+		Rect[] facesArray = mFaceDetector.detect(mGray);
 
 		List<LabelledRect> labelledFaces = recognizeFaces(facesArray);
 
