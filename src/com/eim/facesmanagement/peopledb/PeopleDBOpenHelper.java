@@ -1,4 +1,7 @@
-package com.eim.facesmanagement;
+package com.eim.facesmanagement.peopledb;
+
+import com.eim.facesmanagement.peopledb.FacesContract.Faces;
+import com.eim.facesmanagement.peopledb.FacesContract.People;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -21,7 +24,6 @@ public class PeopleDBOpenHelper extends SQLiteOpenHelper {
 			 + FacesContract.Faces._ID + " INTEGER PRIMARY KEY, " 
 			 + FacesContract.Faces.PERSON_ID + " TEXT UNIQUE "
 			 + FacesContract.Faces.PHOTO_URL + " TEXT "
-			 + FacesContract.Faces.FEATURES + " TEXT "
 			 + "FOREIGN KEY(" + FacesContract.Faces.PERSON_ID + ") REFERENCES " 
 			 + FacesContract.Faces.TABLE + "(" + FacesContract.People._ID + ")"
 			 + ")";

@@ -17,6 +17,7 @@ import android.widget.Toast;
 
 import com.eim.R;
 import com.eim.facedetection.FaceDetectionActivity;
+import com.eim.facesmanagement.peopledb.PeopleDatabase;
 import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;
 import com.eim.utilities.FaceRecognizerMainActivity;

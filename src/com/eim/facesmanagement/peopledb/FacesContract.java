@@ -1,4 +1,4 @@
-package com.eim.facesmanagement;
+package com.eim.facesmanagement.peopledb;
 
 import android.provider.BaseColumns;
 
