@@ -1,6 +1,11 @@
 package com.eim.facerecognition;
 
+import java.util.ArrayList;
+
 import org.opencv.contrib.FaceRecognizer;
+import org.opencv.core.Mat;
+
+import android.content.Context;
  
 public class LBPHFaceRecognizer extends FaceRecognizer {
  
@@ -18,5 +23,30 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
     }
     public LBPHFaceRecognizer(int radius,int neighbours) {
     	super(createLBPHFaceRecognizer_2(radius,neighbours));
+    }
+    
+    private static String MODEL_FILE_NAME = "trainedModel.xml"; 
+    
+    private static LBPHFaceRecognizer instance;
+    private static String mModelPath;
+    public static LBPHFaceRecognizer getInstance(Context c) {
+    	if (instance == null) {
+    		instance = new LBPHFaceRecognizer();
+    		mModelPath = c.getExternalFilesDir(null).getAbsolutePath() + "/" + MODEL_FILE_NAME;
+    		instance.load(mModelPath);
+    	}
+		return instance;
+    }
+    
+    public void incrementalTrain(Mat newFace, int label) {
+    	ArrayList<Mat> newFaces = new ArrayList<Mat>();
+    	Mat labels = new Mat();
+    	
+    	newFaces.add(newFace);
+    	labels.put(0, 0, new int[] { label });
+    	
+    	update(newFaces, labels);
+    	
+    	save(mModelPath);
     }
 }
