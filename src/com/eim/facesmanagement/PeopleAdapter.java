@@ -171,7 +171,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 	public long getChildId(int groupPosition, int childPosition) {
 		return childPosition;
 	}
-	
+
 	public LongSparseArray<Person> getPeople() {
 		return people;
 	}
@@ -201,8 +201,8 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 	/**
 	 * Remove a person to the ExpandableListView
 	 * 
-	 * @param person
-	 *            person to add
+	 * @param id
+	 *            id of the person to be removed
 	 */
 	public boolean removePerson(long id) {
 		Person mPerson = people.get(id);
@@ -229,11 +229,79 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 				if (person != null)
 					addPerson(people.keyAt(i), person);
 			}
-
-			// Collections.sort(this.people); TODO
 		}
 
 		notifyDataSetChanged();
+	}
+
+	/**
+	 * Edit the name of a person
+	 * 
+	 * @param id
+	 *            id of the person to be edited
+	 * @param newName
+	 *            new name
+	 * @return true if the person exists, false otherwise
+	 */
+	public boolean editPersonName(long id, String newName) {
+		if (newName == null)
+			throw new IllegalArgumentException("newName cannot be null");
+
+		Person mPerson = people.get(id);
+		if (mPerson == null)
+			return false;
+
+		people.get(id).setName(newName);
+		notifyDataSetChanged();
+		return true;
+	}
+
+	/**
+	 * Remove a photo from a person
+	 * 
+	 * @param personId
+	 *            id of the person
+	 * @param photoId
+	 *            id of the photo
+	 * @return true if both the person and the photo exist, false otherwise
+	 */
+	public boolean removePhoto(long personId, long photoId) {
+		Person mPerson = people.get(personId);
+		if (mPerson == null)
+			return false;
+
+		Photo mPhoto = mPerson.getPhotos().get(photoId);
+		if (mPhoto == null)
+			return false;
+
+		mPerson.removePhoto(photoId);
+		notifyDataSetChanged();
+		return true;
+	}
+
+	/**
+	 * Add a photo to a person. If the photoId is already present, the photo
+	 * will be replaced.
+	 * 
+	 * @param personId
+	 *            id of the person
+	 * @param photoId
+	 *            id of the photo
+	 * @param photo
+	 *            photo to be added
+	 * @return true if both the person and the photo exist, false otherwise
+	 */
+	public boolean addPhoto(long personId, long photoId, Photo photo) {
+		if (photo == null)
+			throw new IllegalArgumentException("photo cannot be null");
+
+		Person mPerson = people.get(personId);
+		if (mPerson == null)
+			return false;
+
+		mPerson.addPhoto(photoId, photo);
+		notifyDataSetChanged();
+		return true;
 	}
 
 	private OnClickListener editPersonOnClickListener = new OnClickListener() {
@@ -255,7 +323,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 				switch (which) {
 				case DialogInterface.BUTTON_POSITIVE:
 					peopleAdapterListener.editPersonName(id,
-							mEditPersonDialog.getName());
+							mEditPersonDialog.getInsertedName());
 					break;
 
 				case DialogInterface.BUTTON_NEUTRAL:
@@ -299,37 +367,4 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		}
 	};
 
-	public boolean editPersonName(long id, String newName) {
-		Person mPerson = people.get(id);
-		if (mPerson == null)
-			return false;
-
-		people.get(id).setName(newName);
-		notifyDataSetChanged();
-		return true;
-	}
-
-	public boolean removePhoto(long personId, long photoId) {
-		Person mPerson = people.get(personId);
-		if (mPerson == null)
-			return false;
-
-		Photo mPhoto = mPerson.getPhotos().get(photoId);
-		if (mPhoto == null)
-			return false;
-
-		mPerson.removePhoto(photoId);
-		notifyDataSetChanged();
-		return true;
-	}
-
-	public boolean addPhoto(long personId, long photoId, Photo photo) {
-		Person mPerson = people.get(personId);
-		if (mPerson == null)
-			return false;
-
-		mPerson.addPhoto(photoId, photo);
-		notifyDataSetChanged();
-		return true;
-	}
 }

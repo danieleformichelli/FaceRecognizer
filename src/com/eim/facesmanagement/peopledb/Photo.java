@@ -18,7 +18,7 @@ public class Photo {
 	public Photo(String url) {
 		if (url == null)
 			throw new IllegalArgumentException(
-					"url and bitmap cannot be both null");
+					"url cannot be null");
 
 		this.url = url;
 	}
@@ -26,7 +26,7 @@ public class Photo {
 	public Photo(Bitmap bitmap) {
 		if (bitmap == null)
 			throw new IllegalArgumentException(
-					"url and bitmap cannot be both null");
+					"bitmap cannot be null");
 
 		this.bitmap = bitmap;
 	}

@@ -114,8 +114,6 @@ public class PeopleDatabase {
 		while (c.moveToNext()) {
 			long personId = c.getLong(personIdIndex);
 			String name = c.getString(personNameIndex);
-			long photoId = c.getLong(photoIdIndex);
-			String photoUrl = c.getString(photoUrlIndex);
 
 			// add a new Person if it is the first time we found it
 			if (personId != currentId) {
@@ -124,7 +122,12 @@ public class PeopleDatabase {
 				people.put(currentId, currentPerson);
 			}
 
-			currentPerson.addPhoto(photoId, new Photo(photoUrl));
+			if (!c.isNull(photoIdIndex)) {
+				long photoId = c.getLong(photoIdIndex);
+				String photoUrl = c.getString(photoUrlIndex);
+				
+				currentPerson.addPhoto(photoId, new Photo(photoUrl));
+			}
 		}
 
 		return people;

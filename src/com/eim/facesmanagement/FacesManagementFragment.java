@@ -98,7 +98,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 				switch (which) {
 				case DialogInterface.BUTTON_POSITIVE:
 					mPeopleAdapterListener.addPerson(mEditPersonDialog
-							.getName());
+							.getInsertedName());
 					break;
 				default:
 					break;
@@ -212,6 +212,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 
 	};
 
+	@Override
 	public void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode != Activity.RESULT_OK)
 			return;
