@@ -1,7 +1,5 @@
 package com.eim.facesmanagement;
 
-import java.util.List;
-
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.DialogInterface;
@@ -17,6 +15,7 @@ import android.widget.Toast;
 
 import com.eim.R;
 import com.eim.facedetection.FaceDetectionActivity;
+import com.eim.facerecognition.LBPHFaceRecognizer;
 import com.eim.facesmanagement.peopledb.PeopleDatabase;
 import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;
@@ -28,46 +27,49 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 	private static final String TAG = "FacesManagementFragment";
 	private static final int FACE_DETECTION_AND_EXTRACTION = 1;
 
-	Activity activity;
-	ExpandableListView peopleList;
-	PeopleAdapter peopleAdapter;
+	Activity mActivity;
+	ExpandableListView mPeopleList;
+	PeopleAdapter mPeopleAdapter;
 	TextView addPerson, noPeopleMessage;
-	View layout;
+	View mainLayout;
+	LBPHFaceRecognizer mFaceRecognizer;
 
-	PeopleDatabase peopleDatabase;
-	List<Person> people;
+	PeopleDatabase mPeopleDatabase;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		layout = inflater.inflate(R.layout.fragment_faces_management,
+		mainLayout = inflater.inflate(R.layout.fragment_faces_management,
 				container, false);
-		return layout;
+
+		return mainLayout;
 	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
-		activity = (FaceRecognizerMainActivity) getActivity();
+		mActivity = (FaceRecognizerMainActivity) getActivity();
 
-		peopleDatabase = new PeopleDatabase(activity);
+		// mFaceRecognizer = LBPHFaceRecognizer.getInstance(mActivity);
+		mPeopleDatabase = PeopleDatabase.getInstance(mActivity);
 
-		addPerson = (TextView) layout
+		addPerson = (TextView) mainLayout
 				.findViewById(R.id.faces_management_add_person);
 		addPerson.setOnClickListener(addPersonListener);
 
-		noPeopleMessage = (TextView) layout
+		noPeopleMessage = (TextView) mainLayout
 				.findViewById(R.id.faces_management_no_people);
 
-		peopleList = (ExpandableListView) layout
+		mPeopleList = (ExpandableListView) mainLayout
 				.findViewById(R.id.faces_management_people_list);
-		peopleAdapter = new PeopleAdapter(activity, R.layout.person_list_item,
-				R.layout.person_view, peopleDatabase.getPeople(),
-				peopleAdapterListener, photoGalleryListener);
+		mPeopleAdapter = new PeopleAdapter(mActivity,
+				R.layout.person_list_item, R.layout.person_view,
+				mPeopleDatabase.getPeople(), mPeopleAdapterListener,
+				mPhotoGalleryListener);
 
-		peopleList.setAdapter(peopleAdapter);
-		if (peopleAdapter.getGroupCount() == 0)
+		mPeopleList.setAdapter(mPeopleAdapter);
+		if (mPeopleAdapter.getGroupCount() == 0)
 			noPeopleMessage.setVisibility(View.VISIBLE);
 
 	}
@@ -81,13 +83,13 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 	}
 
 	OnClickListener addPersonListener = new OnClickListener() {
-		EditPersonDialog insertNameDialog;
+		EditPersonDialog mEditPersonDialog;
 
 		@Override
 		public void onClick(View v) {
-			insertNameDialog = new EditPersonDialog("", addPersonListener,
+			mEditPersonDialog = new EditPersonDialog("", addPersonListener,
 					null, addPersonListener);
-			insertNameDialog.show(getFragmentManager(), TAG);
+			mEditPersonDialog.show(getFragmentManager(), TAG);
 		}
 
 		DialogInterface.OnClickListener addPersonListener = new DialogInterface.OnClickListener() {
@@ -95,7 +97,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 			public void onClick(DialogInterface dialog, int which) {
 				switch (which) {
 				case DialogInterface.BUTTON_POSITIVE:
-					peopleAdapterListener.addPerson(insertNameDialog.getName());
+					mPeopleAdapterListener.addPerson(mEditPersonDialog
+							.getName());
 					break;
 				default:
 					break;
@@ -104,84 +107,99 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 		};
 	};
 
-	PeopleAdapterListener peopleAdapterListener = new PeopleAdapterListener() {
+	PeopleAdapterListener mPeopleAdapterListener = new PeopleAdapterListener() {
 
 		@Override
 		public void addPerson(String name) {
 			if (name == null || name.length() == 0) {
 				Toast.makeText(
-						activity,
-						activity.getString(R.string.error_person_name_not_valid),
+						mActivity,
+						mActivity
+								.getString(R.string.error_person_name_not_valid),
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
 
-			if (peopleAdapter.addPerson(new Person(name, null)) == false) {
-				Toast.makeText(
-						activity,
-						activity.getString(R.string.error_person_already_present),
-						Toast.LENGTH_SHORT).show();
-			} else {
-				if (peopleAdapter.getGroupCount() != 0)
-					noPeopleMessage.setVisibility(View.GONE);
-				
-				peopleDatabase.addPerson(name);
-			}
-		}
+			long id = mPeopleDatabase.addPerson(name);
 
-		@Override
-		public void editPerson(String oldName, String newName) {
-			if (peopleAdapter.editPerson(oldName, newName) == false) {
+			if (id == -1) {
 				Toast.makeText(
-						activity,
-						activity.getString(R.string.error_person_already_present),
+						mActivity,
+						mActivity
+								.getString(R.string.error_person_already_present),
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
-			
-			peopleDatabase.editPerson(oldName, newName);
+
+			mPeopleAdapter.addPerson(id, new Person(name, null));
+
+			if (mPeopleAdapter.getGroupCount() != 0)
+				noPeopleMessage.setVisibility(View.GONE);
 		}
 
 		@Override
-		public void removePerson(String name) {
-			peopleAdapter.removePerson(name);
-			if (peopleAdapter.getGroupCount() == 0)
+		public void editPersonName(long id, String newName) {
+			if (mPeopleAdapter.editPersonName(id, newName) == false) {
+				Toast.makeText(
+						mActivity,
+						mActivity
+								.getString(R.string.error_person_already_present),
+						Toast.LENGTH_SHORT).show();
+				return;
+			}
+
+			mPeopleDatabase.editPersonName(id, newName);
+		}
+
+		@Override
+		public void removePerson(long id) {
+			mPeopleAdapter.removePerson(id);
+			if (mPeopleAdapter.getGroupCount() == 0)
 				noPeopleMessage.setVisibility(View.VISIBLE);
 
-			peopleDatabase.removePerson(name);
+			mPeopleDatabase.removePerson(id);
 		}
 
 		@Override
-		public void addPhoto(String name, Photo photo) {
-			peopleAdapter.addPhoto(name, photo);
-			peopleDatabase.addPhoto(name, photo.getUrl());
+		public void addPhoto(long personId, Photo photo) {
+			long photoId = mPeopleDatabase.addPhoto(personId, photo.getUrl());
+
+			android.util.Log.e(TAG, personId + ", " + photoId);
+
+			mPeopleAdapter.addPhoto(personId, photoId, photo);
+			// mFaceRecognizer.trainIncremental(id, photo.getUrl());
 		}
 
 		@Override
-		public void removePhoto(String name, Photo photo) {
-			peopleAdapter.removePhoto(name, photo);
-			peopleDatabase.removePhoto(photo.getUrl());
+		public void removePhoto(long personId, long photoId) {
+			mPeopleAdapter.removePhoto(personId, photoId);
+			mPeopleDatabase.removePhoto(photoId);
 		}
 	};
 
-	PhotoGalleryListener photoGalleryListener = new PhotoGalleryListener() {
+	PhotoGalleryListener mPhotoGalleryListener = new PhotoGalleryListener() {
 
 		@Override
 		public void addPhoto(PhotoGallery gallery) {
-			Intent intent = new Intent(activity, FaceDetectionActivity.class);
-			intent.putExtra(FaceDetectionActivity.PERSON_NAME,
-					(String) gallery.getTag());
-			startActivityForResult(intent, FACE_DETECTION_AND_EXTRACTION);
+			long id = (long) gallery.getTag();
+			String name = mPeopleAdapter.getPersonById(id).getName();
+
+			Intent mIntent = new Intent(mActivity, FaceDetectionActivity.class);
+			mIntent.putExtra(FaceDetectionActivity.PERSON_ID, id);
+			mIntent.putExtra(FaceDetectionActivity.PERSON_NAME, name);
+			startActivityForResult(mIntent, FACE_DETECTION_AND_EXTRACTION);
 		}
 
 		@Override
 		public void removeSelectedPhotos(PhotoGallery gallery) {
-			PhotoAdapter galleryAdapter = (PhotoAdapter) gallery.getAdapter();
-			for (int i = 1, l = galleryAdapter.getCount(); i < l; i++)
-				if (galleryAdapter.isSelected(i))
-					peopleAdapterListener.removePhoto(
-							(String) gallery.getTag(),
-							galleryAdapter.getItem(i));
+			PhotoAdapter mPhotoAdapter = (PhotoAdapter) gallery.getAdapter();
+			for (int i = 1, l = mPhotoAdapter.getCount(); i < l; i++)
+				if (mPhotoAdapter.isSelected(i)) {
+					final long personId = (long) gallery.getTag();
+					final long photoId = mPeopleAdapter.getPersonById(personId)
+							.getPhotos().keyAt(i);
+					mPeopleAdapterListener.removePhoto(personId, photoId);
+				}
 		}
 
 	};
@@ -192,13 +210,15 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 
 		switch (requestCode) {
 		case FACE_DETECTION_AND_EXTRACTION:
-			String personName = data.getExtras().getString(
-					FaceDetectionActivity.PERSON_NAME);
+			Bundle extras = data.getExtras();
+			if (extras == null)
+				return;
+
+			long personId = extras.getLong(FaceDetectionActivity.PERSON_ID);
 			String photoPath = data.getExtras().getString(
 					FaceDetectionActivity.PHOTO_PATH);
-
-			peopleAdapterListener.addPhoto(personName, new Photo(photoPath,
-					null));
+			mPeopleAdapterListener.addPhoto(personId,
+					new Photo(photoPath, null));
 			break;
 		}
 	}

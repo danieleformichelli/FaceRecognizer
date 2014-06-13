@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class PeopleDBOpenHelper extends SQLiteOpenHelper {
 	
-	private static final int VERSION = 1;
+	private static final int VERSION = 2;
 
 	private static final String DB_CREATE_PEOPLE = "CREATE TABLE " 
 			 + FacesContract.People.TABLE + "(" 
@@ -18,7 +18,7 @@ public class PeopleDBOpenHelper extends SQLiteOpenHelper {
 	private static final String DB_CREATE_FACES = "CREATE TABLE " 
 			 + FacesContract.Faces.TABLE + " (" 
 			 + FacesContract.Faces._ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " 
-			 + FacesContract.Faces.PERSON_ID + " TEXT UNIQUE NOT NULL, "
+			 + FacesContract.Faces.PERSON_ID + " TEXT NOT NULL, "
 			 + FacesContract.Faces.PHOTO_URL + " TEXT UNIQUE NOT NULL, "
 			 + "FOREIGN KEY(" + FacesContract.Faces.PERSON_ID + ") REFERENCES " 
 			 + FacesContract.People.TABLE + "(" + FacesContract.People._ID + ")"
@@ -45,8 +45,8 @@ public class PeopleDBOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		db.execSQL("DROP TABLE IF EXIST " + FacesContract.Faces.TABLE);
-		db.execSQL("DROP TABLE IF EXIST " + FacesContract.People.TABLE);
+		db.execSQL("DROP TABLE IF EXISTS " + FacesContract.Faces.TABLE);
+		db.execSQL("DROP TABLE IF EXISTS " + FacesContract.People.TABLE);
 		onCreate(db);
 	}
 	

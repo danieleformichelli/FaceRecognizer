@@ -46,6 +46,7 @@ public class FaceDetectionActivity extends Activity {
 	protected static final int REQUEST_TAKE_PHOTO = 1;
 	protected static final int REQUEST_PICK_PHOTO = 2;
 
+	public static final String PERSON_ID = "personId";
 	public static final String PERSON_NAME = "personName";
 	public static final String PHOTO_PATH = "photoPath";
 
@@ -54,11 +55,14 @@ public class FaceDetectionActivity extends Activity {
 
 	private FaceDetector mFaceDetector;
 
+	private long personId = -1;
 	private String mLabelName = "Unknown";
 
 	private boolean mAlreadyStarted = false;
-	
-	private interface GenericCancelListener extends OnCancelListener, OnDismissListener {}
+
+	private interface GenericCancelListener extends OnCancelListener,
+			OnDismissListener {
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +73,7 @@ public class FaceDetectionActivity extends Activity {
 		if (extras == null)
 			finish();
 
+		personId = extras.getLong(PERSON_ID);
 		mLabelName = extras.getString(PERSON_NAME);
 	}
 
@@ -117,19 +122,23 @@ public class FaceDetectionActivity extends Activity {
 
 		String[] dialogOptions = this.getResources().getStringArray(
 				R.array.face_detection_add_photo_options);
-		
+
 		GenericCancelListener dialogCancelListener = new GenericCancelListener() {
-			
+
 			void exitWithError() {
 				setResult(Activity.RESULT_CANCELED);
 				finish();
 			}
-			
-			@Override
-			public void onCancel(DialogInterface dialog) { exitWithError(); }
 
 			@Override
-			public void onDismiss(DialogInterface arg0) { exitWithError(); }; 
+			public void onCancel(DialogInterface dialog) {
+				exitWithError();
+			}
+
+			@Override
+			public void onDismiss(DialogInterface arg0) {
+				exitWithError();
+			};
 		};
 
 		DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
@@ -182,7 +191,7 @@ public class FaceDetectionActivity extends Activity {
 		new AlertDialog.Builder(this).setTitle(dialogTitle)
 				.setItems(dialogOptions, dialogClickListener)
 				.setOnCancelListener(dialogCancelListener)
-				/*.setOnDismissListener(dialogCancelListener)*/
+				/* .setOnDismissListener(dialogCancelListener) */
 				.show();
 
 	}
@@ -199,7 +208,7 @@ public class FaceDetectionActivity extends Activity {
 		case REQUEST_TAKE_PHOTO:
 
 			Bitmap[] detectedFaces = detectFaces();
-//			mSceneFile.delete();
+			// mSceneFile.delete();
 
 			if (detectedFaces.length == 0) {
 				showChooserDialog(true);
@@ -220,7 +229,7 @@ public class FaceDetectionActivity extends Activity {
 	private void processFace(Bitmap bmp) {
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
 				.format(new Date());
-		String imageFileName = mLabelName + timeStamp + ".png";
+		String imageFileName = mLabelName + "_" + timeStamp + ".png";
 
 		String filename = getExternalFilesDir(null).getAbsolutePath() + "/"
 				+ imageFileName;
@@ -236,7 +245,7 @@ public class FaceDetectionActivity extends Activity {
 		}
 
 		Intent returnIntent = new Intent();
-		returnIntent.putExtra(PERSON_NAME, mLabelName);
+		returnIntent.putExtra(PERSON_ID, personId);
 		returnIntent.putExtra(PHOTO_PATH, filename);
 
 		setResult(Activity.RESULT_OK, returnIntent);
@@ -248,9 +257,9 @@ public class FaceDetectionActivity extends Activity {
 		setContentView(R.layout.activity_face_detection);
 
 		List<Photo> faces = new ArrayList<Photo>();
-		for (Bitmap bitmap: detectedFaces)
+		for (Bitmap bitmap : detectedFaces)
 			faces.add(new Photo(bitmap));
-		
+
 		PhotoAdapter adapter = new PhotoAdapter(this, faces, null);
 
 		GridView grid = (GridView) this.findViewById(R.id.face_chooser_grid);

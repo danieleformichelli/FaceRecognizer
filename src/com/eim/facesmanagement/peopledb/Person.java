@@ -1,7 +1,6 @@
 package com.eim.facesmanagement.peopledb;
 
-import java.util.ArrayList;
-import java.util.List;
+import android.util.LongSparseArray;
 
 /**
  * This class represent a person to be recognized. Each person has a name and
@@ -11,12 +10,12 @@ import java.util.List;
 public class Person implements Comparable<Person> {
 
 	String name;
-	List<Photo> photos;
+	LongSparseArray<Photo> photos;
 
-	public Person(String name, List<Photo> photos) {
+	public Person(String name, LongSparseArray<Photo> photos) {
 		setName(name);
 
-		this.photos = new ArrayList<Photo>();
+		this.photos = new LongSparseArray<Photo>();
 		setPhotos(photos);
 	}
 
@@ -32,32 +31,33 @@ public class Person implements Comparable<Person> {
 		this.name = name;
 	}
 
-	public List<Photo> getPhotos() {
+	public LongSparseArray<Photo> getPhotos() {
 		return photos;
 	}
 
-	public void setPhotos(List<Photo> photos) {
-
+	public void setPhotos(LongSparseArray<Photo> photos) {
 		if (photos == null)
 			this.photos.clear();
 		else
 			this.photos = photos;
+
+		this.photos.clear();
+
+		if (photos != null)
+			for (int i = 0, l = photos.size(); i < l; i++) {
+				Photo photo = photos.valueAt(i);
+				if (photo != null)
+					addPhoto(photos.keyAt(i), photo);
+			}
 	}
 
-	public void addPhoto(Photo photo) {
+	public void addPhoto(long id, Photo photo) {
 		if (photo != null)
-			photos.add(photo);
+			photos.put(id, photo);
 	}
 
-	public void removePhoto(int photoIndex) {
-		if (photoIndex < 0 || photoIndex >= photos.size())
-			throw new IndexOutOfBoundsException("Index out of bound: Index "
-					+ photoIndex + ", Size " + photos.size());
-		photos.remove(photoIndex);
-	}
-
-	public boolean removePhoto(Photo photo) {
-		return photos.remove(photo);
+	public void removePhoto(long id) {
+		photos.remove(id);
 	}
 
 	@Override

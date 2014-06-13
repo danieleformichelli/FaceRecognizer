@@ -11,6 +11,7 @@ import org.opencv.core.Mat;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.LongSparseArray;
 import android.util.SparseArray;
 
 import com.eim.facesmanagement.peopledb.Person;
@@ -77,14 +78,16 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
     	
     	for(int i = 0; i < dataset.size(); i++){
     	    int label = dataset.keyAt(i);
-    	    Person pe = dataset.valueAt(i);
+    	    Person person = dataset.valueAt(i);
+    	    LongSparseArray<Photo> photos = person.getPhotos(); 
     	    
-    	    for (Photo ph: pe.getPhotos()) {
+    	    for (int j = 0, l = photos.size(); i<l;i++) {
+    	    	Photo photo = photos.valueAt(j);
     	    	Mat m = new Mat();
     	    	
-    	    	Bitmap b = ph.getBitmap();
+    	    	Bitmap b = photo.getBitmap();
     	    	if (b == null)
-    	    		b = BitmapFactory.decodeFile(ph.getUrl());
+    	    		b = BitmapFactory.decodeFile(photo.getUrl());
     	    	
     	    	Utils.bitmapToMat(b, m);
     	    	faces.add(m);

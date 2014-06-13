@@ -1,125 +1,129 @@
 package com.eim.facesmanagement.peopledb;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.LongSparseArray;
 
 public class PeopleDatabase {
-
+	static PeopleDatabase instance;
 	Context context;
-	PeopleDBOpenHelper pdboh;
+	SQLiteDatabase db;
 
-	public PeopleDatabase(Context context) {
-		this.context = context;
-		pdboh = new PeopleDBOpenHelper(context);
+	public static PeopleDatabase getInstance(Context c) {
+		if (instance == null)
+			instance = new PeopleDatabase(c);
+
+		return instance;
 	}
 
-	public void editPerson(String oldName, String newName) {
-		SQLiteDatabase db = pdboh.getWritableDatabase();
+	private PeopleDatabase(Context context) {
+		this.context = context;
+		db = new PeopleDBOpenHelper(context).getWritableDatabase();
+	}
+
+	public void editPersonName(long id, String newName) {
 		ContentValues values = new ContentValues();
 		values.put(FacesContract.People.NAME, newName);
-		String whereClause = FacesContract.People.NAME + " = ?";
-		String[] whereArgs = { oldName };
+		String whereClause = FacesContract.People._ID + " = ?";
+		String[] whereArgs = { String.valueOf(id) };
 
 		db.update(FacesContract.People.TABLE, values, whereClause, whereArgs);
-		db.close();
 	}
 
-	public void removePerson(String name) {
-		SQLiteDatabase db = pdboh.getWritableDatabase();
-		String whereClause = FacesContract.People.NAME + " = ?";
-		String[] whereArgs = { name };
+	public void removePerson(long id) {
+		String whereClause = FacesContract.People._ID + " = ?";
+		String[] whereArgs = { String.valueOf(id) };
 
 		db.delete(FacesContract.People.TABLE, whereClause, whereArgs);
-		db.close();
 	}
 
-	public void addPerson(String name) {
-		SQLiteDatabase db = pdboh.getWritableDatabase();
+	public long addPerson(String name) {
 		ContentValues values = new ContentValues();
 		values.put(FacesContract.People.NAME, name);
 
-		db.insert(FacesContract.People.TABLE, null, values);
-		db.close();
+		return db.insert(FacesContract.People.TABLE, null, values);
 	}
 
-	public void addPhoto(String name, String photoUrl) {
-		SQLiteDatabase db = pdboh.getWritableDatabase();
+	public long addPhoto(long personId, String photoUrl) {
 		ContentValues values = new ContentValues();
-		values.put(FacesContract.Faces.PERSON_ID, name);
+		values.put(FacesContract.Faces.PERSON_ID, personId);
 		values.put(FacesContract.Faces.PHOTO_URL, photoUrl);
 
-		db.insert(FacesContract.Faces.TABLE, null, values);
-		db.close();
+		return db.insert(FacesContract.Faces.TABLE, null, values);
 	}
 
-	public void removePhoto(String photoUrl) {
-		SQLiteDatabase db = pdboh.getWritableDatabase();
-		String whereClause = FacesContract.People.NAME + " = ? AND "
-				+ FacesContract.Faces.PHOTO_URL + " = ?";
-		String[] whereArgs = { photoUrl };
+	public void removePhoto(long id) {
+		String whereClause = FacesContract.Faces._ID + " = ?";
+		String[] whereArgs = { String.valueOf(id) };
 
 		db.delete(FacesContract.Faces.TABLE, whereClause, whereArgs);
-		db.close();
 	}
 
-	public Person getPerson(int id) {
+	public Person getPerson(long id) {
 		Person selectedPerson = null;
-		SQLiteDatabase db = pdboh.getReadableDatabase();
-		String query = "SELECT " + FacesContract.People.NAME + ", "
-				+ FacesContract.Faces.PHOTO_URL + " FROM "
+		String query = "SELECT " + FacesContract.Faces.TABLE + "."
+				+ FacesContract.Faces._ID + ", " + FacesContract.People.NAME
+				+ ", " + FacesContract.Faces.PHOTO_URL + " FROM "
 				+ FacesContract.People.TABLE + " LEFT JOIN "
 				+ FacesContract.Faces.TABLE + " WHERE "
 				+ FacesContract.People._ID + " = ?";
+		String[] whereArgs = new String[] { String.valueOf(id) };
 
-		Cursor c = db.rawQuery(query, new String[] { String.valueOf(id) });
+		Cursor c = db.rawQuery(query, whereArgs);
 
-		while (!c.isAfterLast()) {
-			if (c.isFirst()) {
-				String name = c.getString(c
-						.getColumnIndex(FacesContract.People.NAME));
-				selectedPerson = new Person(name, null);
+		if (!c.isAfterLast()) {
+			String name = c.getString(c
+					.getColumnIndex(FacesContract.People.NAME));
+			selectedPerson = new Person(name, null);
+
+			while (!c.isAfterLast()) {
+				long photoId = c.getLong(c
+						.getColumnIndex(FacesContract.Faces.TABLE + "."
+								+ FacesContract.Faces._ID));
+				String photoUrl = c.getString(c
+						.getColumnIndex(FacesContract.Faces.PHOTO_URL));
+
+				selectedPerson.addPhoto(photoId, new Photo(photoUrl));
 			}
-
-			String photoUrl = c.getString(c
-					.getColumnIndex(FacesContract.Faces.PHOTO_URL));
-
-			selectedPerson.addPhoto(new Photo(photoUrl));
 		}
 
 		return selectedPerson;
 	}
 
-	public List<Person> getPeople() {
+	public LongSparseArray<Person> getPeople() {
+		long currentId = -1;
 		Person currentPerson = null;
-		List<Person> people = new ArrayList<Person>();
-		SQLiteDatabase db = pdboh.getReadableDatabase();
-		String query = "SELECT " + FacesContract.People.NAME + ", "
+		LongSparseArray<Person> people = new LongSparseArray<Person>();
+
+		String query = "SELECT " + FacesContract.People.TABLE + "."
+				+ FacesContract.People._ID + " AS PERSON_ID, "
+				+ FacesContract.People.NAME + ", " + FacesContract.Faces.TABLE
+				+ "." + FacesContract.Faces._ID + " AS PHOTO_ID, "
 				+ FacesContract.Faces.PHOTO_URL + " FROM "
 				+ FacesContract.People.TABLE + " LEFT JOIN "
-				+ FacesContract.Faces.TABLE + " ORDER BY "
-				+ FacesContract.People.NAME;
+				+ FacesContract.Faces.TABLE + " ORDER BY PERSON_ID";
 		Cursor c = db.rawQuery(query, null);
+
 		while (!c.isAfterLast()) {
+			long personId = c.getLong(c.getColumnIndex("PERSON_ID"));
 			String name = c.getString(c
 					.getColumnIndex(FacesContract.People.NAME));
+			long photoId = c.getLong(c.getColumnIndex("PHOTO_ID"));
 			String photoUrl = c.getString(c
 					.getColumnIndex(FacesContract.Faces.PHOTO_URL));
 
 			// add a new Person if it is the first time we found it
-			if (name.compareTo(currentPerson.getName()) != 0) {
+			if (personId != currentId) {
+				currentId = personId;
 				currentPerson = new Person(name, null);
-				people.add(currentPerson);
+				people.put(currentId, currentPerson);
 			}
 
-			currentPerson.addPhoto(new Photo(photoUrl));
+			currentPerson.addPhoto(photoId, new Photo(photoUrl));
 		}
 
-		db.close();
 		return people;
 	}
 }

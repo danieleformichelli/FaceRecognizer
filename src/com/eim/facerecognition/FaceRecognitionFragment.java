@@ -259,7 +259,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private void setupFaceDetection() {
 		mFaceDetector = new FaceDetector(getActivity());
 		mFaceRecognizer = LBPHFaceRecognizer.getInstance(activity);
-		mPeopleDatabase = new PeopleDatabase(activity);
+		mPeopleDatabase = PeopleDatabase.getInstance(activity);
 	}
 	
 	public class LabelledRect {
