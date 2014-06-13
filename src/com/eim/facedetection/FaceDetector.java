@@ -100,7 +100,9 @@ public class FaceDetector {
 		this.mMinNeighbors = mMinNeighbors;
 	}
 
-	public Rect[] detect(Mat scene, MatOfRect faces) {
+	public Rect[] detect(Mat scene) {
+		
+		MatOfRect faces = new MatOfRect();
 		
 		if (mAbsoluteFaceSize == 0) {
 		
