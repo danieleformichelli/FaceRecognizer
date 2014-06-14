@@ -47,6 +47,7 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 	private static LBPHFaceRecognizer instance;
 	private static String mModelPath;
 	private static Context mContext;
+	private static boolean isTrained;
 
 	public static LBPHFaceRecognizer getInstance(Context c) {
 		if (instance == null) {
@@ -55,18 +56,18 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 			mContext = c;
 			mModelPath = c.getExternalFilesDir(null).getAbsolutePath() + "/"
 					+ MODEL_FILE_NAME;
-			if (new File(mModelPath).exists())
+			if (new File(mModelPath).exists()) {
 				instance.load(mModelPath);
+				isTrained = true;
+			}
 		}
+
 		return instance;
 	}
 
-	public static LBPHFaceRecognizer getNewInstance(Context c) {
-		if (mModelPath == null)
-			mModelPath = c.getExternalFilesDir(null).getAbsolutePath() + "/"
-					+ MODEL_FILE_NAME;
-		resetModel();
-		return getInstance(c);
+	public static void resetModel() {
+		new File(mModelPath).delete();
+		isTrained = false;
 	}
 
 	/**
@@ -78,36 +79,39 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 	 *            the id of the person related to the new face
 	 */
 	public void incrementalTrain(String newFacePath, int label) {
-		ArrayList<Mat> newFaces = new ArrayList<Mat>();
-		Mat labels = new Mat(1,1, CvType.CV_32SC1);
+		List<Mat> newFaces = new ArrayList<Mat>();
+		Mat labels = new Mat(1, 1, CvType.CV_32SC1);
 		Mat newFaceMat = new Mat();
 
 		Bitmap newFace = BitmapFactory.decodeFile(newFacePath);
 		Utils.bitmapToMat(newFace, newFaceMat);
-		
-		Imgproc.cvtColor(newFaceMat, newFaceMat, Imgproc.COLOR_RGB2GRAY); 
+
+		Imgproc.cvtColor(newFaceMat, newFaceMat, Imgproc.COLOR_RGB2GRAY);
 
 		newFaces.add(newFaceMat);
 		labels.put(0, 0, new int[] { label });
 
-		update(newFaces, labels);
+		if (isTrained)
+			update(newFaces, labels);
+		else
+			train(newFaces, labels);
+
 		save(mModelPath);
 	}
 
 	/**
-	 * Train with the specified dataset. If the dataset is empty, a new model is created and returned.
-	 * (We cannot train a LBPHFaceRecognizer with empty dataset in OpenCV, an exception is raised)
+	 * Train with the specified dataset. If the dataset is empty, a new model is
+	 * created and returned. (We cannot train a LBPHFaceRecognizer with empty
+	 * dataset in OpenCV, an exception is raised)
 	 * 
-	 * Use like this:
-	 * mFaceRecognizer = mFaceRecognizer.train(dataset); 
+	 * Use like this: mFaceRecognizer = mFaceRecognizer.train(dataset);
 	 * 
 	 * @param dataset
 	 * @return the model instance
 	 */
-	public LBPHFaceRecognizer train(LongSparseArray<Person> dataset) {
-
-		if (dataset.size() == 0)
-			return getNewInstance(mContext);
+	public void train(LongSparseArray<Person> dataset) {
+		if (!isDatasetValid(dataset))
+			resetModel();
 
 		List<Mat> faces = new ArrayList<Mat>();
 		Mat labels = new Mat();
@@ -134,11 +138,17 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 
 		train(faces, labels);
 		save(mModelPath);
-		return this;
 	}
 
-	public static void resetModel() {
-		new File(mModelPath).delete();
-		instance = null;
+	private boolean isDatasetValid(LongSparseArray<Person> dataset) {
+		// TODO check if at least one person has a photo
+		return dataset == null || dataset.size() == 0;
 	}
+
+	@Override
+	public void predict(Mat src, int[] label, double[] confidence) {
+		if (isTrained)
+			predict(src, label, confidence);
+	}
+
 }

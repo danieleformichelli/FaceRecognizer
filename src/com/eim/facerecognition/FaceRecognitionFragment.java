@@ -36,12 +36,12 @@ import com.eim.utilities.FaceRecognizerMainActivity.OnOpenCVLoaded;
 import com.eim.utilities.Swipeable;
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-public class FaceRecognitionFragment extends Fragment implements Swipeable, OnOpenCVLoaded, 
-		CvCameraViewListener2 {
+public class FaceRecognitionFragment extends Fragment implements Swipeable,
+		OnOpenCVLoaded, CvCameraViewListener2 {
 	private static final String TAG = "FaceRecognitionFragment";
 	private static final Scalar FACE_RECT_COLOR = new Scalar(255, 192, 100, 255);
 	private static final Double CONFIDENCE_THRESHOLD = 0.0;
-	
+
 	private Activity activity;
 
 	private ControlledJavaCameraView mCameraView;
@@ -69,30 +69,29 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable, OnOp
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-		
+
 		activity = getActivity();
-		// XXX da gestire in uscita?
-		activity.getWindow().addFlags(
-				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-		mCameraView = (ControlledJavaCameraView) activity.findViewById(
-				R.id.face_recognition_surface_view);
-
+		mCameraView = (ControlledJavaCameraView) activity
+				.findViewById(R.id.face_recognition_surface_view);
 		mCameraView.setCvCameraViewListener(this);
-	}
-
-	@Override
-	public String toString() {
-		return TAG;
+		
+		
 	}
 
 	@Override
 	public void swipeOut(boolean right) {
+		activity.getWindow().clearFlags(
+				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
 		mCameraView.disableView();
 	}
 
 	@Override
 	public void swipeIn(boolean right) {
+		activity.getWindow().addFlags(
+				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
 		mCameraView.enableView();
 	}
 
@@ -113,7 +112,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable, OnOp
 
 	public void onOpenCVLoaded() {
 		mOpenCVLoaded = true;
-		if (mCameraView != null) 
+		if (mCameraView != null)
 			mCameraView.enableView();
 	}
 
@@ -123,24 +122,26 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable, OnOp
 		 * for (Size s: mCameraView.getResolutionList()) if (s.width == 320) {
 		 * mCameraView.setResolution(s); break; }
 		 */
-		
+
 		setupFaceDetection();
-		
+
 		mGray = new Mat();
 		mRgba = new Mat();
-		
+
 		// TEST THUMBNAIL LOADING
-		Bitmap thumb = BitmapFactory.decodeResource(getResources(), R.drawable.barbetta);
+		Bitmap thumb = BitmapFactory.decodeResource(getResources(),
+				R.drawable.barbetta);
 		Mat thumbnail = new Mat();
 		Mat transparentThumbnail = new Mat();
 		Utils.bitmapToMat(thumb, thumbnail);
 		mTestThumbnail = new Mat();
-					
+
 		double absoluteFaceSize = height * mFaceDetector.getRelativeFaceSize();
-		mThumbnailSize = (int) (absoluteFaceSize  * 0.6);
-		Core.subtract(thumbnail, new Scalar(0,0,0,100), transparentThumbnail);
-					
-		Imgproc.resize(transparentThumbnail, mTestThumbnail, new Size(mThumbnailSize, mThumbnailSize));
+		mThumbnailSize = (int) (absoluteFaceSize * 0.6);
+		Core.subtract(thumbnail, new Scalar(0, 0, 0, 100), transparentThumbnail);
+
+		Imgproc.resize(transparentThumbnail, mTestThumbnail, new Size(
+				mThumbnailSize, mThumbnailSize));
 		thumbnail.release();
 		transparentThumbnail.release();
 	}
@@ -168,11 +169,11 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable, OnOp
 	}
 
 	private void drawLabel(Mat frame, LabelledRect info) {
-		
+
 		// Bounding box
 		Core.rectangle(frame, info.rect.tl(), info.rect.br(), FACE_RECT_COLOR,
 				3);
-		
+
 		// Text...
 		double fontScale = 6;
 		int fontFace = Core.FONT_HERSHEY_PLAIN;
@@ -180,7 +181,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable, OnOp
 
 		Size textSize = Core.getTextSize(info.text, fontFace, fontScale,
 				thickness, null);
-		
+
 		// ... under the box centered ...
 		Point textOrigin = new Point();
 		textOrigin.x = info.rect.tl().x - (textSize.width - info.rect.width)
@@ -205,13 +206,14 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable, OnOp
 
 		Core.putText(frame, info.text, textOrigin, fontFace, fontScale,
 				FACE_RECT_COLOR, thickness);
-		
+
 		// Thumbnail
 
-		Rect thumbnailPosition = new Rect(info.rect.x, info.rect.y, mThumbnailSize, mThumbnailSize);
-		
+		Rect thumbnailPosition = new Rect(info.rect.x, info.rect.y,
+				mThumbnailSize, mThumbnailSize);
+
 		mTestThumbnail.copyTo(frame.submat(thumbnailPosition));
-		
+
 	}
 
 	private List<LabelledRect> recognizeFaces(Rect[] facesArray) {
@@ -219,17 +221,19 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable, OnOp
 		List<LabelledRect> recognizedPeople = new ArrayList<LabelledRect>();
 
 		for (Rect faceRect : facesArray) {
-			Mat face = mGray.submat(faceRect); 
+			Mat face = mGray.submat(faceRect);
 			int[] predictedLabel = new int[1];
 			double[] confidence = new double[1];
 			mFaceRecognizer.predict(face, predictedLabel, confidence);
 			if (confidence[0] > CONFIDENCE_THRESHOLD) {
 				// LabelledRect l = getInfoFromLabel(prediction.first);
-				
+
 				Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
-				Log.d(TAG, "Prediction: " + predictedLabel[0] + " (" + confidence[0] + ")");
+				Log.d(TAG, "Prediction: " + predictedLabel[0] + " ("
+						+ confidence[0] + ")");
 				if (guess != null)
-					recognizedPeople.add(new LabelledRect(faceRect, guess.getName(), guess.getPhotos().get(0)));
+					recognizedPeople.add(new LabelledRect(faceRect, guess
+							.getName(), guess.getPhotos().get(0)));
 			}
 		}
 
@@ -241,7 +245,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable, OnOp
 		mFaceRecognizer = LBPHFaceRecognizer.getInstance(activity);
 		mPeopleDatabase = PeopleDatabase.getInstance(activity);
 	}
-	
+
 	public class LabelledRect {
 		public LabelledRect(Rect rect, String text, Object thumbnail) {
 			super();

@@ -176,7 +176,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable, OnOp
 			mPeopleDatabase.removePerson(id);
 
 			// A person has been removed: retrain the entire network
-			mFaceRecognizer = mFaceRecognizer.train(mPeopleAdapter.getPeople());
+			mFaceRecognizer.train(mPeopleAdapter.getPeople());
 		}
 
 		@Override
@@ -197,7 +197,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable, OnOp
 			mPeopleDatabase.removePhoto(photoId);
 
 			// A photo has been removed: retrain the entire network
-			mFaceRecognizer = mFaceRecognizer.train(mPeopleAdapter.getPeople());
+			mFaceRecognizer.train(mPeopleAdapter.getPeople());
 		}
 	};
 
