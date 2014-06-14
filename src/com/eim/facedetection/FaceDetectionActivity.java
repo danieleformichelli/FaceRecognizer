@@ -39,6 +39,7 @@ import android.widget.GridView;
 import com.eim.R;
 import com.eim.facesmanagement.peopledb.Photo;
 import com.eim.utilities.PhotoAdapter;
+import com.eim.utilities.Preferences;
 
 public class FaceDetectionActivity extends Activity {
 	private static final String TAG = "FaceDetectionAndExtractionActivity";
@@ -220,13 +221,21 @@ public class FaceDetectionActivity extends Activity {
 				return;
 			}
 
-			processFace(detectedFaces[0]);
+			showConfirmDialog(detectedFaces[0]);
 			break;
 		}
 
 	}
 
-	private void processFace(Bitmap bmp) {
+	private void showConfirmDialog(Bitmap bitmap) {
+		if (Preferences.getInstance(this).showDetectionConfirmationDialog())
+			;// TODO showConfirmDialog
+		
+		processFace(bitmap);
+		
+	}
+
+	private void processFace(Bitmap bitmap) {
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
 				.format(new Date());
 		String imageFileName = mLabelName + "_" + timeStamp + ".png";
@@ -237,7 +246,7 @@ public class FaceDetectionActivity extends Activity {
 		try {
 			FileOutputStream out;
 			out = new FileOutputStream(filename);
-			bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
+			bitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
 			out.close();
 			Log.i(TAG, "Face saved to " + filename);
 		} catch (Exception e) {
@@ -268,7 +277,7 @@ public class FaceDetectionActivity extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v,
 					int position, long id) {
-				processFace(detectedFaces[position]);
+				showConfirmDialog(detectedFaces[position]);
 			}
 		});
 	}

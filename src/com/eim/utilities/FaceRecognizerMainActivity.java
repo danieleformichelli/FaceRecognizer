@@ -26,25 +26,27 @@ import com.eim.facesmanagement.FacesManagementFragment;
 public class FaceRecognizerMainActivity extends Activity {
 	private static final String TAG = "FaceRecognizerMainActivity";
 
+	private ViewPager mViewPager;
+	private List<Fragment> sections;
 	private int currentPosition;
-
 	private SectionsPagerAdapter mSectionsPagerAdapter;
 	private FaceRecognitionFragment mFaceRecognitionFragment;
 	private FacesManagementFragment mFacesManagementFragment;
-	private SettingsFragment mSettingsFragment;
+	private MyPreferencesFragment mSettingsFragment;
 
-	private List<Fragment> sections;
-	private ViewPager mViewPager;
+	private Preferences mPreferences;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_face_recognizer_main);
 
+		mPreferences = Preferences.getInstance(this);
+
 		// Instantiate the fragments
 		mFaceRecognitionFragment = new FaceRecognitionFragment();
 		mFacesManagementFragment = new FacesManagementFragment();
-		mSettingsFragment = new SettingsFragment();
+		mSettingsFragment = new MyPreferencesFragment();
 
 		// Create the sections of the adapter
 		sections = new ArrayList<Fragment>();
@@ -62,7 +64,8 @@ public class FaceRecognizerMainActivity extends Activity {
 		mViewPager.setAdapter(mSectionsPagerAdapter);
 		mViewPager.setOnPageChangeListener(mOnPageChangeListener);
 
-		currentPosition = 0;
+		currentPosition = mPreferences.showFacesManagementOnStartup() ? 1 : 0;
+		mViewPager.setCurrentItem(currentPosition, true);
 
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, this,
 				new BaseLoaderCallback(this) {
@@ -102,13 +105,12 @@ public class FaceRecognizerMainActivity extends Activity {
 
 	@Override
 	public void onBackPressed() {
-		switch (currentPosition) {
-		case 0:
-			askForExit();
-			break;
-		default:
-			mViewPager.setCurrentItem(currentPosition - 1, true);
-		}
+		askForExit();
+		// Remove comment to enable fragments navigation with back button
+		/*
+		 * switch (currentPosition) { case 0: askForExit(); break; default:
+		 * mViewPager.setCurrentItem(currentPosition - 1, true); }
+		 */
 	}
 
 	private void askForExit() {

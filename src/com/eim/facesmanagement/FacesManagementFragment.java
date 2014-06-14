@@ -186,8 +186,6 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		public void addPhoto(long personId, Photo photo) {
 			long photoId = mPeopleDatabase.addPhoto(personId, photo.getUrl());
 
-			android.util.Log.e(TAG, personId + ", " + photoId);
-
 			mPeopleAdapter.addPhoto(personId, photoId, photo);
 
 			// A person has been removed: incrementally train the network

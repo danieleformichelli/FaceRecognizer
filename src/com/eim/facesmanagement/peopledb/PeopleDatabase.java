@@ -115,8 +115,10 @@ public class PeopleDatabase {
 				+ "." + FacesContract.Faces._ID + " AS PHOTO_ID, "
 				+ FacesContract.Faces.PHOTO_URL + " FROM "
 				+ FacesContract.People.TABLE + " LEFT JOIN "
-				+ FacesContract.Faces.TABLE + " ORDER BY PERSON_ID";
+				+ FacesContract.Faces.TABLE + " ON PERSON_ID = "
+				+ FacesContract.Faces.PERSON_ID + " ORDER BY PERSON_ID";
 		Cursor c = db.rawQuery(query, null);
+		
 		int personIdIndex = c.getColumnIndex("PERSON_ID");
 		int personNameIndex = c.getColumnIndex(FacesContract.People.NAME);
 		int photoIdIndex = c.getColumnIndex("PHOTO_ID");
