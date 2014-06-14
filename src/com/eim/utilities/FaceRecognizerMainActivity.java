@@ -8,7 +8,12 @@ import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.Fragment;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -58,7 +63,7 @@ public class FaceRecognizerMainActivity extends Activity {
 		mViewPager.setOnPageChangeListener(mOnPageChangeListener);
 
 		currentPosition = 0;
-		
+
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, this,
 				new BaseLoaderCallback(this) {
 					@Override
@@ -90,8 +95,50 @@ public class FaceRecognizerMainActivity extends Activity {
 			currentPosition = position;
 		}
 	};
-	
+
 	public interface OnOpenCVLoaded {
 		public void onOpenCVLoaded();
 	}
-}
+
+	@Override
+	public void onBackPressed() {
+		switch (currentPosition) {
+		case 0:
+			askForExit();
+			break;
+		default:
+			mViewPager.setCurrentItem(currentPosition - 1, true);
+		}
+	}
+
+	private void askForExit() {
+		new DialogFragment() {
+			@Override
+			public Dialog onCreateDialog(Bundle savedInstanceState) {
+				Context mContext = FaceRecognizerMainActivity.this;
+
+				return new AlertDialog.Builder(mContext)
+						.setIcon(
+								mContext.getResources().getDrawable(
+										R.drawable.action_alert))
+						.setTitle(
+								mContext.getString(R.string.alert_dialog_exit_title))
+						.setMessage(
+								mContext.getString(R.string.alert_dialog_exit_text))
+						.setPositiveButton(
+								mContext.getString(R.string.alert_dialog_yes),
+								positiveClick)
+						.setNegativeButton(
+								mContext.getString(R.string.alert_dialog_no),
+								null).create();
+			}
+
+			DialogInterface.OnClickListener positiveClick = new DialogInterface.OnClickListener() {
+				@Override
+				public void onClick(DialogInterface dialog, int which) {
+					finish();
+				}
+			};
+		}.show(FaceRecognizerMainActivity.this.getFragmentManager(), TAG);
+	}
+};
