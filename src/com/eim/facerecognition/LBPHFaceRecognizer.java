@@ -30,15 +30,15 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 	private static native long createLBPHFaceRecognizer_2(int radius,
 			int neighbours);
 
-	public LBPHFaceRecognizer() {
+	private LBPHFaceRecognizer() {
 		super(createLBPHFaceRecognizer_0());
 	}
 
-	public LBPHFaceRecognizer(int radius) {
+	private LBPHFaceRecognizer(int radius) {
 		super(createLBPHFaceRecognizer_1(radius));
 	}
 
-	public LBPHFaceRecognizer(int radius, int neighbours) {
+	private LBPHFaceRecognizer(int radius, int neighbours) {
 		super(createLBPHFaceRecognizer_2(radius, neighbours));
 	}
 
@@ -59,12 +59,16 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 			if (new File(mModelPath).exists()) {
 				instance.load(mModelPath);
 				isTrained = true;
-			}
+			} else
+				isTrained = false;
 		}
 
 		return instance;
 	}
 
+	/**
+	 * Resets the trained model
+	 */
 	public static void resetModel() {
 		new File(mModelPath).delete();
 		isTrained = false;
@@ -86,6 +90,7 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 		Bitmap newFace = BitmapFactory.decodeFile(newFacePath);
 		if (newFace == null)
 			return;
+
 		Utils.bitmapToMat(newFace, newFaceMat);
 
 		Imgproc.cvtColor(newFaceMat, newFaceMat, Imgproc.COLOR_RGB2GRAY);
@@ -102,14 +107,12 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 	}
 
 	/**
-	 * Train with the specified dataset. If the dataset is empty, a new model is
-	 * created and returned. (We cannot train a LBPHFaceRecognizer with empty
-	 * dataset in OpenCV, an exception is raised)
-	 * 
-	 * Use like this: mFaceRecognizer = mFaceRecognizer.train(dataset);
+	 * Train with the specified dataset. If the dataset contains no faces the
+	 * model is resetted
 	 * 
 	 * @param dataset
-	 * @return the model instance
+	 *            faces dataset, keys are the labels and faces are contained in
+	 *            the field Photos of the value
 	 */
 	public void train(LongSparseArray<Person> dataset) {
 		if (!isDatasetValid(dataset)) {
@@ -127,15 +130,15 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 			LongSparseArray<Photo> photos = person.getPhotos();
 
 			for (int j = 0, k = photos.size(); i < k; i++) {
-				Photo photo = photos.valueAt(j);
-				Mat m = new Mat();
+				Photo mPhoto = photos.valueAt(j);
+				Mat mMat = new Mat();
 
-				Bitmap b = photo.getBitmap();
-				if (b == null)
-					b = BitmapFactory.decodeFile(photo.getUrl());
+				Bitmap face = mPhoto.getBitmap();
+				if (face == null)
+					face = BitmapFactory.decodeFile(mPhoto.getUrl());
 
-				Utils.bitmapToMat(b, m);
-				faces.add(m);
+				Utils.bitmapToMat(face, mMat);
+				faces.add(mMat);
 				labels.put(counter++, 0, new int[] { (int) label });
 			}
 		}
