@@ -1,11 +1,14 @@
 package com.eim.facesmanagement.peopledb;
 
+import android.annotation.TargetApi;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Build;
 import android.util.LongSparseArray;
 
+@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public class PeopleDatabase {
 	static PeopleDatabase instance;
 	static SQLiteDatabase db;
@@ -77,7 +80,8 @@ public class PeopleDatabase {
 				+ FacesContract.Faces.PHOTO_URL + " FROM "
 				+ FacesContract.People.TABLE + " LEFT JOIN "
 				+ FacesContract.Faces.TABLE + " WHERE "
-				+ FacesContract.People._ID + " = ?";
+				+ FacesContract.Faces.TABLE + "." + FacesContract.People._ID
+				+ " = ?";
 		String[] whereArgs = new String[] { String.valueOf(id) };
 
 		Cursor c = db.rawQuery(query, whereArgs);
@@ -85,7 +89,7 @@ public class PeopleDatabase {
 		int photoIdIndex = c.getColumnIndex("PHOTO_ID");
 		int photoUrlIndex = c.getColumnIndex(FacesContract.Faces.PHOTO_URL);
 
-		if (c.moveToNext()) {
+		if (!c.moveToNext()) {
 			c.close();
 			return null;
 		}

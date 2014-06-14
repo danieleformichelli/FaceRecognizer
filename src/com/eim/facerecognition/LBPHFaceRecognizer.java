@@ -6,21 +6,22 @@ import java.util.List;
 
 import org.opencv.android.Utils;
 import org.opencv.contrib.FaceRecognizer;
+import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.util.LongSparseArray;
 
 import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;
 
+@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public class LBPHFaceRecognizer extends FaceRecognizer {
-
-	static {
-		System.loadLibrary("facerecognizer");
-	}
 
 	private static native long createLBPHFaceRecognizer_0();
 
@@ -45,16 +46,27 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 
 	private static LBPHFaceRecognizer instance;
 	private static String mModelPath;
+	private static Context mContext;
 
 	public static LBPHFaceRecognizer getInstance(Context c) {
 		if (instance == null) {
+			System.loadLibrary("facerecognizer");
 			instance = new LBPHFaceRecognizer();
+			mContext = c;
 			mModelPath = c.getExternalFilesDir(null).getAbsolutePath() + "/"
 					+ MODEL_FILE_NAME;
 			if (new File(mModelPath).exists())
 				instance.load(mModelPath);
 		}
 		return instance;
+	}
+
+	public static LBPHFaceRecognizer getNewInstance(Context c) {
+		if (mModelPath == null)
+			mModelPath = c.getExternalFilesDir(null).getAbsolutePath() + "/"
+					+ MODEL_FILE_NAME;
+		resetModel();
+		return getInstance(c);
 	}
 
 	/**
@@ -65,23 +77,37 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 	 * @param label
 	 *            the id of the person related to the new face
 	 */
-	public void incrementalTrain(String newFacePath, long label) {
+	public void incrementalTrain(String newFacePath, int label) {
 		ArrayList<Mat> newFaces = new ArrayList<Mat>();
-		Mat labels = new Mat();
+		Mat labels = new Mat(1,1, CvType.CV_32SC1);
 		Mat newFaceMat = new Mat();
 
 		Bitmap newFace = BitmapFactory.decodeFile(newFacePath);
-
 		Utils.bitmapToMat(newFace, newFaceMat);
+		
+		Imgproc.cvtColor(newFaceMat, newFaceMat, Imgproc.COLOR_RGB2GRAY); 
 
 		newFaces.add(newFaceMat);
-		labels.put(0, 0, label);
+		labels.put(0, 0, new int[] { label });
 
 		update(newFaces, labels);
 		save(mModelPath);
 	}
 
-	public void train(LongSparseArray<Person> dataset) {
+	/**
+	 * Train with the specified dataset. If the dataset is empty, a new model is created and returned.
+	 * (We cannot train a LBPHFaceRecognizer with empty dataset in OpenCV, an exception is raised)
+	 * 
+	 * Use like this:
+	 * mFaceRecognizer = mFaceRecognizer.train(dataset); 
+	 * 
+	 * @param dataset
+	 * @return the model instance
+	 */
+	public LBPHFaceRecognizer train(LongSparseArray<Person> dataset) {
+
+		if (dataset.size() == 0)
+			return getNewInstance(mContext);
 
 		List<Mat> faces = new ArrayList<Mat>();
 		Mat labels = new Mat();
@@ -108,5 +134,11 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 
 		train(faces, labels);
 		save(mModelPath);
+		return this;
+	}
+
+	public static void resetModel() {
+		new File(mModelPath).delete();
+		instance = null;
 	}
 }

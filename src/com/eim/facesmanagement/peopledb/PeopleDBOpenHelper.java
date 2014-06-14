@@ -38,7 +38,7 @@ public class PeopleDBOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		LBPHFaceRecognizer.getInstance(mContext).train(null);
+		LBPHFaceRecognizer.resetModel();
 		db.execSQL("DROP TABLE IF EXISTS " + FacesContract.Faces.TABLE);
 		db.execSQL("DROP TABLE IF EXISTS " + FacesContract.People.TABLE);
 		onCreate(db);

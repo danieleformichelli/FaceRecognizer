@@ -3,11 +3,8 @@ package com.eim.facerecognition;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
-import org.opencv.android.LoaderCallbackInterface;
-import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.contrib.FaceRecognizer;
 import org.opencv.core.Core;
@@ -18,10 +15,12 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,9 +32,11 @@ import com.eim.R;
 import com.eim.facedetection.FaceDetector;
 import com.eim.facesmanagement.peopledb.PeopleDatabase;
 import com.eim.facesmanagement.peopledb.Person;
+import com.eim.utilities.FaceRecognizerMainActivity.OnOpenCVLoaded;
 import com.eim.utilities.Swipeable;
 
-public class FaceRecognitionFragment extends Fragment implements Swipeable,
+@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+public class FaceRecognitionFragment extends Fragment implements Swipeable, OnOpenCVLoaded, 
 		CvCameraViewListener2 {
 	private static final String TAG = "FaceRecognitionFragment";
 	private static final Scalar FACE_RECT_COLOR = new Scalar(255, 192, 100, 255);
@@ -57,15 +58,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private FaceRecognizer mFaceRecognizer;
 	private PeopleDatabase mPeopleDatabase;
 
-	/**
-	 * Called when the fragment is first created.
-	 */
-	@Override
-	public void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-
-	}
-
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
@@ -83,9 +75,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		activity.getWindow().addFlags(
 				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-		setupFaceDetection();
-
-		mCameraView = (ControlledJavaCameraView) getActivity().findViewById(
+		mCameraView = (ControlledJavaCameraView) activity.findViewById(
 				R.id.face_recognition_surface_view);
 
 		mCameraView.setCvCameraViewListener(this);
@@ -109,21 +99,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	@Override
 	public void onResume() {
 		super.onResume();
-			OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, activity,
-					new BaseLoaderCallback(activity) {
-						@Override
-						public void onManagerConnected(int status) {
-							switch (status) {
-							case LoaderCallbackInterface.SUCCESS:
-								Log.i(TAG, "OpenCV loaded successfully");
-								onOpenCVLoaded();
-								break;
-							default:
-								Log.i(TAG, "OpenCV connection error: " + status);
-								super.onManagerConnected(status);
-							}
-						}
-					});
 		if (mOpenCVLoaded)
 			mCameraView.enableView();
 	}
@@ -138,7 +113,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	public void onOpenCVLoaded() {
 		mOpenCVLoaded = true;
-		if (mCameraView != null)
+		if (mCameraView != null) 
 			mCameraView.enableView();
 	}
 
@@ -148,6 +123,9 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		 * for (Size s: mCameraView.getResolutionList()) if (s.width == 320) {
 		 * mCameraView.setResolution(s); break; }
 		 */
+		
+		setupFaceDetection();
+		
 		mGray = new Mat();
 		mRgba = new Mat();
 		
@@ -249,7 +227,9 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				// LabelledRect l = getInfoFromLabel(prediction.first);
 				
 				Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
-				recognizedPeople.add(new LabelledRect(faceRect, guess.getName(), guess.getPhotos().get(0)));
+				Log.d(TAG, "Prediction: " + predictedLabel[0] + " (" + confidence[0] + ")");
+				if (guess != null)
+					recognizedPeople.add(new LabelledRect(faceRect, guess.getName(), guess.getPhotos().get(0)));
 			}
 		}
 
@@ -257,7 +237,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	}
 
 	private void setupFaceDetection() {
-		mFaceDetector = new FaceDetector(getActivity());
+		mFaceDetector = new FaceDetector(activity);
 		mFaceRecognizer = LBPHFaceRecognizer.getInstance(activity);
 		mPeopleDatabase = PeopleDatabase.getInstance(activity);
 	}

@@ -1,9 +1,11 @@
 package com.eim.facesmanagement;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,7 +14,6 @@ import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.eim.R;
 import com.eim.facedetection.FaceDetectionActivity;
 import com.eim.facerecognition.LBPHFaceRecognizer;
@@ -22,10 +23,12 @@ import com.eim.facesmanagement.peopledb.PeopleDatabase;
 import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;
 import com.eim.utilities.FaceRecognizerMainActivity;
+import com.eim.utilities.FaceRecognizerMainActivity.OnOpenCVLoaded;
 import com.eim.utilities.PhotoAdapter;
 import com.eim.utilities.Swipeable;
 
-public class FacesManagementFragment extends Fragment implements Swipeable {
+@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+public class FacesManagementFragment extends Fragment implements Swipeable, OnOpenCVLoaded {
 	private static final String TAG = "FacesManagementFragment";
 	private static final int FACE_DETECTION_AND_EXTRACTION = 1;
 
@@ -37,6 +40,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 	LBPHFaceRecognizer mFaceRecognizer;
 
 	PeopleDatabase mPeopleDatabase;
+	private boolean mOpenCVLoaded = false;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -53,7 +57,6 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 
 		mActivity = (FaceRecognizerMainActivity) getActivity();
 
-		mFaceRecognizer = LBPHFaceRecognizer.getInstance(mActivity);
 		mPeopleDatabase = PeopleDatabase.getInstance(mActivity);
 
 		addPerson = (TextView) mainLayout
@@ -73,9 +76,20 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 		mPeopleList.setAdapter(mPeopleAdapter);
 		if (mPeopleAdapter.getGroupCount() == 0)
 			noPeopleMessage.setVisibility(View.VISIBLE);
-
+		
+		if (mOpenCVLoaded)
+			mFaceRecognizer = LBPHFaceRecognizer.getInstance(mActivity);
 	}
-
+	
+	@Override
+	public void onOpenCVLoaded() {
+		// Due to dynamic linking, LBPHFaceRecognizer cannot be created before OpenCV library has been loaded,
+		// but due to dependency of Context, cannot be created before OnActivityCreated()
+		mOpenCVLoaded = true;
+		if (mActivity != null)
+			mFaceRecognizer = LBPHFaceRecognizer.getInstance(mActivity);
+	}
+	
 	@Override
 	public void swipeOut(boolean toRight) {
 	}
@@ -162,7 +176,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 			mPeopleDatabase.removePerson(id);
 
 			// A person has been removed: retrain the entire network
-			mFaceRecognizer.train(mPeopleAdapter.getPeople());
+			mFaceRecognizer = mFaceRecognizer.train(mPeopleAdapter.getPeople());
 		}
 
 		@Override
@@ -174,7 +188,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 			mPeopleAdapter.addPhoto(personId, photoId, photo);
 
 			// A person has been removed: incrementally train the network
-			mFaceRecognizer.incrementalTrain(photo.getUrl(), personId);
+			mFaceRecognizer.incrementalTrain(photo.getUrl(), (int) personId);
 		}
 
 		@Override
@@ -183,7 +197,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable {
 			mPeopleDatabase.removePhoto(photoId);
 
 			// A photo has been removed: retrain the entire network
-			mFaceRecognizer.train(mPeopleAdapter.getPeople());
+			mFaceRecognizer = mFaceRecognizer.train(mPeopleAdapter.getPeople());
 		}
 	};
 
