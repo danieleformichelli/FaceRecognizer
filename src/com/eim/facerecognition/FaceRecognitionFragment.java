@@ -98,7 +98,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (mOpenCVLoaded)
+		if (mOpenCVLoaded && getUserVisibleHint())
 			mCameraView.enableView();
 	}
 
