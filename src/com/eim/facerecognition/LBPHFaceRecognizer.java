@@ -129,7 +129,7 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 			Person person = dataset.valueAt(i);
 			LongSparseArray<Photo> photos = person.getPhotos();
 
-			for (int j = 0, k = photos.size(); i < k; i++) {
+			for (int j = 0, k = photos.size(); j < k; j++) {
 				Photo mPhoto = photos.valueAt(j);
 				Mat mMat = new Mat();
 
