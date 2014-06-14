@@ -10,15 +10,13 @@ import android.util.LongSparseArray;
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public class PeopleDatabase {
-	static PeopleDatabase instance;
-	static SQLiteDatabase db;
+	private static PeopleDatabase instance;
+	private static SQLiteDatabase db;
 
-	Context context;
-
-	public static PeopleDatabase getInstance(Context c) {
+	public static PeopleDatabase getInstance(Context mContext) {
 		if (instance == null) {
-			instance = new PeopleDatabase(c);
-			db = new PeopleDBOpenHelper(c).getWritableDatabase();
+			instance = new PeopleDatabase();
+			db = new PeopleDBOpenHelper(mContext).getWritableDatabase();
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 				public void run() {
 					db.close();
@@ -29,8 +27,7 @@ public class PeopleDatabase {
 		return instance;
 	}
 
-	private PeopleDatabase(Context context) {
-		this.context = context;
+	private PeopleDatabase() {
 	}
 
 	public void editPersonName(long id, String newName) {

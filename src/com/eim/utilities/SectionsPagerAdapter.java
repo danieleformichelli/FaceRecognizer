@@ -11,7 +11,7 @@ import android.support.v13.app.FragmentPagerAdapter;
  * one of the sections/tabs/pages.
  */
 public class SectionsPagerAdapter extends FragmentPagerAdapter {
-	List<Fragment> sections;
+	private List<Fragment> sections;
 
 	public SectionsPagerAdapter(FragmentManager fm, List<Fragment> sections) {
 		super(fm);

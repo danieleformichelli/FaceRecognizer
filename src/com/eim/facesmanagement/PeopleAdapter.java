@@ -28,10 +28,10 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 	private static final String TAG = "PeopleAdapter";
 
 	private Activity context;
-	LongSparseArray<Person> people;
-	int groupResource, childResource;
-	PeopleAdapterListener peopleAdapterListener;
-	PhotoGalleryListener photoGalleryListener;
+	private LongSparseArray<Person> people;
+	private int groupResource, childResource;
+	private PeopleAdapterListener peopleAdapterListener;
+	private PhotoGalleryListener photoGalleryListener;
 
 	/**
 	 * 
@@ -120,8 +120,8 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 			mPhotoGallery.removeAllPhotos();
 		}
 
-		long id = people.keyAt(groupPosition);
 		// set the id as tag so it can be retrieved later
+		long id = people.keyAt(groupPosition);
 		mPhotoGallery.setTag(id);
 
 		LongSparseArray<Photo> photos = people.get(id).getPhotos();

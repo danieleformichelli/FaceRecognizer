@@ -24,17 +24,17 @@ import com.eim.facerecognition.FaceRecognitionFragment;
 import com.eim.facesmanagement.FacesManagementFragment;
 
 public class FaceRecognizerMainActivity extends Activity {
-	protected static final String TAG = "FaceRecognizerMainActivity";
+	private static final String TAG = "FaceRecognizerMainActivity";
 
-	int currentPosition;
+	private int currentPosition;
 
-	SectionsPagerAdapter mSectionsPagerAdapter;
-	FaceRecognitionFragment mFaceRecognitionFragment;
-	FacesManagementFragment mFacesManagementFragment;
-	SettingsFragment mSettingsFragment;
+	private SectionsPagerAdapter mSectionsPagerAdapter;
+	private FaceRecognitionFragment mFaceRecognitionFragment;
+	private FacesManagementFragment mFacesManagementFragment;
+	private SettingsFragment mSettingsFragment;
 
-	List<Fragment> sections;
-	ViewPager mViewPager;
+	private List<Fragment> sections;
+	private ViewPager mViewPager;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {

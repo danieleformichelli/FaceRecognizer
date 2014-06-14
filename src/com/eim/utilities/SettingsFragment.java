@@ -1,5 +1,6 @@
 package com.eim.utilities;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.preference.PreferenceFragment;
 
@@ -8,7 +9,7 @@ import com.eim.R;
 public class SettingsFragment extends PreferenceFragment implements Swipeable {
 	private static final String TAG = "SettingsFragment";
 
-	FaceRecognizerMainActivity activity;
+	private Activity activity;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -21,11 +22,8 @@ public class SettingsFragment extends PreferenceFragment implements Swipeable {
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
-	}
-
-	@Override
-	public String toString() {
-		return TAG;
+		
+		activity = getActivity();
 	}
 
 	@Override

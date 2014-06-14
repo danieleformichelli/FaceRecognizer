@@ -3,8 +3,8 @@ package com.eim.facesmanagement.peopledb;
 import android.graphics.Bitmap;
 
 public class Photo {
-	String url;
-	Bitmap bitmap;
+	private String url;
+	private Bitmap bitmap;
 
 	public Photo(String url, Bitmap bitmap) {
 		if (url == null && bitmap == null)

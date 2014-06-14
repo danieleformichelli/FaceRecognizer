@@ -28,18 +28,19 @@ import com.eim.utilities.PhotoAdapter;
 import com.eim.utilities.Swipeable;
 
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-public class FacesManagementFragment extends Fragment implements Swipeable, OnOpenCVLoaded {
+public class FacesManagementFragment extends Fragment implements Swipeable,
+		OnOpenCVLoaded {
 	private static final String TAG = "FacesManagementFragment";
 	private static final int FACE_DETECTION_AND_EXTRACTION = 1;
 
-	Activity mActivity;
-	ExpandableListView mPeopleList;
-	PeopleAdapter mPeopleAdapter;
-	TextView addPerson, noPeopleMessage;
-	View mainLayout;
-	LBPHFaceRecognizer mFaceRecognizer;
+	private Activity mActivity;
+	private ExpandableListView mPeopleList;
+	private PeopleAdapter mPeopleAdapter;
+	private TextView addPerson, noPeopleMessage;
+	private View mainLayout;
+	private LBPHFaceRecognizer mFaceRecognizer;
 
-	PeopleDatabase mPeopleDatabase;
+	private PeopleDatabase mPeopleDatabase;
 	private boolean mOpenCVLoaded = false;
 
 	@Override
@@ -76,20 +77,22 @@ public class FacesManagementFragment extends Fragment implements Swipeable, OnOp
 		mPeopleList.setAdapter(mPeopleAdapter);
 		if (mPeopleAdapter.getGroupCount() == 0)
 			noPeopleMessage.setVisibility(View.VISIBLE);
-		
+
 		if (mOpenCVLoaded)
 			mFaceRecognizer = LBPHFaceRecognizer.getInstance(mActivity);
 	}
-	
+
 	@Override
 	public void onOpenCVLoaded() {
-		// Due to dynamic linking, LBPHFaceRecognizer cannot be created before OpenCV library has been loaded,
-		// but due to dependency of Context, cannot be created before OnActivityCreated()
+		// Due to dynamic linking, LBPHFaceRecognizer cannot be created before
+		// OpenCV library has been loaded,
+		// but due to dependency of Context, cannot be created before
+		// OnActivityCreated()
 		mOpenCVLoaded = true;
 		if (mActivity != null)
 			mFaceRecognizer = LBPHFaceRecognizer.getInstance(mActivity);
 	}
-	
+
 	@Override
 	public void swipeOut(boolean toRight) {
 	}

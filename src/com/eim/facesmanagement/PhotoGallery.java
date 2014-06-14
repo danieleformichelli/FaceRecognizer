@@ -5,12 +5,12 @@ import android.graphics.BitmapFactory;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ImageView;
 
 import com.eim.R;
 import com.eim.facesmanagement.peopledb.Photo;
 import com.eim.utilities.NoScrollGridView;
 import com.eim.utilities.PhotoAdapter;
+import com.eim.utilities.PhotoAdapter.PhotoSelectionListener;
 
 /**
  * A Gallery is an horizontal LinearLayout that can contain zero or more photos
@@ -20,13 +20,11 @@ public class PhotoGallery extends NoScrollGridView implements
 		PhotoSelectionListener {
 	private static final int colCount = 5;
 
-	ImageView addDeletePhoto;
-	PhotoAdapter galleryAdapter;
-	PhotoGalleryListener photoGalleryListener;
-	int photoCount;
-	Photo add, delete;
-	Context context;
-	boolean addOrDelete;
+	private PhotoAdapter galleryAdapter;
+	private PhotoGalleryListener photoGalleryListener;
+	private int photoCount;
+	private Photo add, delete;
+	private boolean addOrDelete;
 
 	public PhotoGallery(Context context) {
 		super(context);
@@ -44,7 +42,6 @@ public class PhotoGallery extends NoScrollGridView implements
 	}
 
 	private void initView(Context context) {
-		this.context = context;
 		setNumColumns(colCount);
 
 		add = new Photo(null, BitmapFactory.decodeResource(
@@ -90,6 +87,9 @@ public class PhotoGallery extends NoScrollGridView implements
 	}
 
 	public void addPhoto(Photo photo) {
+		if (photo == null)
+			throw new IllegalArgumentException("photo cannot be null");
+
 		if (photo.getBitmap() == null)
 			photo.setBitmap(BitmapFactory.decodeFile(photo.getUrl()));
 

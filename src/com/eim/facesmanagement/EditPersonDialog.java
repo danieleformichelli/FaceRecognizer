@@ -12,8 +12,8 @@ import android.widget.EditText;
 import com.eim.R;
 
 public class EditPersonDialog extends DialogFragment {
-	String oldName, name;
-	OnClickListener okOnClickListener, deleteOnClickListener,
+	private String oldName, name;
+	private OnClickListener okOnClickListener, deleteOnClickListener,
 			cancelOnClickListener;
 
 	public EditPersonDialog(String oldName, OnClickListener okOnClickListener,

@@ -9,8 +9,8 @@ import android.util.LongSparseArray;
  */
 public class Person implements Comparable<Person> {
 
-	String name;
-	LongSparseArray<Photo> photos;
+	private String name;
+	private LongSparseArray<Photo> photos;
 
 	public Person(String name, LongSparseArray<Photo> photos) {
 		setName(name);

@@ -3,9 +3,6 @@ package com.eim.utilities;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.eim.facesmanagement.PhotoSelectionListener;
-import com.eim.facesmanagement.peopledb.Photo;
-
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,16 +10,18 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
-public class PhotoAdapter extends BaseAdapter {
-	Context context;
-	List<Photo> photos;
-	List<Boolean> selected;
-	PhotoSelectionListener photoSelectionListener;
-	int selectedColor, notSelectedColor;
+import com.eim.facesmanagement.peopledb.Photo;
 
-	public PhotoAdapter(Context context, List<Photo> photos,
+public class PhotoAdapter extends BaseAdapter {
+	private Context mContext;
+	private List<Photo> photos;
+	private List<Boolean> selected;
+	private PhotoSelectionListener photoSelectionListener;
+	private int selectedColor, notSelectedColor;
+
+	public PhotoAdapter(Context mContext, List<Photo> photos,
 			PhotoSelectionListener photoSelectionListener) {
-		this.context = context;
+		this.mContext = mContext;
 
 		this.photos = new ArrayList<Photo>();
 		selected = new ArrayList<Boolean>();
@@ -30,9 +29,9 @@ public class PhotoAdapter extends BaseAdapter {
 
 		replacePhotos(photos);
 
-		selectedColor = context.getResources().getColor(
+		selectedColor = mContext.getResources().getColor(
 				android.R.color.holo_blue_bright);
-		notSelectedColor = context.getResources().getColor(
+		notSelectedColor = mContext.getResources().getColor(
 				android.R.color.transparent);
 	}
 
@@ -46,10 +45,7 @@ public class PhotoAdapter extends BaseAdapter {
 			return;
 
 		for (Photo photo : photos)
-			if (photo != null) {
-				this.photos.add(photo);
-				selected.add(false);
-			}
+			addPhoto(photo);
 
 		notifyDataSetChanged();
 	}
@@ -104,7 +100,8 @@ public class PhotoAdapter extends BaseAdapter {
 		if (selected.get(position) == true) {
 			selected.set(position, false);
 			if (photoSelectionListener != null)
-				photoSelectionListener.photosSelectionChanged(atLeastOneSelected());
+				photoSelectionListener
+						.photosSelectionChanged(atLeastOneSelected());
 		}
 
 		notifyDataSetChanged();
@@ -118,7 +115,8 @@ public class PhotoAdapter extends BaseAdapter {
 		photos.remove(position);
 		if (selected.remove(position) == true)
 			if (photoSelectionListener != null)
-				photoSelectionListener.photosSelectionChanged(atLeastOneSelected());
+				photoSelectionListener
+						.photosSelectionChanged(atLeastOneSelected());
 
 		notifyDataSetChanged();
 	}
@@ -141,7 +139,7 @@ public class PhotoAdapter extends BaseAdapter {
 		SquareImageView imageView;
 
 		if (convertView == null) {
-			imageView = new SquareImageView(context);
+			imageView = new SquareImageView(mContext);
 			imageView.setSize(GridView.LayoutParams.MATCH_PARENT);
 			imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
 			imageView.setPadding(5, 5, 5, 5);
@@ -180,4 +178,14 @@ public class PhotoAdapter extends BaseAdapter {
 		return selected.get(position);
 	}
 
+	public interface PhotoSelectionListener {
+
+		/**
+		 * The state of the selection is changed
+		 * 
+		 * @param selected
+		 *            true if at least one photo is selected, false otherwise
+		 */
+		public void photosSelectionChanged(boolean selected);
+	}
 }
