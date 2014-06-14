@@ -128,7 +128,7 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 
 				Utils.bitmapToMat(b, m);
 				faces.add(m);
-				labels.put(counter++, 0, label);
+				labels.put(counter++, 0, new int[] { (int) label });
 			}
 		}
 
