@@ -84,6 +84,8 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 		Mat newFaceMat = new Mat();
 
 		Bitmap newFace = BitmapFactory.decodeFile(newFacePath);
+		if (newFace == null)
+			return;
 		Utils.bitmapToMat(newFace, newFaceMat);
 
 		Imgproc.cvtColor(newFaceMat, newFaceMat, Imgproc.COLOR_RGB2GRAY);
@@ -110,19 +112,21 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 	 * @return the model instance
 	 */
 	public void train(LongSparseArray<Person> dataset) {
-		if (!isDatasetValid(dataset))
+		if (!isDatasetValid(dataset)) {
 			resetModel();
+			return;
+		}
 
 		List<Mat> faces = new ArrayList<Mat>();
 		Mat labels = new Mat();
 		int counter = 0;
 
-		for (int i = 0; i < dataset.size(); i++) {
+		for (int i = 0, l = dataset.size(); i < l; i++) {
 			long label = dataset.keyAt(i);
 			Person person = dataset.valueAt(i);
 			LongSparseArray<Photo> photos = person.getPhotos();
 
-			for (int j = 0, l = photos.size(); i < l; i++) {
+			for (int j = 0, k = photos.size(); i < k; i++) {
 				Photo photo = photos.valueAt(j);
 				Mat m = new Mat();
 
@@ -141,8 +145,14 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 	}
 
 	private boolean isDatasetValid(LongSparseArray<Person> dataset) {
-		// TODO check if at least one person has a photo
-		return dataset == null || dataset.size() == 0;
+		if (dataset == null)
+			return false;
+
+		for (int i = 0, l = dataset.size(); i < l; i++)
+			if (dataset.valueAt(i).getPhotos().size() > 0)
+				return true;
+
+		return false;
 	}
 
 	@Override
