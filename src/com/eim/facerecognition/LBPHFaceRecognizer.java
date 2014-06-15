@@ -121,7 +121,7 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 		}
 
 		List<Mat> faces = new ArrayList<Mat>();
-		Mat labels = new Mat();
+		Mat labels = new Mat(0,0,CvType.CV_32SC1);
 		int counter = 0;
 
 		for (int i = 0, l = dataset.size(); i < l; i++) {
@@ -161,7 +161,7 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 	@Override
 	public void predict(Mat src, int[] label, double[] confidence) {
 		if (isTrained)
-			predict(src, label, confidence);
+			super.predict(src, label, confidence);
 	}
 
 }

@@ -60,6 +60,7 @@ public class FaceDetectionActivity extends Activity {
 	private String mLabelName = "Unknown";
 
 	private boolean mAlreadyStarted = false;
+	private boolean mChooserVisible = false;
 
 	private interface GenericCancelListener extends OnCancelListener,
 			OnDismissListener {
@@ -216,12 +217,12 @@ public class FaceDetectionActivity extends Activity {
 				return;
 			}
 
-			if (detectedFaces.length > 1) {
+			//if (detectedFaces.length > 1) {
 				displayFaceChooser(detectedFaces);
-				return;
-			}
+				//return;
+			//}
 
-			showConfirmDialog(detectedFaces[0]);
+			// showConfirmDialog(detectedFaces[0]);
 			break;
 		}
 
@@ -230,12 +231,19 @@ public class FaceDetectionActivity extends Activity {
 	private void showConfirmDialog(Bitmap bitmap) {
 		if (Preferences.getInstance(this).showDetectionConfirmationDialog())
 			;// TODO showConfirmDialog
-		
+
 		processFace(bitmap);
-		
 	}
 
-	private void processFace(Bitmap bitmap) {
+	@Override
+	public void onBackPressed() {
+		if (mChooserVisible)
+			showChooserDialog();
+		else
+			super.onBackPressed();
+	}
+
+	private void processFace(Bitmap bmp) {
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
 				.format(new Date());
 		String imageFileName = mLabelName + "_" + timeStamp + ".png";
@@ -263,6 +271,7 @@ public class FaceDetectionActivity extends Activity {
 
 	private void displayFaceChooser(final Bitmap[] detectedFaces) {
 
+		mChooserVisible = true;
 		setContentView(R.layout.activity_face_detection);
 
 		List<Photo> faces = new ArrayList<Photo>();
@@ -277,7 +286,9 @@ public class FaceDetectionActivity extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v,
 					int position, long id) {
-				showConfirmDialog(detectedFaces[position]);
+				// showConfirmDialog(detectedFaces[position]);
+				mChooserVisible = false;
+				processFace(detectedFaces[position]);
 			}
 		});
 	}
