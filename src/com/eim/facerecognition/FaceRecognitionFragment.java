@@ -38,6 +38,11 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private static final Scalar FACE_RECT_COLOR = new Scalar(255, 192, 100, 255);
 	private static final Double CONFIDENCE_THRESHOLD = 0.0;
 
+
+	public enum Type {
+		EIGEN, FISHER, LBPH
+	}	
+	
 	private Activity activity;
 
 	private ControlledJavaCameraView mCameraView;

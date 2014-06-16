@@ -3,7 +3,9 @@ package com.eim.facesmanagement;
 import android.content.Context;
 import android.graphics.BitmapFactory;
 import android.util.AttributeSet;
+import android.view.Surface;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 
 import com.eim.R;
@@ -11,6 +13,7 @@ import com.eim.facesmanagement.peopledb.Photo;
 import com.eim.utilities.NoScrollGridView;
 import com.eim.utilities.PhotoAdapter;
 import com.eim.utilities.PhotoAdapter.PhotoSelectionListener;
+import com.eim.utilities.Preferences;
 
 /**
  * A Gallery is an horizontal LinearLayout that can contain zero or more photos
@@ -41,15 +44,24 @@ public class PhotoGallery extends NoScrollGridView implements
 		initView(context);
 	}
 
-	private void initView(Context context) {
+	private void initView(Context mContext) {
 		setNumColumns(colCount);
 
 		add = new Photo(null, BitmapFactory.decodeResource(
-				context.getResources(), R.drawable.action_add_photo));
+				mContext.getResources(), R.drawable.action_add_photo));
 		delete = new Photo(null, BitmapFactory.decodeResource(
-				context.getResources(), R.drawable.action_delete));
+				mContext.getResources(), R.drawable.action_delete));
 
-		galleryAdapter = new PhotoAdapter(context, null, this);
+		Preferences mPreferences = Preferences.getInstance(mContext);
+		final int rotation = ((WindowManager) mContext
+				.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay()
+				.getRotation();
+		if (rotation == Surface.ROTATION_90 || rotation == Surface.ROTATION_270)
+			this.setNumColumns(mPreferences.numberOfGalleryColumnsLandscape());
+		else
+			this.setNumColumns(mPreferences.numberOfGalleryColumnsPortrait());
+
+		galleryAdapter = new PhotoAdapter(mContext, null, this);
 		addPhoto(add);
 		setAdapter(galleryAdapter);
 

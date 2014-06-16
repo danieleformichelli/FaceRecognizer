@@ -65,7 +65,6 @@ public class FaceRecognizerMainActivity extends Activity {
 		mViewPager.setOnPageChangeListener(mOnPageChangeListener);
 
 		currentPosition = mPreferences.showFacesManagementOnStartup() ? 1 : 0;
-		mViewPager.setCurrentItem(currentPosition, true);
 
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, this,
 				new BaseLoaderCallback(this) {
@@ -83,6 +82,13 @@ public class FaceRecognizerMainActivity extends Activity {
 						}
 					}
 				});
+	}
+
+	@Override
+	protected void onStart() {
+		super.onStart();
+		
+		mViewPager.setCurrentItem(currentPosition, false);
 	}
 
 	OnPageChangeListener mOnPageChangeListener = new ViewPager.SimpleOnPageChangeListener() {
