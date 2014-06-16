@@ -81,16 +81,16 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	@Override
 	public void swipeOut(boolean right) {
-		activity.getWindow().clearFlags(
-				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+//		activity.getWindow().clearFlags(
+//				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		mCameraView.disableView();
 	}
 
 	@Override
 	public void swipeIn(boolean right) {
-		activity.getWindow().addFlags(
-				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+//		activity.getWindow().addFlags(
+//				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		mCameraView.enableView();
 	}

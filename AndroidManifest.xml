@@ -22,8 +22,7 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.eim.utilities.FaceRecognizerMainActivity"
-            android:label="@string/app_name"
-            android:screenOrientation="landscape" >
+            android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -32,8 +31,7 @@
         </activity>
         <activity
             android:name="com.eim.facedetection.FaceDetectionActivity"
-            android:label="@string/title_activity_face_decection_and_extraction"
-            android:screenOrientation="landscape" >
+            android:label="@string/title_activity_face_decection_and_extraction" >
         </activity>
     </application>
 
