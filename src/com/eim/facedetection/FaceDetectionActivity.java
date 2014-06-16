@@ -243,7 +243,7 @@ public class FaceDetectionActivity extends Activity {
 			super.onBackPressed();
 	}
 
-	private void processFace(Bitmap bmp) {
+	private void processFace(Bitmap bitmap) {
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
 				.format(new Date());
 		String imageFileName = mLabelName + "_" + timeStamp + ".png";
