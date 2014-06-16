@@ -8,30 +8,105 @@
 // so we have to something about that (adding a refcount):
 //
 
-//template<typename Y>
-//Y * extractPtr(cv::Ptr<Y> & y)
-//{
-//#if (CV_MAJOR_VERSION > 2) // 3.0 / master
-//    new (&y)cv::Ptr<Y>(y); // inplace new ;)
-//    return y.get();
-//#else                      // 2.4
-//    y.addref();
-//    return y.obj;
-//#endif
-//}
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-// don't worry about the _10 , _1 resolves to a single underscore
+/**
+ * EigenFaceRecognizer constructors
+ */
+
+JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_EigenFaceRecognizer_createEigenFaceRecognizer_10(JNIEnv* env, jclass);
+JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_EigenFaceRecognizer_createEigenFaceRecognizer_10(JNIEnv* env, jclass) {
+    try {
+    	cv::Ptr<cv::FaceRecognizer> pfr = cv::createEigenFaceRecognizer();
+    	pfr.addref();
+        return (jlong) pfr.obj;
+    } catch (...) {
+        jclass je = env->FindClass("java/lang/Exception");
+        env->ThrowNew(je, "sorry, dave..");
+    }
+    return 0;
+}
+
+JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_EigenFaceRecognizer_createEigenFaceRecognizer_11(JNIEnv* env, jclass, jint num_components);
+JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_EigenFaceRecognizer_createEigenFaceRecognizer_11(JNIEnv* env, jclass, jint num_components) {
+    try {
+    	cv::Ptr<cv::FaceRecognizer> pfr = cv::createEigenFaceRecognizer((int)num_components);
+    	pfr.addref();
+        return (jlong) pfr.obj;
+    } catch (...) {
+        jclass je = env->FindClass("java/lang/Exception");
+        env->ThrowNew(je, "sorry, dave..");
+    }
+    return 0;
+}
+
+JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_EigenFaceRecognizer_createEigenFaceRecognizer_12(JNIEnv* env, jclass, jint num_components, jdouble threshold);
+JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_EigenFaceRecognizer_createEigenFaceRecognizer_12(JNIEnv* env, jclass, jint num_components, jdouble threshold) {
+    try {
+    	cv::Ptr<cv::FaceRecognizer> pfr = cv::createEigenFaceRecognizer((int)num_components,(double)threshold);
+    	pfr.addref();
+        return (jlong) pfr.obj;
+    } catch (...) {
+        jclass je = env->FindClass("java/lang/Exception");
+        env->ThrowNew(je, "sorry, dave..");
+    }
+    return 0;
+}
+
+/**
+ * FisherFaceRecognizer constructors
+ */
+
+JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_FisherFaceRecognizer_createFisherFaceRecognizer_10(JNIEnv* env, jclass);
+JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_FisherFaceRecognizer_createFisherFaceRecognizer_10(JNIEnv* env, jclass) {
+    try {
+    	cv::Ptr<cv::FaceRecognizer> pfr = cv::createFisherFaceRecognizer();
+    	pfr.addref();
+        return (jlong) pfr.obj;
+    } catch (...) {
+        jclass je = env->FindClass("java/lang/Exception");
+        env->ThrowNew(je, "sorry, dave..");
+    }
+    return 0;
+}
+
+JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_FisherFaceRecognizer_createFisherFaceRecognizer_11(JNIEnv* env, jclass, jint num_components);
+JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_FisherFaceRecognizer_createFisherFaceRecognizer_11(JNIEnv* env, jclass, jint num_components) {
+    try {
+    	cv::Ptr<cv::FaceRecognizer> pfr = cv::createFisherFaceRecognizer((int)num_components);
+    	pfr.addref();
+        return (jlong) pfr.obj;
+    } catch (...) {
+        jclass je = env->FindClass("java/lang/Exception");
+        env->ThrowNew(je, "sorry, dave..");
+    }
+    return 0;
+}
+
+JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_FisherFaceRecognizer_createFisherFaceRecognizer_12(JNIEnv* env, jclass, jint num_components, jdouble threshold);
+JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_FisherFaceRecognizer_createFisherFaceRecognizer_12(JNIEnv* env, jclass, jint num_components, jdouble threshold) {
+    try {
+    	cv::Ptr<cv::FaceRecognizer> pfr = cv::createFisherFaceRecognizer((int)num_components,(double)threshold);
+    	pfr.addref();
+        return (jlong) pfr.obj;
+    } catch (...) {
+        jclass je = env->FindClass("java/lang/Exception");
+        env->ThrowNew(je, "sorry, dave..");
+    }
+    return 0;
+}
+
+/**
+ * LBPHFaceRecognizer constructors
+ */
 
 JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_LBPHFaceRecognizer_createLBPHFaceRecognizer_10(JNIEnv* env, jclass);
 JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_LBPHFaceRecognizer_createLBPHFaceRecognizer_10(JNIEnv* env, jclass) {
     try {
     	cv::Ptr<cv::FaceRecognizer> pfr = cv::createLBPHFaceRecognizer();
     	pfr.addref();
-        // cv::FaceRecognizer * pfr = extractPtr<cv::FaceRecognizer>(cv::createLBPHFaceRecognizer());
         return (jlong) pfr.obj;
     } catch (...) {
         jclass je = env->FindClass("java/lang/Exception");
@@ -45,7 +120,6 @@ JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_LBPHFaceRecognizer_createLB
     try {
     	cv::Ptr<cv::FaceRecognizer> pfr = cv::createLBPHFaceRecognizer((int)radius);
     	pfr.addref();
-        // cv::FaceRecognizer * pfr = extractPtr<cv::FaceRecognizer>(cv::createLBPHFaceRecognizer((int)radius));
         return (jlong) pfr.obj;
     } catch (...) {
         jclass je = env->FindClass("java/lang/Exception");
@@ -59,7 +133,6 @@ JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_LBPHFaceRecognizer_createLB
     try {
     	cv::Ptr<cv::FaceRecognizer> pfr = cv::createLBPHFaceRecognizer((int)radius,(int)neighbours);
     	pfr.addref();
-        // cv::FaceRecognizer * pfr = extractPtr<cv::FaceRecognizer>(cv::createLBPHFaceRecognizer((int)radius,(int)neighbours));
         return (jlong) pfr.obj;
     } catch (...) {
         jclass je = env->FindClass("java/lang/Exception");
@@ -73,7 +146,6 @@ JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_LBPHFaceRecognizer_createLB
     try {
     	cv::Ptr<cv::FaceRecognizer> pfr = cv::createLBPHFaceRecognizer((int)radius,(int)neighbours,(int)grid_x,(int)grid_y,(double)threshold);
     	pfr.addref();
-        // cv::FaceRecognizer * pfr = extractPtr<cv::FaceRecognizer>(cv::createLBPHFaceRecognizer((int)radius,(int)neighbours));
         return (jlong) pfr.obj;
     } catch (...) {
         jclass je = env->FindClass("java/lang/Exception");
@@ -81,7 +153,6 @@ JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_LBPHFaceRecognizer_createLB
     }
     return 0;
 }
-// and so on for the remaining args ....
 
 #ifdef __cplusplus
 }
