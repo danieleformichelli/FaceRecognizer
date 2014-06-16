@@ -75,22 +75,20 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mCameraView = (ControlledJavaCameraView) activity
 				.findViewById(R.id.face_recognition_surface_view);
 		mCameraView.setCvCameraViewListener(this);
-		
-		
 	}
 
 	@Override
 	public void swipeOut(boolean right) {
-//		activity.getWindow().clearFlags(
-//				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		// activity.getWindow().clearFlags(
+		// WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		mCameraView.disableView();
 	}
 
 	@Override
 	public void swipeIn(boolean right) {
-//		activity.getWindow().addFlags(
-//				WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+		// activity.getWindow().addFlags(
+		// WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		mCameraView.enableView();
 	}
@@ -112,7 +110,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	public void onOpenCVLoaded() {
 		mOpenCVLoaded = true;
-		if (mCameraView != null)
+		if (mCameraView != null && getUserVisibleHint())
 			mCameraView.enableView();
 	}
 
