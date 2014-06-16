@@ -39,13 +39,13 @@ import android.widget.GridView;
 import com.eim.R;
 import com.eim.facesmanagement.peopledb.Photo;
 import com.eim.utilities.PhotoAdapter;
-import com.eim.utilities.Preferences;
 
 public class FaceDetectionActivity extends Activity {
 	private static final String TAG = "FaceDetectionAndExtractionActivity";
 
 	protected static final int REQUEST_TAKE_PHOTO = 1;
 	protected static final int REQUEST_PICK_PHOTO = 2;
+	protected static final int REQUEST_TAKE_PHOTO_DETECTION = 3;
 
 	public static final String PERSON_ID = "personId";
 	public static final String PERSON_NAME = "personName";
@@ -163,7 +163,7 @@ public class FaceDetectionActivity extends Activity {
 					Intent takePictureIntent = new Intent(
 							MediaStore.ACTION_IMAGE_CAPTURE);
 
-					// check if camera activity is available
+					// check if camera activity is not available
 					if (takePictureIntent.resolveActivity(activity
 							.getPackageManager()) == null) {
 						mSceneFile.delete();
@@ -186,7 +186,25 @@ public class FaceDetectionActivity extends Activity {
 							pickImageIntent, "Select Image"),
 							REQUEST_PICK_PHOTO);
 					break;
+				case 2: // take photo from camera
+
+					Intent takeDetectedPictureIntent = new Intent(activity, TakePhotoWithDetectionActivity.class);
+
+					// check if camera activity is not available
+					if (takeDetectedPictureIntent.resolveActivity(activity
+							.getPackageManager()) == null) {
+						mSceneFile.delete();
+						return;
+					}
+
+					takeDetectedPictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,
+							Uri.fromFile(mSceneFile));
+
+					activity.startActivityForResult(takeDetectedPictureIntent,
+							REQUEST_TAKE_PHOTO);
+					break;
 				}
+
 			}
 		};
 
@@ -208,31 +226,21 @@ public class FaceDetectionActivity extends Activity {
 		case REQUEST_PICK_PHOTO:
 			copyPickedPhoto(data);
 		case REQUEST_TAKE_PHOTO:
+		case REQUEST_TAKE_PHOTO_DETECTION:
 
 			Bitmap[] detectedFaces = detectFaces();
-			// mSceneFile.delete();
+			mSceneFile.delete();
 
 			if (detectedFaces.length == 0) {
 				showChooserDialog(true);
 				return;
 			}
 
-			//if (detectedFaces.length > 1) {
-				displayFaceChooser(detectedFaces);
-				//return;
-			//}
+			displayFaceChooser(detectedFaces);
 
-			// showConfirmDialog(detectedFaces[0]);
 			break;
 		}
 
-	}
-
-	private void showConfirmDialog(Bitmap bitmap) {
-		if (Preferences.getInstance(this).showDetectionConfirmationDialog())
-			;// TODO showConfirmDialog
-
-		processFace(bitmap);
 	}
 
 	@Override

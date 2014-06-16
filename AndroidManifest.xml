@@ -7,13 +7,13 @@
     <uses-sdk
         android:minSdkVersion="16"
         android:targetSdkVersion="19" />
-    
-    <uses-permission android:name="android.permission.CAMERA"/>
 
-    <uses-feature android:name="android.hardware.camera"/>
-    <uses-feature android:name="android.hardware.camera.autofocus"/>
-    <uses-feature android:name="android.hardware.camera.front"/>
-    <uses-feature android:name="android.hardware.camera.front.autofocus"/>
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-feature android:name="android.hardware.camera.front" />
+    <uses-feature android:name="android.hardware.camera.front.autofocus" />
 
     <application
         android:allowBackup="true"
@@ -22,7 +22,8 @@
         android:theme="@style/AppTheme" >
         <activity
             android:name="com.eim.utilities.FaceRecognizerMainActivity"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:screenOrientation="landscape" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -31,7 +32,12 @@
         </activity>
         <activity
             android:name="com.eim.facedetection.FaceDetectionActivity"
-            android:label="@string/title_activity_face_decection_and_extraction" >
+            android:label="@string/title_activity_face_decection" >
+        </activity>
+        <activity
+            android:name="com.eim.facedetection.TakePhotoWithDetectionActivity"
+            android:label="@string/title_activity_take_photo_with_detection"
+            android:screenOrientation="landscape" >
         </activity>
     </application>
 

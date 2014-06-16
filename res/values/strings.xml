@@ -2,6 +2,5 @@
 <resources>
 
     <string name="app_name">FaceRecognizer</string>
-    <string name="title_activity_face_decection_and_extraction">FaceDecectionAndExtractionActivity</string>
 
 </resources>

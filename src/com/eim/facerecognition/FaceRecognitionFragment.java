@@ -15,18 +15,15 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 
 import com.eim.R;
 import com.eim.facedetection.FaceDetector;
@@ -35,7 +32,6 @@ import com.eim.facesmanagement.peopledb.Person;
 import com.eim.utilities.FaceRecognizerMainActivity.OnOpenCVLoaded;
 import com.eim.utilities.Swipeable;
 
-@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		OnOpenCVLoaded, CvCameraViewListener2 {
 	private static final String TAG = "FaceRecognitionFragment";
@@ -79,18 +75,14 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	@Override
 	public void swipeOut(boolean right) {
-		// activity.getWindow().clearFlags(
-		// WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-		mCameraView.disableView();
+		if (mCameraView != null)
+			mCameraView.disableView();
 	}
 
 	@Override
 	public void swipeIn(boolean right) {
-		// activity.getWindow().addFlags(
-		// WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-		mCameraView.enableView();
+		if (mCameraView != null)
+			mCameraView.enableView();
 	}
 
 	@Override
@@ -116,11 +108,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	@Override
 	public void onCameraViewStarted(int width, int height) {
-		/*
-		 * for (Size s: mCameraView.getResolutionList()) if (s.width == 320) {
-		 * mCameraView.setResolution(s); break; }
-		 */
-
 		setupFaceDetection();
 
 		mGray = new Mat();

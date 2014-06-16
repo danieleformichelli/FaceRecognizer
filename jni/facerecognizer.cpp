@@ -68,6 +68,19 @@ JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_LBPHFaceRecognizer_createLB
     return 0;
 }
 
+JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_LBPHFaceRecognizer_createLBPHFaceRecognizer_12(JNIEnv* env, jclass, jint radius, jint neighbours, jint grid_x, jint grid_y, jdouble threshold);
+JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_LBPHFaceRecognizer_createLBPHFaceRecognizer_12(JNIEnv* env, jclass, jint radius, jint neighbours, jint grid_x, jint grid_y, jdouble threshold) {
+    try {
+    	cv::Ptr<cv::FaceRecognizer> pfr = cv::createLBPHFaceRecognizer((int)radius,(int)neighbours,(int)grid_x,(int)grid_y,(double)threshold);
+    	pfr.addref();
+        // cv::FaceRecognizer * pfr = extractPtr<cv::FaceRecognizer>(cv::createLBPHFaceRecognizer((int)radius,(int)neighbours));
+        return (jlong) pfr.obj;
+    } catch (...) {
+        jclass je = env->FindClass("java/lang/Exception");
+        env->ThrowNew(je, "sorry, dave..");
+    }
+    return 0;
+}
 // and so on for the remaining args ....
 
 #ifdef __cplusplus

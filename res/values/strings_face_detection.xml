@@ -1,13 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="title_activity_face_decection">FaceDecectionAndExtractionActivity</string>
     <string name="face_detection_add_photo_title">Add photo</string>
     <string name="face_detection_retry_add_photo_title">No face found. Try again!</string>
-	<string name="face_detection_choose_face">Choose the face you want to recognize</string>
-	
+    <string name="face_detection_choose_face">Choose the face you want to recognize</string>
+
     <string-array name="face_detection_add_photo_options">
         <item>Take from camera</item>
         <item>Pick from gallery</item>
+        <item>Take from camera (with detection)</item>
     </string-array>
+
+    <string name="title_activity_take_photo_with_detection">TakePhotoWithDetectionActivity</string>
 
 </resources>
