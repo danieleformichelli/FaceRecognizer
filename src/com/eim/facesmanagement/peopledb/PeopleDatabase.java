@@ -110,18 +110,23 @@ public class PeopleDatabase {
 		LongSparseArray<Person> people = new LongSparseArray<Person>();
 
 		final String query = "SELECT " + FacesContract.People.TABLE + "."
-				+ FacesContract.People._ID + " AS PERSON_ID, "
-				+ FacesContract.People.NAME + ", " + FacesContract.Faces.TABLE
-				+ "." + FacesContract.Faces._ID + " AS PHOTO_ID, "
+				+ FacesContract.People._ID + " , " + FacesContract.People.NAME
+				+ ", " + FacesContract.Faces.TABLE + "."
+				+ FacesContract.Faces._ID + ", "
 				+ FacesContract.Faces.PHOTO_URL + " FROM "
 				+ FacesContract.People.TABLE + " LEFT JOIN "
-				+ FacesContract.Faces.TABLE + " ON PERSON_ID = "
-				+ FacesContract.Faces.PERSON_ID + " ORDER BY PERSON_ID";
+				+ FacesContract.Faces.TABLE + " ON "
+				+ FacesContract.People.TABLE + "." + FacesContract.People._ID
+				+ " = " + FacesContract.Faces.PERSON_ID + " ORDER BY "
+				+ FacesContract.People.TABLE + "." + FacesContract.People._ID;
+
 		Cursor c = db.rawQuery(query, null);
-		
-		int personIdIndex = c.getColumnIndex("PERSON_ID");
+
+		int personIdIndex = c.getColumnIndex(FacesContract.People.TABLE + "."
+				+ FacesContract.People._ID);
 		int personNameIndex = c.getColumnIndex(FacesContract.People.NAME);
-		int photoIdIndex = c.getColumnIndex("PHOTO_ID");
+		int photoIdIndex = c.getColumnIndex(FacesContract.Faces.TABLE + "."
+				+ FacesContract.Faces._ID);
 		int photoUrlIndex = c.getColumnIndex(FacesContract.Faces.PHOTO_URL);
 
 		while (c.moveToNext()) {
