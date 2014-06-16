@@ -141,7 +141,7 @@ public class PeopleDatabase {
 		Person selectedPerson;
 
 		String query = "SELECT " + FacesContract.Faces.TABLE + "."
-				+ FacesContract.Faces._ID + " AS PHOTO_ID, "
+				+ FacesContract.Faces._ID + " AS photoId, "
 				+ FacesContract.People.NAME + ", "
 				+ FacesContract.Faces.PHOTO_URL + " FROM "
 				+ FacesContract.People.TABLE + " LEFT JOIN "
@@ -152,7 +152,7 @@ public class PeopleDatabase {
 
 		Cursor c = db.rawQuery(query, whereArgs);
 		int personNameIndex = c.getColumnIndex(FacesContract.People.NAME);
-		int photoIdIndex = c.getColumnIndex("PHOTO_ID");
+		int photoIdIndex = c.getColumnIndex("photoId");
 		int photoUrlIndex = c.getColumnIndex(FacesContract.Faces.PHOTO_URL);
 
 		if (!c.moveToNext()) {
@@ -185,9 +185,9 @@ public class PeopleDatabase {
 		LongSparseArray<Person> people = new LongSparseArray<Person>();
 
 		final String query = "SELECT " + FacesContract.People.TABLE + "."
-				+ FacesContract.People._ID + " , " + FacesContract.People.NAME
+				+ FacesContract.People._ID + " AS personId, " + FacesContract.People.NAME
 				+ ", " + FacesContract.Faces.TABLE + "."
-				+ FacesContract.Faces._ID + ", "
+				+ FacesContract.Faces._ID + " AS photoId, "
 				+ FacesContract.Faces.PHOTO_URL + " FROM "
 				+ FacesContract.People.TABLE + " LEFT JOIN "
 				+ FacesContract.Faces.TABLE + " ON "
@@ -197,16 +197,15 @@ public class PeopleDatabase {
 
 		Cursor c = db.rawQuery(query, null);
 
-		int personIdIndex = c.getColumnIndex(FacesContract.People.TABLE + "."
-				+ FacesContract.People._ID);
+		int personIdIndex = c.getColumnIndex("personId");
 		int personNameIndex = c.getColumnIndex(FacesContract.People.NAME);
-		int photoIdIndex = c.getColumnIndex(FacesContract.Faces.TABLE + "."
-				+ FacesContract.Faces._ID);
+		int photoIdIndex = c.getColumnIndex("photoId");
 		int photoUrlIndex = c.getColumnIndex(FacesContract.Faces.PHOTO_URL);
 
 		while (c.moveToNext()) {
 			long personId = c.getLong(personIdIndex);
 			String name = c.getString(personNameIndex);
+
 
 			// add a new Person if it is the first time we found it
 			if (personId != currentId) {
