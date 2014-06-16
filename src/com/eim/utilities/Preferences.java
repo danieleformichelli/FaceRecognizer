@@ -2,6 +2,7 @@ package com.eim.utilities;
 
 import com.eim.R;
 import com.eim.facedetection.FaceDetector;
+import com.eim.facerecognition.FaceRecognitionFragment;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -90,14 +91,27 @@ public class Preferences {
 		return mSharedPreferences.getInt(numberOfGalleryColumnsPortraitKey,
 				numberOfGalleryColumnsPortraitDefault);
 	}
+	
 
 	private String detectorTypeKey;
 	private boolean detectorTypeDefault;
 
-	public FaceDetector.Type detectionDetectorType() {
+	public FaceDetector.Type detectorType() {
 		return mSharedPreferences.getBoolean(detectorTypeKey,
 				detectorTypeDefault) ? FaceDetector.Type.JAVA
 				: FaceDetector.Type.NATIVE;
+	}
+	
+	private String recognitionTypeKey;
+	public FaceRecognitionFragment.Type recognitionType() {
+		int current = mSharedPreferences.getInt(recognitionTypeKey, R.string.recognition_type_default);
+		switch (current) {
+		case 0: return FaceRecognitionFragment.Type.EIGEN;
+		case 1: return FaceRecognitionFragment.Type.FISHER;
+		case 2: return FaceRecognitionFragment.Type.LBPH;
+		default: return null;
+		}
+		
 	}
 
 	private void getKeysAndDefaultValues(Context mContext) {
@@ -148,6 +162,8 @@ public class Preferences {
 		numberOfGalleryColumnsPortraitDefault = Integer
 				.valueOf(mContext
 						.getString(R.string.management_number_of_gallery_columns_portrait));
+		
+		recognitionTypeKey = mContext.getString(R.string.recognition_type);
 	}
 
 }

@@ -8,6 +8,21 @@
     <string name="general_clear_data">general_clear_data</string>
     <string name="general_clear_data_title">Clear data</string>
     <string name="preference_recognition">Recognition</string>
+    <string name="recognition_type">recognition_type</string>
+    <string name="recognition_type_title">Recognition type</string>
+    <string name="recognition_type_default">1</string>
+    <string-array
+        name ="recognition_type_entries">
+        <item>Eigen faces</item>
+        <item>Fisher faces</item>
+        <item>Local binary Pattern histogram</item>
+        </string-array>
+    <string-array
+        name = "recognition_type_entry_values">
+        <item>EigenFaces</item>
+        <item>FisherFaces</item>
+        <item>LocalBinaryPatternHistogram</item>
+    </string-array>
     <string name="preference_detection">Detection</string>
     <string name="detection_detector_type">detection_detector_type</string>
     <string name="detection_detector_type_title">Detector Type</string>

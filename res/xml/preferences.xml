@@ -11,6 +11,13 @@
             android:title="@string/general_clear_data_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_recognition" >
+        <MultiSelectListPreference
+            android:defaultValue="@string/recognition_type_default"
+            android:key="@string/recognition_type"
+            android:title="@string/recognition_type_title"
+            android:entries="@array/recognition_type_entries"
+            android:entryValues="@array/recognition_type_entry_values"
+            />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_detection" >
         <SwitchPreference
