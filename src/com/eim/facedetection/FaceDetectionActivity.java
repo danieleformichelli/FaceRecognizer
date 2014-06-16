@@ -39,6 +39,7 @@ import android.widget.GridView;
 import com.eim.R;
 import com.eim.facesmanagement.peopledb.Photo;
 import com.eim.utilities.PhotoAdapter;
+import com.eim.utilities.Preferences;
 
 public class FaceDetectionActivity extends Activity {
 	private static final String TAG = "FaceDetectionAndExtractionActivity";
@@ -326,7 +327,9 @@ public class FaceDetectionActivity extends Activity {
 	}
 
 	private void initDetector() {
-
+		
+		Preferences appPrefs = Preferences.getInstance(this);
+		
 		mFaceDetector = new FaceDetector(this);
 
 		Bitmap sceneBitmap = BitmapFactory.decodeFile(mSceneFile

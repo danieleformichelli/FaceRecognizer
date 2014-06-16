@@ -30,6 +30,9 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 	private static native long createLBPHFaceRecognizer_2(int radius,
 			int neighbours);
 
+	private static native long createLBPHFaceRecognizer_3(int radius,
+			int neighbours, int gridX, int gridY, double threshold);
+
 	private LBPHFaceRecognizer() {
 		super(createLBPHFaceRecognizer_0());
 	}
@@ -40,6 +43,12 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 
 	private LBPHFaceRecognizer(int radius, int neighbours) {
 		super(createLBPHFaceRecognizer_2(radius, neighbours));
+	}
+
+	private LBPHFaceRecognizer(int radius, int neighbours, int gridX,
+			int gridY, double threshold) {
+		super(createLBPHFaceRecognizer_3(radius, neighbours, gridX, gridY,
+				threshold));
 	}
 
 	private static String MODEL_FILE_NAME = "trainedModel.xml";
@@ -121,7 +130,7 @@ public class LBPHFaceRecognizer extends FaceRecognizer {
 		}
 
 		List<Mat> faces = new ArrayList<Mat>();
-		Mat labels = new Mat(0,0,CvType.CV_32SC1);
+		Mat labels = new Mat(0, 0, CvType.CV_32SC1);
 		int counter = 0;
 
 		for (int i = 0, l = dataset.size(); i < l; i++) {

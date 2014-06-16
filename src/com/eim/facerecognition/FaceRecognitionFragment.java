@@ -121,7 +121,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		Utils.bitmapToMat(thumb, thumbnail);
 		mTestThumbnail = new Mat();
 
-		double absoluteFaceSize = height * mFaceDetector.getRelativeFaceSize();
+		double absoluteFaceSize = height * mFaceDetector.getMinRelativeFaceSize();
 		mThumbnailSize = (int) (absoluteFaceSize * 0.6);
 		Core.subtract(thumbnail, new Scalar(0, 0, 0, 100), transparentThumbnail);
 

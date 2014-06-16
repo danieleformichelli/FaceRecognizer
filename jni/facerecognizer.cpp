@@ -68,8 +68,8 @@ JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_LBPHFaceRecognizer_createLB
     return 0;
 }
 
-JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_LBPHFaceRecognizer_createLBPHFaceRecognizer_12(JNIEnv* env, jclass, jint radius, jint neighbours, jint grid_x, jint grid_y, jdouble threshold);
-JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_LBPHFaceRecognizer_createLBPHFaceRecognizer_12(JNIEnv* env, jclass, jint radius, jint neighbours, jint grid_x, jint grid_y, jdouble threshold) {
+JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_LBPHFaceRecognizer_createLBPHFaceRecognizer_13(JNIEnv* env, jclass, jint radius, jint neighbours, jint grid_x, jint grid_y, jdouble threshold);
+JNIEXPORT jlong JNICALL Java_com_eim_facerecognition_LBPHFaceRecognizer_createLBPHFaceRecognizer_13(JNIEnv* env, jclass, jint radius, jint neighbours, jint grid_x, jint grid_y, jdouble threshold) {
     try {
     	cv::Ptr<cv::FaceRecognizer> pfr = cv::createLBPHFaceRecognizer((int)radius,(int)neighbours,(int)grid_x,(int)grid_y,(double)threshold);
     	pfr.addref();

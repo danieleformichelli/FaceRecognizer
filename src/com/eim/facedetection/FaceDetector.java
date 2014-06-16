@@ -15,6 +15,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.eim.R;
+import com.eim.utilities.Preferences;
 
 public class FaceDetector {
 	
@@ -27,8 +28,12 @@ public class FaceDetector {
 
 	private double mScaleFactor = 1.1;
 	private int mMinNeighbors = 2;
-	private long mAbsoluteFaceSize = 0;
-	private double mRelativeFaceSize = 0.2;
+	
+	private long mMinAbsoluteFaceSize = 0;
+	private double mMinRelativeFaceSize = 0.2;
+
+	private double mMaxAbsoluteFaceSize = 0;
+	private double mMaxRelativeFaceSize = 1;
 
 	public FaceDetector(Context c) {
 		mContext = c;
@@ -69,6 +74,8 @@ public class FaceDetector {
 			// mNativeDetector = new
 			// DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0);
 			// cascadeDir.delete();
+			
+			loadParamsFromPreferences();
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -76,16 +83,38 @@ public class FaceDetector {
 		}
 	}
 
-	public double getRelativeFaceSize() {
-		return mRelativeFaceSize;
+	public void loadParamsFromPreferences() {
+		
+		Preferences appPrefs = Preferences.getInstance(mContext);
+		
+		setMinNeighbors(Integer.parseInt(appPrefs.showDetectionMinNeighbors()));
+		setMinRelativeFaceSize(Double.parseDouble(appPrefs.showDetectionMinRelativeFaceSize()));
+		// setMaxRelativeFaceSize(Double.parseDouble(appPrefs.showDetectionMaxRelativeFaceSize()));
+		setScaleFactor(Double.parseDouble(appPrefs.showDetectionScaleFactor()));
+	}
+
+	public double getMinRelativeFaceSize() {
+		return mMinRelativeFaceSize;
 	}
 	
-	public void setRelativeFaceSize(double d) {
+	public void setMinRelativeFaceSize(double d) {
 		if (d > 1 || d < 0)
 			throw new IllegalArgumentException("Argument must be between 0 and 1");
 		
-		mRelativeFaceSize = d;
-		mAbsoluteFaceSize = 0;		
+		mMinRelativeFaceSize = d;
+		mMinAbsoluteFaceSize = 0;		
+	}
+	
+	public double getMaxRelativeFaceSize() {
+		return mMaxRelativeFaceSize;
+	}
+	
+	public void setMaxRelativeFaceSize(double d) {
+		if (d > 1 || d < 0)
+			throw new IllegalArgumentException("Argument must be between 0 and 1");
+		
+		mMaxRelativeFaceSize = d;
+		mMaxAbsoluteFaceSize = 0;		
 	}
 	
 	public double getScaleFactor() {
@@ -108,11 +137,20 @@ public class FaceDetector {
 		
 		MatOfRect faces = new MatOfRect();
 		
-		if (mAbsoluteFaceSize == 0) {
+		if (mMinAbsoluteFaceSize == 0) {
 		
 			int height = scene.rows();
-			if (Math.round(height * mRelativeFaceSize) > 0)
-				mAbsoluteFaceSize = Math.round(height * mRelativeFaceSize);
+			if (Math.round(height * mMinRelativeFaceSize) > 0)
+				mMinAbsoluteFaceSize = Math.round(height * mMinRelativeFaceSize);
+
+			// mNativeDetector.setMinFaceSize(mAbsoluteFaceSize);
+		}
+		
+		if (mMaxAbsoluteFaceSize == 0) {
+			
+			int height = scene.rows();
+			if (Math.round(height * mMaxRelativeFaceSize) > 0)
+				mMaxAbsoluteFaceSize = Math.round(height * mMaxRelativeFaceSize);
 
 			// mNativeDetector.setMinFaceSize(mAbsoluteFaceSize);
 		}
@@ -121,8 +159,8 @@ public class FaceDetector {
 			if (mJavaDetector != null)
 				mJavaDetector.detectMultiScale(scene, faces, mScaleFactor , mMinNeighbors,
 						2, // TODO: objdetect.CV_HAAR_SCALE_IMAGE
-						new Size(mAbsoluteFaceSize, mAbsoluteFaceSize),
-						new Size());
+						new Size(mMinAbsoluteFaceSize, mMinAbsoluteFaceSize),
+						new Size(mMaxAbsoluteFaceSize, mMaxAbsoluteFaceSize));
 		}
 		// else if (mDetectorType == NATIVE_DETECTOR) {
 		// if (mNativeDetector != null)
