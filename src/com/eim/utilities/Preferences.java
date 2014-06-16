@@ -34,26 +34,26 @@ public class Preferences {
 		showDetectionConfirmationDialogDefault = Boolean
 				.valueOf(mContext
 						.getString(R.string.detection_show_confirmation_dialog_default));
-
+						
 		detectionScaleFactorKey = mContext
 				.getString(R.string.detection_scale_factor);
-		detectionScaleFactorDefault = mContext
-				.getString(R.string.detection_scale_factor_default);
+		detectionScaleFactorDefault = Float.parseFloat(mContext
+				.getString(R.string.detection_scale_factor_default));
 
 		detectionMinNeighborsKey = mContext
 				.getString(R.string.detection_min_neighbors);
-		detectionMinNeighborsDefault = mContext
-				.getString(R.string.detection_min_neighbors_default);
+		detectionMinNeighborsDefault = Integer.parseInt(mContext
+				.getString(R.string.detection_min_neighbors_default));
 
 		detectionMinRelativeFaceSizeKey = mContext
 				.getString(R.string.detection_min_relative_face_size);
-		detectionMinRelativeFaceSizeDefault = mContext
-				.getString(R.string.detection_min_relative_face_size_default);
+		detectionMinRelativeFaceSizeDefault = Float.parseFloat(mContext
+				.getString(R.string.detection_min_relative_face_size_default));
 
 		detectionMaxRelativeFaceSizeKey = mContext
 				.getString(R.string.detection_max_relative_face_size);
-		detectionMaxRelativeFaceSizeDefault = mContext
-				.getString(R.string.detection_max_relative_face_size_default);
+		detectionMaxRelativeFaceSizeDefault = Float.parseFloat(mContext
+				.getString(R.string.detection_max_relative_face_size_default));
 
 		detectorTypeKey = mContext.getString(R.string.detection_detector_type);
 		detectorTypeDefault = mContext
@@ -61,13 +61,13 @@ public class Preferences {
 
 		numberOfGalleryColumnsLandscapeKey = mContext
 				.getString(R.string.management_number_of_gallery_columns_landscape);
-		numberOfGalleryColumnsLandscapeDefault = mContext
-				.getString(R.string.management_number_of_gallery_columns_landscape);
+		numberOfGalleryColumnsLandscapeDefault = Integer.parseInt(mContext
+				.getString(R.string.management_number_of_gallery_columns_landscape));
 
 		numberOfGalleryColumnsPortraitKey = mContext
 				.getString(R.string.management_number_of_gallery_columns_portrait);
-		numberOfGalleryColumnsPortraitDefault = mContext
-				.getString(R.string.management_number_of_gallery_columns_portrait);
+		numberOfGalleryColumnsPortraitDefault = Integer.parseInt(mContext
+				.getString(R.string.management_number_of_gallery_columns_portrait));
 	}
 
 	private String showFacesManagementOnStartupKey;
@@ -88,55 +88,55 @@ public class Preferences {
 	}
 
 	private String detectionScaleFactorKey;
-	private String detectionScaleFactorDefault;
+	private float detectionScaleFactorDefault;
 
-	public Double detectionScaleFactor() {
-		return Double.parseDouble(mSharedPreferences.getString(
-				detectionScaleFactorKey, detectionScaleFactorDefault));
+	public float detectionScaleFactor() {
+		return mSharedPreferences.getFloat(
+				detectionScaleFactorKey, detectionScaleFactorDefault);
 	}
 
 	private String detectionMinNeighborsKey;
-	private String detectionMinNeighborsDefault;
+	private int detectionMinNeighborsDefault;
 
 	public int detectionMinNeighbors() {
-		return Integer.parseInt(mSharedPreferences.getString(
-				detectionMinNeighborsKey, detectionMinNeighborsDefault));
+		return mSharedPreferences.getInt(
+				detectionMinNeighborsKey, detectionMinNeighborsDefault);
 	}
 
 	private String detectionMinRelativeFaceSizeKey;
-	private String detectionMinRelativeFaceSizeDefault;
+	private float detectionMinRelativeFaceSizeDefault;
 
-	public double detectionMinRelativeFaceSize() {
-		return Double.parseDouble(mSharedPreferences.getString(
+	public float detectionMinRelativeFaceSize() {
+		return mSharedPreferences.getFloat(
 				detectionMinRelativeFaceSizeKey,
-				detectionMinRelativeFaceSizeDefault));
+				detectionMinRelativeFaceSizeDefault);
 	}
 
 	private String detectionMaxRelativeFaceSizeKey;
-	private String detectionMaxRelativeFaceSizeDefault;
+	private float detectionMaxRelativeFaceSizeDefault;
 
-	public double detectionMaxRelativeFaceSize() {
-		return Double.parseDouble(mSharedPreferences.getString(
+	public float detectionMaxRelativeFaceSize() {
+		return mSharedPreferences.getFloat(
 				detectionMaxRelativeFaceSizeKey,
-				detectionMaxRelativeFaceSizeDefault));
+				detectionMaxRelativeFaceSizeDefault);
 	}
 
 	private String numberOfGalleryColumnsLandscapeKey;
-	private String numberOfGalleryColumnsLandscapeDefault;
+	private int numberOfGalleryColumnsLandscapeDefault;
 
 	public int numberOfGalleryColumnsLandscape() {
-		return Integer.parseInt(mSharedPreferences.getString(
+		return mSharedPreferences.getInt(
 				numberOfGalleryColumnsLandscapeKey,
-				numberOfGalleryColumnsLandscapeDefault));
+				numberOfGalleryColumnsLandscapeDefault);
 	}
 
 	private String numberOfGalleryColumnsPortraitKey;
-	private String numberOfGalleryColumnsPortraitDefault;
+	private int numberOfGalleryColumnsPortraitDefault;
 
 	public int numberOfGalleryColumnsPortrait() {
-		return Integer.parseInt(mSharedPreferences.getString(
+		return mSharedPreferences.getInt(
 				numberOfGalleryColumnsPortraitKey,
-				numberOfGalleryColumnsPortraitDefault));
+				numberOfGalleryColumnsPortraitDefault);
 	}
 
 	private String detectorTypeKey;
