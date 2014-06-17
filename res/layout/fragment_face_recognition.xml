@@ -12,4 +12,14 @@
         opencv:camera_id="any"
         opencv:show_fps="true" />
 
+    <SeekBar
+        android:id="@+id/threshold_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:indeterminate="false"
+        android:max="1000"
+        android:progress="10" />
+
 </RelativeLayout>
