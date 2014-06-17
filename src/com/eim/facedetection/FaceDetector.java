@@ -15,7 +15,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.eim.R;
-import com.eim.utilities.Preferences;
+import com.eim.utilities.EIMPreferences;
 
 public class FaceDetector {
 	private static final String TAG = "FaceDetector";
@@ -88,7 +88,7 @@ public class FaceDetector {
 
 	public void loadParamsFromPreferences() {
 
-		Preferences appPrefs = Preferences.getInstance(mContext);
+		EIMPreferences appPrefs = EIMPreferences.getInstance(mContext);
 
 		setMinNeighbors(appPrefs.detectionMinNeighbors());
 		setMinRelativeFaceSize(appPrefs.detectionMinRelativeFaceSize());

@@ -1,28 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <!-- General -->
+
     <string name="preference_general">General</string>
     <string name="general_show_management_on_startup">general_show_management_on_startup</string>
     <string name="general_show_management_on_startup_title">Show faces management on startup</string>
     <string name="general_show_management_on_startup_default">false</string>
     <string name="general_clear_data">general_clear_data</string>
     <string name="general_clear_data_title">Clear data</string>
+    <string name="invalid_number_of_gallery_columns">The number of gallery columns must be positive</string>
+
+    <!-- Recognition -->
+
     <string name="preference_recognition">Recognition</string>
     <string name="recognition_type">recognition_type</string>
     <string name="recognition_type_title">Recognition type</string>
     <string name="recognition_type_default">1</string>
-    <string-array
-        name ="recognition_type_entries">
+
+    <string-array name="recognition_type_entries">
         <item>Eigen faces</item>
         <item>Fisher faces</item>
         <item>Local binary Pattern histogram</item>
-        </string-array>
-    <string-array
-        name = "recognition_type_entry_values">
+    </string-array>
+    <string-array name="recognition_type_entry_values">
         <item>EigenFaces</item>
         <item>FisherFaces</item>
         <item>LocalBinaryPatternHistogram</item>
     </string-array>
+
+    <!-- Detection -->
+
     <string name="preference_detection">Detection</string>
     <string name="detection_detector_type">detection_detector_type</string>
     <string name="detection_detector_type_title">Detector Type</string>
@@ -43,6 +51,14 @@
     <string name="detection_max_relative_face_size">detection_max_relative_face_size</string>
     <string name="detection_max_relative_face_size_default">1</string>
     <string name="detection_max_relative_face_size_title">Maximum Relative Face Size</string>
+    <string name="detection_invalid_min_neighbors">Minimum number of neighbors must be positive</string>
+    <string name="detection_invalid_min_relative_face_size">Minimum relative face must be in the range [0,1]</string>
+    <string name="detection_invalid_max_relative_face_size">Maximum relative face must be in the range [0,1]</string>
+    <string name="detection_invalid_relative_face_size_ratio">Maximum relative face must be greater than the minimum one</string>
+    <string name="detection_invalid_scale_factor">Scale factor must be greater than one</string>
+
+    <!-- Management -->
+
     <string name="preference_management">Management</string>
     <string name="management_number_of_gallery_columns_landscape">management_number_of_gallery_columns_landscape</string>
     <string name="management_number_of_gallery_columns_landscape_default">5</string>

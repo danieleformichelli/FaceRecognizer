@@ -34,14 +34,14 @@ public class FaceRecognizerMainActivity extends Activity {
 	private FacesManagementFragment mFacesManagementFragment;
 	private MyPreferencesFragment mSettingsFragment;
 
-	private Preferences mPreferences;
+	private EIMPreferences mPreferences;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_face_recognizer_main);
 
-		mPreferences = Preferences.getInstance(this);
+		mPreferences = EIMPreferences.getInstance(this);
 
 		// Instantiate the fragments
 		mFaceRecognitionFragment = new FaceRecognitionFragment();

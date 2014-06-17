@@ -8,19 +8,19 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-public class Preferences {
-	private static Preferences instance;
+public class EIMPreferences {
+	private static EIMPreferences instance;
 
 	private SharedPreferences mSharedPreferences;
 
-	public static Preferences getInstance(Context mContext) {
+	public static EIMPreferences getInstance(Context mContext) {
 		if (instance == null)
-			instance = new Preferences(mContext);
+			instance = new EIMPreferences(mContext);
 
 		return instance;
 	}
 
-	private Preferences(Context mContext) {
+	private EIMPreferences(Context mContext) {
 		mSharedPreferences = PreferenceManager
 				.getDefaultSharedPreferences(mContext);
 
@@ -28,21 +28,20 @@ public class Preferences {
 	}
 
 	private String showFacesManagementOnStartupKey;
-	private String showFacesManagementOnStartupDefault;
+	private boolean showFacesManagementOnStartupDefault;
 
 	public boolean showFacesManagementOnStartup() {
-		return Boolean.valueOf(mSharedPreferences.getString(
-				showFacesManagementOnStartupKey,
-				showFacesManagementOnStartupDefault));
+		return mSharedPreferences.getBoolean(showFacesManagementOnStartupKey,
+				showFacesManagementOnStartupDefault);
 	}
 
 	private String showDetectionConfirmationDialogKey;
-	private String showDetectionConfirmationDialogDefault;
+	private boolean showDetectionConfirmationDialogDefault;
 
 	public boolean showDetectionConfirmationDialog() {
-		return Boolean.valueOf(mSharedPreferences.getString(
+		return mSharedPreferences.getBoolean(
 				showDetectionConfirmationDialogKey,
-				showDetectionConfirmationDialogDefault));
+				showDetectionConfirmationDialogDefault);
 	}
 
 	private String detectionScaleFactorKey;
@@ -57,15 +56,16 @@ public class Preferences {
 	private String detectionMinNeighborsDefault;
 
 	public int detectionMinNeighbors() {
-		return Integer.parseInt(mSharedPreferences.getString(detectionMinNeighborsKey,
-				detectionMinNeighborsDefault));
+		return Integer.parseInt(mSharedPreferences.getString(
+				detectionMinNeighborsKey, detectionMinNeighborsDefault));
 	}
 
 	private String detectionMinRelativeFaceSizeKey;
 	private String detectionMinRelativeFaceSizeDefault;
 
 	public float detectionMinRelativeFaceSize() {
-		return Float.parseFloat(mSharedPreferences.getString(detectionMinRelativeFaceSizeKey,
+		return Float.parseFloat(mSharedPreferences.getString(
+				detectionMinRelativeFaceSizeKey,
 				detectionMinRelativeFaceSizeDefault));
 	}
 
@@ -73,7 +73,8 @@ public class Preferences {
 	private String detectionMaxRelativeFaceSizeDefault;
 
 	public float detectionMaxRelativeFaceSize() {
-		return Float.parseFloat(mSharedPreferences.getString(detectionMaxRelativeFaceSizeKey,
+		return Float.parseFloat(mSharedPreferences.getString(
+				detectionMaxRelativeFaceSizeKey,
 				detectionMaxRelativeFaceSizeDefault));
 	}
 
@@ -81,7 +82,8 @@ public class Preferences {
 	private String numberOfGalleryColumnsLandscapeDefault;
 
 	public int numberOfGalleryColumnsLandscape() {
-		return Integer.parseInt(mSharedPreferences.getString(numberOfGalleryColumnsLandscapeKey,
+		return Integer.parseInt(mSharedPreferences.getString(
+				numberOfGalleryColumnsLandscapeKey,
 				numberOfGalleryColumnsLandscapeDefault));
 	}
 
@@ -89,7 +91,8 @@ public class Preferences {
 	private String numberOfGalleryColumnsPortraitDefault;
 
 	public int numberOfGalleryColumnsPortrait() {
-		return Integer.parseInt(mSharedPreferences.getString(numberOfGalleryColumnsPortraitKey,
+		return Integer.parseInt(mSharedPreferences.getString(
+				numberOfGalleryColumnsPortraitKey,
 				numberOfGalleryColumnsPortraitDefault));
 	}
 
@@ -123,13 +126,15 @@ public class Preferences {
 	private void getKeysAndDefaultValues(Context mContext) {
 		showFacesManagementOnStartupKey = mContext
 				.getString(R.string.general_show_management_on_startup);
-		showFacesManagementOnStartupDefault = mContext
-				.getString(R.string.general_show_management_on_startup_default);
+		showFacesManagementOnStartupDefault = Boolean
+				.valueOf(mContext
+						.getString(R.string.general_show_management_on_startup_default));
 
 		showDetectionConfirmationDialogKey = mContext
 				.getString(R.string.detection_show_confirmation_dialog);
-		showDetectionConfirmationDialogDefault = mContext
-				.getString(R.string.detection_show_confirmation_dialog_default);
+		showDetectionConfirmationDialogDefault = Boolean
+				.valueOf(mContext
+						.getString(R.string.detection_show_confirmation_dialog_default));
 
 		detectionScaleFactorKey = mContext
 				.getString(R.string.detection_scale_factor);

@@ -13,7 +13,7 @@ import com.eim.facesmanagement.peopledb.Photo;
 import com.eim.utilities.NoScrollGridView;
 import com.eim.utilities.PhotoAdapter;
 import com.eim.utilities.PhotoAdapter.PhotoSelectionListener;
-import com.eim.utilities.Preferences;
+import com.eim.utilities.EIMPreferences;
 
 /**
  * A Gallery is an horizontal LinearLayout that can contain zero or more photos
@@ -52,7 +52,7 @@ public class PhotoGallery extends NoScrollGridView implements
 		delete = new Photo(null, BitmapFactory.decodeResource(
 				mContext.getResources(), R.drawable.action_delete));
 
-		Preferences mPreferences = Preferences.getInstance(mContext);
+		EIMPreferences mPreferences = EIMPreferences.getInstance(mContext);
 		final int rotation = ((WindowManager) mContext
 				.getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay()
 				.getRotation();
