@@ -27,23 +27,6 @@ public class EIMPreferences {
 		getKeysAndDefaultValues(mContext);
 	}
 
-	private String showFacesManagementOnStartupKey;
-	private boolean showFacesManagementOnStartupDefault;
-
-	public boolean showFacesManagementOnStartup() {
-		return mSharedPreferences.getBoolean(showFacesManagementOnStartupKey,
-				showFacesManagementOnStartupDefault);
-	}
-
-	private String showDetectionConfirmationDialogKey;
-	private boolean showDetectionConfirmationDialogDefault;
-
-	public boolean showDetectionConfirmationDialog() {
-		return mSharedPreferences.getBoolean(
-				showDetectionConfirmationDialogKey,
-				showDetectionConfirmationDialogDefault);
-	}
-
 	private String detectionScaleFactorKey;
 	private String detectionScaleFactorDefault;
 
@@ -124,18 +107,6 @@ public class EIMPreferences {
 	}
 
 	private void getKeysAndDefaultValues(Context mContext) {
-		showFacesManagementOnStartupKey = mContext
-				.getString(R.string.general_show_management_on_startup);
-		showFacesManagementOnStartupDefault = Boolean
-				.valueOf(mContext
-						.getString(R.string.general_show_management_on_startup_default));
-
-		showDetectionConfirmationDialogKey = mContext
-				.getString(R.string.detection_show_confirmation_dialog);
-		showDetectionConfirmationDialogDefault = Boolean
-				.valueOf(mContext
-						.getString(R.string.detection_show_confirmation_dialog_default));
-
 		detectionScaleFactorKey = mContext
 				.getString(R.string.detection_scale_factor);
 		detectionScaleFactorDefault = mContext

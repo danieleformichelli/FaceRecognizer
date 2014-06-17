@@ -4,9 +4,8 @@
     <!-- General -->
 
     <string name="preference_general">Generali</string>
-    <string name="general_show_management_on_startup_title">Mostra faces management all\'apertura</string>
-    <string name="general_clear_data_title">Pulisci</string>
-    <string name="restore_default_preferences_title">Ripristina impostazioni predefinite</string>
+    <string name="general_clear_database_title">Svuota database</string>
+    <string name="general_restore_default_preferences_title">Ripristina impostazioni predefinite</string>
     <string name="invalid_number_of_gallery_columns">Il numero di colonne della galleria deve essere positivo</string>
 
     <!-- Recognition -->
@@ -24,7 +23,6 @@
 
     <string name="preference_detection">Detection</string>
     <string name="detection_detector_type_title">Tipo detector</string>
-    <string name="detection_show_confirmation_dialog_title">Show confirmation dialog</string>
     <string name="detection_scale_factor_title">Fattore di scala</string>
     <string name="detection_min_neighbors_title">Minor numero di vicini</string>
     <string name="detection_min_relative_face_size_title">Dimensione relativa minima della faccia</string>

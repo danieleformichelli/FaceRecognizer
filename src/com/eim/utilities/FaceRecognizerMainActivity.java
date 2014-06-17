@@ -34,14 +34,10 @@ public class FaceRecognizerMainActivity extends Activity {
 	private FacesManagementFragment mFacesManagementFragment;
 	private MyPreferencesFragment mSettingsFragment;
 
-	private EIMPreferences mPreferences;
-
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_face_recognizer_main);
-
-		mPreferences = EIMPreferences.getInstance(this);
 
 		// Instantiate the fragments
 		mFaceRecognitionFragment = new FaceRecognitionFragment();
@@ -64,7 +60,7 @@ public class FaceRecognizerMainActivity extends Activity {
 		mViewPager.setAdapter(mSectionsPagerAdapter);
 		mViewPager.setOnPageChangeListener(mOnPageChangeListener);
 
-		currentPosition = mPreferences.showFacesManagementOnStartup() ? 1 : 0;
+		currentPosition = 0;
 
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, this,
 				new BaseLoaderCallback(this) {
@@ -82,13 +78,6 @@ public class FaceRecognizerMainActivity extends Activity {
 						}
 					}
 				});
-	}
-
-	@Override
-	protected void onStart() {
-		super.onStart();
-		
-		mViewPager.setCurrentItem(currentPosition, false);
 	}
 
 	OnPageChangeListener mOnPageChangeListener = new ViewPager.SimpleOnPageChangeListener() {

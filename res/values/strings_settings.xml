@@ -4,13 +4,10 @@
     <!-- General -->
 
     <string name="preference_general">General</string>
-    <string name="general_show_management_on_startup">general_show_management_on_startup</string>
-    <string name="general_show_management_on_startup_title">Show faces management on startup</string>
-    <string name="general_show_management_on_startup_default">false</string>
-    <string name="general_clear_data">general_clear_data</string>
-    <string name="general_clear_data_title">Clear data</string>
-    <string name="restore_default_preferences">restore_default_preferences</string>
-    <string name="restore_default_preferences_title">Restore default preferences</string>
+    <string name="general_clear_database">general_clear_data</string>
+    <string name="general_clear_database_title">Clear database</string>
+    <string name="general_restore_default_preferences">restore_default_preferences</string>
+    <string name="general_restore_default_preferences_title">Restore default preferences</string>
     <string name="invalid_number_of_gallery_columns">The number of gallery columns must be positive</string>
 
     <!-- Recognition -->
@@ -18,7 +15,7 @@
     <string name="preference_recognition">Recognition</string>
     <string name="recognition_type">recognition_type</string>
     <string name="recognition_type_title">Recognition type</string>
-    <string name="recognition_type_default">1</string>
+    <string name="recognition_type_default">LocalBinaryPatternHistogram</string>
 
     <string-array name="recognition_type_entries">
         <item>Eigen Faces</item>
@@ -38,9 +35,6 @@
     <string name="detection_detector_type_title">Detector Type</string>
     <string name="detection_detector_type_on">Java</string>
     <string name="detection_detector_type_off">Native</string>
-    <string name="detection_show_confirmation_dialog">detection_show_confirmation_dialog</string>
-    <string name="detection_show_confirmation_dialog_title">Show confirmation dialog</string>
-    <string name="detection_show_confirmation_dialog_default">true</string>
     <string name="detection_scale_factor">detection_scale_factor</string>
     <string name="detection_scale_factor_default">1.1</string>
     <string name="detection_scale_factor_title">Scale Factor</string>

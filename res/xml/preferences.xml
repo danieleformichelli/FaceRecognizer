@@ -2,63 +2,66 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <PreferenceCategory android:title="@string/preference_general" >
-        <CheckBoxPreference
-            android:defaultValue="@string/general_show_management_on_startup_default"
-            android:key="@string/general_show_management_on_startup"
-            android:title="@string/general_show_management_on_startup_title" />
-        <EditTextPreference
-            android:key="@string/general_clear_data"
-            android:title="@string/general_clear_data_title" />
-        <EditTextPreference 
-            android:key="@string/restore_default_preferences"/>
+        <Preference
+            android:key="@string/general_clear_database"
+            android:title="@string/general_clear_database_title" />
+        <Preference
+            android:key="@string/general_restore_default_preferences"
+            android:title="@string/general_restore_default_preferences_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_recognition" >
         <ListPreference
             android:defaultValue="@string/recognition_type_default"
-            android:key="@string/recognition_type"
-            android:title="@string/recognition_type_title"
             android:entries="@array/recognition_type_entries"
             android:entryValues="@array/recognition_type_entry_values"
-            />
+            android:key="@string/recognition_type"
+            android:title="@string/recognition_type_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_detection" >
         <SwitchPreference
             android:key="@string/detection_detector_type"
-            android:title="@string/detection_detector_type_title"
+            android:switchTextOff="@string/detection_detector_type_off"
             android:switchTextOn="@string/detection_detector_type_on"
-            android:switchTextOff="@string/detection_detector_type_off"/>
-        <CheckBoxPreference
-            android:defaultValue="@string/detection_show_confirmation_dialog_default"
-            android:key="@string/detection_show_confirmation_dialog"
-            android:title="@string/detection_show_confirmation_dialog_title" />
+            android:title="@string/detection_detector_type_title" />
+
         <EditTextPreference
             android:defaultValue="@string/detection_scale_factor_default"
+            android:digits="0123456789."
+            android:inputType="phone"
             android:key="@string/detection_scale_factor"
             android:title="@string/detection_scale_factor_title" />
         <EditTextPreference
             android:defaultValue="@string/detection_min_neighbors_default"
+            android:digits="0123456789"
+            android:inputType="phone"
             android:key="@string/detection_min_neighbors"
             android:title="@string/detection_min_neighbors_title" />
         <EditTextPreference
             android:defaultValue="@string/detection_min_relative_face_size_default"
+            android:digits="0123456789."
+            android:inputType="phone"
             android:key="@string/detection_min_relative_face_size"
             android:title="@string/detection_min_relative_face_size_title" />
-         <EditTextPreference
+        <EditTextPreference
             android:defaultValue="@string/detection_max_relative_face_size_default"
+            android:digits="0123456789."
+            android:inputType="phone"
             android:key="@string/detection_max_relative_face_size"
             android:title="@string/detection_max_relative_face_size_title" />
-        
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_management" >
         <EditTextPreference
             android:defaultValue="@string/management_number_of_gallery_columns_landscape_default"
+            android:digits="0123456789"
+            android:inputType="phone"
             android:key="@string/management_number_of_gallery_columns_landscape"
-            android:title="@string/management_number_of_gallery_columns_landscape_title"/>
+            android:title="@string/management_number_of_gallery_columns_landscape_title" />
         <EditTextPreference
             android:defaultValue="@string/management_number_of_gallery_columns_portrait_default"
+            android:digits="0123456789"
+            android:inputType="phone"
             android:key="@string/management_number_of_gallery_columns_portrait"
-            android:title="@string/management_number_of_gallery_columns_portrait_title"/> 
-            
+            android:title="@string/management_number_of_gallery_columns_portrait_title" />
     </PreferenceCategory>
 
 </PreferenceScreen>
