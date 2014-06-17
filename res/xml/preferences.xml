@@ -26,40 +26,34 @@
 
         <EditTextPreference
             android:defaultValue="@string/detection_scale_factor_default"
-            android:digits="0123456789."
-            android:inputType="phone"
+            android:inputType="numberDecimal"
             android:key="@string/detection_scale_factor"
             android:title="@string/detection_scale_factor_title" />
         <EditTextPreference
             android:defaultValue="@string/detection_min_neighbors_default"
-            android:digits="0123456789"
-            android:inputType="phone"
+            android:inputType="number"
             android:key="@string/detection_min_neighbors"
             android:title="@string/detection_min_neighbors_title" />
         <EditTextPreference
             android:defaultValue="@string/detection_min_relative_face_size_default"
-            android:digits="0123456789."
-            android:inputType="phone"
+            android:inputType="numberDecimal"
             android:key="@string/detection_min_relative_face_size"
             android:title="@string/detection_min_relative_face_size_title" />
         <EditTextPreference
             android:defaultValue="@string/detection_max_relative_face_size_default"
-            android:digits="0123456789."
-            android:inputType="phone"
+            android:inputType="numberDecimal"
             android:key="@string/detection_max_relative_face_size"
             android:title="@string/detection_max_relative_face_size_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_management" >
         <EditTextPreference
             android:defaultValue="@string/management_number_of_gallery_columns_landscape_default"
-            android:digits="0123456789"
-            android:inputType="phone"
+            android:inputType="number"
             android:key="@string/management_number_of_gallery_columns_landscape"
             android:title="@string/management_number_of_gallery_columns_landscape_title" />
         <EditTextPreference
             android:defaultValue="@string/management_number_of_gallery_columns_portrait_default"
-            android:digits="0123456789"
-            android:inputType="phone"
+            android:inputType="number"
             android:key="@string/management_number_of_gallery_columns_portrait"
             android:title="@string/management_number_of_gallery_columns_portrait_title" />
     </PreferenceCategory>
