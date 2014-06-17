@@ -9,6 +9,8 @@
     <string name="general_show_management_on_startup_default">false</string>
     <string name="general_clear_data">general_clear_data</string>
     <string name="general_clear_data_title">Clear data</string>
+    <string name="restore_default_preferences">restore_default_preferences</string>
+    <string name="restore_default_preferences_title">Restore default preferences</string>
     <string name="invalid_number_of_gallery_columns">The number of gallery columns must be positive</string>
 
     <!-- Recognition -->
@@ -19,9 +21,9 @@
     <string name="recognition_type_default">1</string>
 
     <string-array name="recognition_type_entries">
-        <item>Eigen faces</item>
-        <item>Fisher faces</item>
-        <item>Local binary Pattern histogram</item>
+        <item>Eigen Faces</item>
+        <item>Fisher Faces</item>
+        <item>Local Binary Pattern Histogram</item>
     </string-array>
     <string-array name="recognition_type_entry_values">
         <item>EigenFaces</item>

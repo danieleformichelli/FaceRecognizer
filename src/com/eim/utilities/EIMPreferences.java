@@ -47,8 +47,8 @@ public class EIMPreferences {
 	private String detectionScaleFactorKey;
 	private String detectionScaleFactorDefault;
 
-	public float detectionScaleFactor() {
-		return Float.parseFloat(mSharedPreferences.getString(
+	public double detectionScaleFactor() {
+		return Double.parseDouble(mSharedPreferences.getString(
 				detectionScaleFactorKey, detectionScaleFactorDefault));
 	}
 
@@ -63,8 +63,8 @@ public class EIMPreferences {
 	private String detectionMinRelativeFaceSizeKey;
 	private String detectionMinRelativeFaceSizeDefault;
 
-	public float detectionMinRelativeFaceSize() {
-		return Float.parseFloat(mSharedPreferences.getString(
+	public double detectionMinRelativeFaceSize() {
+		return Double.parseDouble(mSharedPreferences.getString(
 				detectionMinRelativeFaceSizeKey,
 				detectionMinRelativeFaceSizeDefault));
 	}
@@ -72,8 +72,8 @@ public class EIMPreferences {
 	private String detectionMaxRelativeFaceSizeKey;
 	private String detectionMaxRelativeFaceSizeDefault;
 
-	public float detectionMaxRelativeFaceSize() {
-		return Float.parseFloat(mSharedPreferences.getString(
+	public double detectionMaxRelativeFaceSize() {
+		return Double.parseDouble(mSharedPreferences.getString(
 				detectionMaxRelativeFaceSizeKey,
 				detectionMaxRelativeFaceSizeDefault));
 	}

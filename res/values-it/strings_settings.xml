@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- General -->
+
+    <string name="preference_general">Generali</string>
+    <string name="general_show_management_on_startup_title">Mostra faces management all\'apertura</string>
+    <string name="general_clear_data_title">Pulisci</string>
+    <string name="restore_default_preferences_title">Ripristina impostazioni predefinite</string>
+    <string name="invalid_number_of_gallery_columns">Il numero di colonne della galleria deve essere positivo</string>
+
+    <!-- Recognition -->
+
+    <string name="preference_recognition">Recognition</string>
+    <string name="recognition_type_title">Tipo riconoscitore</string>
+    
+    <string-array name="recognition_type_entries">
+        <item>Eigen Faces</item>
+        <item>Fisher Faces</item>
+        <item>Local Binary Pattern Histogram</item>
+    </string-array>
+    
+    <!-- Detection -->
+
+    <string name="preference_detection">Detection</string>
+    <string name="detection_detector_type_title">Tipo detector</string>
+    <string name="detection_show_confirmation_dialog_title">Show confirmation dialog</string>
+    <string name="detection_scale_factor_title">Fattore di scala</string>
+    <string name="detection_min_neighbors_title">Minor numero di vicini</string>
+    <string name="detection_min_relative_face_size_title">Dimensione relativa minima della faccia</string>
+    <string name="detection_max_relative_face_size_title">Dimensione relativa massima della faccia</string>
+    <string name="detection_invalid_min_neighbors">Il minor numero di vicini deve essere positivo</string>
+    <string name="detection_invalid_min_relative_face_size">La dimensione relativa minima della faccia deve essere nel range [0,1]</string>
+    <string name="detection_invalid_max_relative_face_size">La dimensione relativa massima della faccia deve essere nel range [0,1]</string>
+    <string name="detection_invalid_relative_face_size_ratio">La dimensione relativa massima deve essere maggiore della minima</string>
+    <string name="detection_invalid_scale_factor">Il fattore di scala deve essere maggiore di uno</string>
+
+    <!-- Management -->
+
+    <string name="preference_management">Management</string>
+    <string name="management_number_of_gallery_columns_landscape_title">Numero di colonne nella galleria orizzontale</string>
+    <string name="management_number_of_gallery_columns_portrait_title">Numero di colonne nella galleria verticale</string>
+
+</resources>
