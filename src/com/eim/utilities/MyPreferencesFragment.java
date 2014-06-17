@@ -15,13 +15,11 @@ import android.preference.PreferenceScreen;
 import android.widget.Toast;
 
 import com.eim.R;
-import com.eim.facesmanagement.peopledb.PeopleDatabase;
 
 public class MyPreferencesFragment extends PreferenceFragment implements
 		Swipeable {
 	private Activity activity;
 	private PreferenceScreen mPreferenceScreen;
-
 	private String oldValue;
 
 	private String clearDatabaseKey, restorePreferencesKey;
@@ -106,6 +104,9 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 			mEditTextPreference.setSummary(mEditTextPreference.getText());
 		} else if (mPreference instanceof ListPreference) {
 			ListPreference mListPreference = (ListPreference) mPreference;
+			// TODO how to set this from xml?
+			if (mListPreference.getValue() == null)
+				mListPreference.setValueIndex(2);
 			mListPreference.setSummary(mListPreference.getEntry());
 		}
 	}
@@ -114,6 +115,10 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		@Override
 		public void onSharedPreferenceChanged(
 				SharedPreferences sharedPreferences, String key) {
+			Preference mPreference = findPreference(key);
+
+			if (!(mPreference instanceof EditTextPreference))
+				setPreferenceSummary(mPreference);
 
 			// avoid to reevaluate settings after a restore
 			if (oldValue != null) {
@@ -121,7 +126,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 				switch (isValid(sharedPreferences)) {
 				case VALID:
-					setPreferenceSummary(findPreference(key));
+					setPreferenceSummary(mPreference);
 					return;
 				case NOT_VALID_DETECTION_SCALE_FACTOR:
 					msgId = R.string.detection_invalid_scale_factor;
@@ -154,36 +159,36 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		}
 
 		private Validity isValid(SharedPreferences sharedPreferences) {
-			com.eim.utilities.EIMPreferences mPreferences = com.eim.utilities.EIMPreferences
-					.getInstance(activity);
+			EIMPreferences mPreferences = EIMPreferences.getInstance(activity);
 
+			android.util.Log.e("ASD", "0");
 			if (mPreferences.detectionScaleFactor() <= 1)
 				return Validity.NOT_VALID_DETECTION_SCALE_FACTOR;
 
+			android.util.Log.e("ASD", "1");
 			if (mPreferences.detectionMinNeighbors() < 1)
 				return Validity.NOT_VALID_DETECTION_MIN_NEIGHBORS;
 
+			android.util.Log.e("ASD", "2");
 			if (mPreferences.detectionMinRelativeFaceSize() < 0
 					|| mPreferences.detectionMinRelativeFaceSize() > 1)
 				return Validity.NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE;
 
+			android.util.Log.e("ASD", "3");
 			if (mPreferences.detectionMaxRelativeFaceSize() < 0
 					|| mPreferences.detectionMaxRelativeFaceSize() > 1)
 				return Validity.NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE;
 
+			android.util.Log.e("ASD", "4");
 			if (mPreferences.detectionMinRelativeFaceSize() >= mPreferences
 					.detectionMaxRelativeFaceSize())
 				return Validity.NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO;
 
-			android.util.Log.e("NGCP",
-					"" + mPreferences.numberOfGalleryColumnsPortrait());
-
+			android.util.Log.e("ASD", "5");
 			if (mPreferences.numberOfGalleryColumnsPortrait() < 1)
 				return Validity.NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT;
 
-			android.util.Log.e("NGCL",
-					"" + mPreferences.numberOfGalleryColumnsLandscape());
-
+			android.util.Log.e("ASD", "6");
 			if (mPreferences.numberOfGalleryColumnsLandscape() < 1)
 				return Validity.NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE;
 
@@ -210,22 +215,36 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	OnPreferenceClickListener mOnPreferenceClickListener = new OnPreferenceClickListener() {
 
 		@Override
-		public boolean onPreferenceClick(Preference preference) {
-			if (preference.getKey().compareTo(clearDatabaseKey) == 0)
-				// TODO notify faces management
-				PeopleDatabase.getInstance(activity).clear();
+		public boolean onPreferenceClick(Preference mPreference) {
+			if (mPreference.getKey().compareTo(clearDatabaseKey) == 0) {
+				((FaceRecognizerMainActivity) activity)
+						.getFacesManagementFragment().clearPeople();
+				Toast.makeText(
+						activity,
+						activity.getString(R.string.general_clear_database_confirmation),
+						Toast.LENGTH_SHORT).show();
+			}
 
-			if (preference.getKey().compareTo(restorePreferencesKey) == 0)
-				//TODO
+			if (mPreference.getKey().compareTo(restorePreferencesKey) == 0) {
+				restorePreferences();
+				Toast.makeText(
+						activity,
+						activity.getString(R.string.general_restore_default_preferences_confirmation),
+						Toast.LENGTH_SHORT).show();
+			}
 
-			if (preference instanceof EditTextPreference) {
-				EditTextPreference etp = (EditTextPreference) preference;
+			if (mPreference instanceof EditTextPreference) {
+				EditTextPreference mEditTextPreference = (EditTextPreference) mPreference;
 
-				oldValue = etp.getText();
-				etp.getEditText().selectAll();
+				oldValue = mEditTextPreference.getText();
+				mEditTextPreference.getEditText().selectAll();
 			}
 
 			return false;
 		}
 	};
+
+	protected void restorePreferences() {
+		// TODO
+	}
 }

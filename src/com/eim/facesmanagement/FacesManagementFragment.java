@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.LongSparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -14,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.eim.R;
 import com.eim.facedetection.FaceDetectionActivity;
 import com.eim.facerecognition.LBPHFaceRecognizer;
@@ -125,6 +127,16 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			}
 		};
 	};
+
+	/**
+	 * Remove all the poeple people
+	 */
+	public void clearPeople() {
+		LongSparseArray<Person> people = mPeopleAdapter.getPeople();
+		for (int i = 0, l = people.size(); i < l; i++)
+			mPeopleAdapterListener.removePerson(people.keyAt(i));
+
+	}
 
 	PeopleAdapterListener mPeopleAdapterListener = new PeopleAdapterListener() {
 

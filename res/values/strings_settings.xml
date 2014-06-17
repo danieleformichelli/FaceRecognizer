@@ -6,8 +6,10 @@
     <string name="preference_general">General</string>
     <string name="general_clear_database">general_clear_data</string>
     <string name="general_clear_database_title">Clear database</string>
+    <string name="general_clear_database_confirmation">All people have been removed from database</string>
     <string name="general_restore_default_preferences">restore_default_preferences</string>
     <string name="general_restore_default_preferences_title">Restore default preferences</string>
+    <string name="general_restore_default_preferences_confirmation">Preferences restored</string>
     <string name="invalid_number_of_gallery_columns">The number of gallery columns must be positive</string>
 
     <!-- Recognition -->

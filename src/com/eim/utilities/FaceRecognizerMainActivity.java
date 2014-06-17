@@ -138,4 +138,8 @@ public class FaceRecognizerMainActivity extends Activity {
 			};
 		}.show(FaceRecognizerMainActivity.this.getFragmentManager(), TAG);
 	}
+
+	public FacesManagementFragment getFacesManagementFragment() {
+		return mFacesManagementFragment;
+	}
 };

@@ -5,7 +5,9 @@
 
     <string name="preference_general">Generali</string>
     <string name="general_clear_database_title">Svuota database</string>
+    <string name="general_clear_database_confirmation">Tutte le persone sono state rimosse dal database</string>
     <string name="general_restore_default_preferences_title">Ripristina impostazioni predefinite</string>
+    <string name="general_restore_default_preferences_confirmation">Impostazioni ripristinate</string>
     <string name="invalid_number_of_gallery_columns">Il numero di colonne della galleria deve essere positivo</string>
 
     <!-- Recognition -->

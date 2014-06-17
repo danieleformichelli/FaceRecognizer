@@ -11,7 +11,7 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_recognition" >
         <ListPreference
-            android:defaultValue="@string/recognition_type_default"
+            android:defaultValue="2"
             android:entries="@array/recognition_type_entries"
             android:entryValues="@array/recognition_type_entry_values"
             android:key="@string/recognition_type"
