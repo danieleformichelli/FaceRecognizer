@@ -92,7 +92,7 @@ public class EIMPreferences {
 
 	public FaceRecognitionFragment.Type recognitionType() {
 		int current = mSharedPreferences.getInt(recognitionTypeKey,
-				R.string.recognition_type_default);
+				R.string.recognition_recognizer_type_default);
 		switch (current) {
 		case 0:
 			return FaceRecognitionFragment.Type.EIGEN;
@@ -141,7 +141,7 @@ public class EIMPreferences {
 		numberOfGalleryColumnsPortraitDefault = mContext
 				.getString(R.string.management_number_of_gallery_columns_portrait_default);
 
-		recognitionTypeKey = mContext.getString(R.string.recognition_type);
+		recognitionTypeKey = mContext.getString(R.string.recognition_recognizer_type);
 	}
 
 }

@@ -101,11 +101,6 @@ public class FaceRecognizerMainActivity extends Activity {
 	@Override
 	public void onBackPressed() {
 		askForExit();
-		// Remove comment to enable fragments navigation with back button
-		/*
-		 * switch (currentPosition) { case 0: askForExit(); break; default:
-		 * mViewPager.setCurrentItem(currentPosition - 1, true); }
-		 */
 	}
 
 	private void askForExit() {

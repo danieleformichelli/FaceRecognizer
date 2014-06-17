@@ -15,16 +15,16 @@
     <!-- Recognition -->
 
     <string name="preference_recognition">Recognition</string>
-    <string name="recognition_type">recognition_type</string>
-    <string name="recognition_type_title">Recognition type</string>
-    <string name="recognition_type_default">LocalBinaryPatternHistogram</string>
+    <string name="recognition_recognizer_type">recognition_type</string>
+    <string name="recognition_recognizer_type_title">Recognition type</string>
+    <string name="recognition_recognizer_type_default">LocalBinaryPatternHistogram</string>
 
-    <string-array name="recognition_type_entries">
+    <string-array name="recognition_recognizer_type_entries">
         <item>Eigen Faces</item>
         <item>Fisher Faces</item>
         <item>Local Binary Pattern Histogram</item>
     </string-array>
-    <string-array name="recognition_type_entry_values">
+    <string-array name="recognition_recognizer_type_entry_values">
         <item>EigenFaces</item>
         <item>FisherFaces</item>
         <item>LocalBinaryPatternHistogram</item>
@@ -37,6 +37,7 @@
     <string name="detection_detector_type_title">Detector Type</string>
     <string name="detection_detector_type_on">Java</string>
     <string name="detection_detector_type_off">Native</string>
+    <string name="detection_detector_type_default">Native</string>
     <string name="detection_scale_factor">detection_scale_factor</string>
     <string name="detection_scale_factor_default">1.1</string>
     <string name="detection_scale_factor_title">Scale Factor</string>

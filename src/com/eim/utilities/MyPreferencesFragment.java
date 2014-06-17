@@ -12,6 +12,7 @@ import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
+import android.preference.SwitchPreference;
 import android.widget.Toast;
 
 import com.eim.R;
@@ -44,6 +45,15 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		super.onActivityCreated(savedInstanceState);
 
 		activity = getActivity();
+
+		// TODO do it in xml
+		ListPreference recognizerType = (ListPreference) mPreferenceScreen
+				.findPreference(activity
+						.getString(R.string.recognition_recognizer_type));
+		if (recognizerType.getValue() == null) {
+			recognizerType.setValueIndex(2);
+			recognizerType.setSummary(recognizerType.getEntry());
+		}
 
 		clearDatabaseKey = activity.getString(R.string.general_clear_database);
 		restorePreferencesKey = activity
@@ -81,6 +91,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	}
 
 	private void initPreferences() {
+
 		for (int i = 0; i < mPreferenceScreen.getPreferenceCount(); i++) {
 			Preference mPreference = mPreferenceScreen.getPreference(i);
 
@@ -104,9 +115,6 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 			mEditTextPreference.setSummary(mEditTextPreference.getText());
 		} else if (mPreference instanceof ListPreference) {
 			ListPreference mListPreference = (ListPreference) mPreference;
-			// TODO how to set this from xml?
-			if (mListPreference.getValue() == null)
-				mListPreference.setValueIndex(2);
 			mListPreference.setSummary(mListPreference.getEntry());
 		}
 	}
@@ -244,7 +252,51 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		}
 	};
 
-	protected void restorePreferences() {
-		// TODO
+	private void restorePreferences() {
+		setPreference(R.string.recognition_recognizer_type,
+				R.string.recognition_recognizer_type_default);
+		setPreference(R.string.detection_detector_type,
+				R.string.detection_detector_type_default);
+		setPreference(R.string.detection_scale_factor,
+				R.string.detection_scale_factor_default);
+		setPreference(R.string.detection_min_neighbors,
+				R.string.detection_min_neighbors_default);
+		setPreference(R.string.detection_min_relative_face_size,
+				R.string.detection_min_relative_face_size_default);
+		setPreference(R.string.detection_max_relative_face_size,
+				R.string.detection_max_relative_face_size_default);
+		setPreference(R.string.management_number_of_gallery_columns_landscape,
+				R.string.management_number_of_gallery_columns_landscape_default);
+		setPreference(R.string.management_number_of_gallery_columns_portrait,
+				R.string.management_number_of_gallery_columns_portrait_default);
+	}
+
+	private void setPreference(int preferenceId, int defaultValue) {
+		String preferenceKey = activity.getString(preferenceId);
+		Preference mPreference = mPreferenceScreen
+				.findPreference(preferenceKey);
+		Editor mEditor;
+
+		if (mPreference instanceof EditTextPreference) {
+			String value = activity.getString(defaultValue);
+			((EditTextPreference) mPreference).setText(value);
+			mEditor = mPreferenceScreen.getSharedPreferences().edit();
+			mEditor.putString(mPreference.getKey(), value);
+			mEditor.commit();
+		} else if (mPreference instanceof ListPreference) {
+			String value = activity.getString(defaultValue);
+			((ListPreference) mPreference).setValue(value);
+			mEditor = mPreferenceScreen.getSharedPreferences().edit();
+			mEditor.putString(mPreference.getKey(), value);
+			mEditor.commit();
+		} else if (mPreference instanceof SwitchPreference) {
+			Boolean value = Boolean.parseBoolean(activity
+					.getString(defaultValue));
+			((SwitchPreference) mPreference).setChecked(value);
+			mEditor = mPreferenceScreen.getSharedPreferences().edit();
+			mEditor.putBoolean(mPreference.getKey(), value);
+			mEditor.commit();
+		}
+		setPreferenceSummary(mPreference);
 	}
 }

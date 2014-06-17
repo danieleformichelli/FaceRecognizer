@@ -13,9 +13,9 @@
     <!-- Recognition -->
 
     <string name="preference_recognition">Recognition</string>
-    <string name="recognition_type_title">Tipo riconoscitore</string>
+    <string name="recognition_recognizer_type_title">Tipo riconoscitore</string>
     
-    <string-array name="recognition_type_entries">
+    <string-array name="recognition_recognizer_type_entries">
         <item>Eigen Faces</item>
         <item>Fisher Faces</item>
         <item>Local Binary Pattern Histogram</item>

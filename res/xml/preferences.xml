@@ -12,13 +12,14 @@
     <PreferenceCategory android:title="@string/preference_recognition" >
         <ListPreference
             android:defaultValue="2"
-            android:entries="@array/recognition_type_entries"
-            android:entryValues="@array/recognition_type_entry_values"
-            android:key="@string/recognition_type"
-            android:title="@string/recognition_type_title" />
+            android:entries="@array/recognition_recognizer_type_entries"
+            android:entryValues="@array/recognition_recognizer_type_entry_values"
+            android:key="@string/recognition_recognizer_type"
+            android:title="@string/recognition_recognizer_type_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_detection" >
         <SwitchPreference
+            android:defaultValue="@string/detection_detector_type_default"
             android:key="@string/detection_detector_type"
             android:switchTextOff="@string/detection_detector_type_off"
             android:switchTextOn="@string/detection_detector_type_on"
