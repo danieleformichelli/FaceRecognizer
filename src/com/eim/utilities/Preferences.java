@@ -155,13 +155,13 @@ public class Preferences {
 				.getString(R.string.management_number_of_gallery_columns_landscape);
 		numberOfGalleryColumnsLandscapeDefault = Integer
 				.valueOf(mContext
-						.getString(R.string.management_number_of_gallery_columns_landscape));
+						.getString(R.string.management_number_of_gallery_columns_landscape_default));
 
 		numberOfGalleryColumnsPortraitKey = mContext
 				.getString(R.string.management_number_of_gallery_columns_portrait);
 		numberOfGalleryColumnsPortraitDefault = Integer
 				.valueOf(mContext
-						.getString(R.string.management_number_of_gallery_columns_portrait));
+						.getString(R.string.management_number_of_gallery_columns_portrait_default));
 		
 		recognitionTypeKey = mContext.getString(R.string.recognition_type);
 	}
