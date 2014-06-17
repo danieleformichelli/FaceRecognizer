@@ -52,8 +52,10 @@ public class Person implements Comparable<Person> {
 	}
 
 	public void addPhoto(long id, Photo photo) {
-		if (photo != null)
-			photos.put(id, photo);
+		if (photo == null)
+			throw new IllegalArgumentException("photo cannot be null");
+
+		photos.put(id, photo);
 	}
 
 	public void removePhoto(long id) {

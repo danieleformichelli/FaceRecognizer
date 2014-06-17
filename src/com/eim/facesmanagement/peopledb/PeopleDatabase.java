@@ -62,17 +62,20 @@ public class PeopleDatabase {
 		String[] whereArgs = { String.valueOf(id) };
 
 		Cursor c = db.rawQuery(query, whereArgs);
-		int photoUrlIndex = c.getColumnIndex(FacesContract.Faces.PHOTO_URL);
-		while (c.moveToNext()) {
-			String photoUrl = c.getString(photoUrlIndex);
-			File photoFile = new File(photoUrl);
-			if (photoFile != null)
-				photoFile.delete();
+
+		if (c.moveToNext()) {
+			int photoUrlIndex = c.getColumnIndex(FacesContract.Faces.PHOTO_URL);
+			while (c.moveToNext()) {
+				String photoUrl = c.getString(photoUrlIndex);
+				File photoFile = new File(photoUrl);
+				if (photoFile != null)
+					photoFile.delete();
+			}
+
+			String whereClause = FacesContract.People._ID + " = ?";
+
+			db.delete(FacesContract.People.TABLE, whereClause, whereArgs);
 		}
-
-		String whereClause = FacesContract.People._ID + " = ?";
-
-		db.delete(FacesContract.People.TABLE, whereClause, whereArgs);
 	}
 
 	/**
@@ -103,7 +106,9 @@ public class PeopleDatabase {
 		values.put(FacesContract.Faces.PERSON_ID, personId);
 		values.put(FacesContract.Faces.PHOTO_URL, photoUrl);
 
-		return db.insert(FacesContract.Faces.TABLE, null, values);
+		long x = db.insert(FacesContract.Faces.TABLE, null, values);
+		android.util.Log.e("ASD", "" + x);
+		return x;
 	}
 
 	/**
@@ -116,19 +121,22 @@ public class PeopleDatabase {
 
 		String query = "SELECT " + FacesContract.Faces.PHOTO_URL + " FROM "
 				+ FacesContract.Faces.TABLE + " WHERE "
-				+ FacesContract.Faces._ID + " = ?";
-		String[] whereArgs = { String.valueOf(id) };
+				+ FacesContract.Faces._ID + " = " + id;
 
-		Cursor c = db.rawQuery(query, whereArgs);
+		Cursor c = db.rawQuery(query, null);
 		int photoUrlIndex = c.getColumnIndex(FacesContract.Faces.PHOTO_URL);
-		String photoUrl = c.getString(photoUrlIndex);
-		File photoFile = new File(photoUrl);
-		if (photoFile != null)
-			photoFile.delete();
 
-		String whereClause = FacesContract.Faces._ID + " = ?";
+		if (c.moveToNext()) {
+			String photoUrl = c.getString(photoUrlIndex);
+			File photoFile = new File(photoUrl);
+			if (photoFile != null)
+				photoFile.delete();
 
-		db.delete(FacesContract.Faces.TABLE, whereClause, whereArgs);
+			String whereClause = FacesContract.Faces._ID + " = ?";
+			String[] whereArgs = { String.valueOf(id) };
+
+			db.delete(FacesContract.Faces.TABLE, whereClause, whereArgs);
+		}
 	}
 
 	/**
@@ -185,9 +193,9 @@ public class PeopleDatabase {
 		LongSparseArray<Person> people = new LongSparseArray<Person>();
 
 		final String query = "SELECT " + FacesContract.People.TABLE + "."
-				+ FacesContract.People._ID + " AS personId, " + FacesContract.People.NAME
-				+ ", " + FacesContract.Faces.TABLE + "."
-				+ FacesContract.Faces._ID + " AS photoId, "
+				+ FacesContract.People._ID + " AS personId, "
+				+ FacesContract.People.NAME + ", " + FacesContract.Faces.TABLE
+				+ "." + FacesContract.Faces._ID + " AS photoId, "
 				+ FacesContract.Faces.PHOTO_URL + " FROM "
 				+ FacesContract.People.TABLE + " LEFT JOIN "
 				+ FacesContract.Faces.TABLE + " ON "
@@ -205,7 +213,6 @@ public class PeopleDatabase {
 		while (c.moveToNext()) {
 			long personId = c.getLong(personIdIndex);
 			String name = c.getString(personNameIndex);
-
 
 			// add a new Person if it is the first time we found it
 			if (personId != currentId) {

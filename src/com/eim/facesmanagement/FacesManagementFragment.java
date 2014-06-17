@@ -79,7 +79,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			noPeopleMessage.setVisibility(View.VISIBLE);
 
 		if (mOpenCVLoaded)
-			mFaceRecognizer = EIMFaceRecognizer.getInstance(mActivity, mFaceRecognizerType);
+			mFaceRecognizer = EIMFaceRecognizer.getInstance(mActivity,
+					mFaceRecognizerType);
 	}
 
 	@Override
@@ -90,7 +91,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		// OnActivityCreated()
 		mOpenCVLoaded = true;
 		if (mActivity != null)
-			mFaceRecognizer = EIMFaceRecognizer.getInstance(mActivity, mFaceRecognizerType);
+			mFaceRecognizer = EIMFaceRecognizer.getInstance(mActivity,
+					mFaceRecognizerType);
 	}
 
 	@Override
@@ -228,11 +230,12 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		@Override
 		public void removeSelectedPhotos(PhotoGallery gallery) {
 			PhotoAdapter mPhotoAdapter = (PhotoAdapter) gallery.getAdapter();
+			// i = 0 is add/delete
 			for (int i = 1, l = mPhotoAdapter.getCount(); i < l; i++)
 				if (mPhotoAdapter.isSelected(i)) {
 					final long personId = (long) gallery.getTag();
 					final long photoId = mPeopleAdapter.getPersonById(personId)
-							.getPhotos().keyAt(i);
+							.getPhotos().keyAt(i - 1);
 					mPeopleAdapterListener.removePhoto(personId, photoId);
 				}
 		}
