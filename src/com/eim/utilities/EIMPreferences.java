@@ -2,7 +2,7 @@ package com.eim.utilities;
 
 import com.eim.R;
 import com.eim.facedetection.FaceDetector;
-import com.eim.facerecognition.FaceRecognitionFragment;
+import com.eim.facerecognition.EIMFaceRecognizer;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -89,20 +89,19 @@ public class EIMPreferences {
 	}
 
 	private String recognitionTypeKey;
+	private String recognitionTypeDefault;
+	private String[] recognitionTypes;
 
-	public FaceRecognitionFragment.Type recognitionType() {
-		int current = mSharedPreferences.getInt(recognitionTypeKey,
-				R.string.recognition_recognizer_type_default);
-		switch (current) {
-		case 0:
-			return FaceRecognitionFragment.Type.EIGEN;
-		case 1:
-			return FaceRecognitionFragment.Type.FISHER;
-		case 2:
-			return FaceRecognitionFragment.Type.LBPH;
-		default:
-			return null;
-		}
+	public EIMFaceRecognizer.Type recognitionType() {
+		String mType = mSharedPreferences.getString(recognitionTypeKey,
+				recognitionTypeDefault);
+
+		if (recognitionTypes[0].equals(mType))
+			return EIMFaceRecognizer.Type.EIGEN;
+		else if (recognitionTypes[1].equals(mType))
+			return EIMFaceRecognizer.Type.FISHER;
+		else
+			return EIMFaceRecognizer.Type.LBPH;
 
 	}
 
@@ -141,7 +140,12 @@ public class EIMPreferences {
 		numberOfGalleryColumnsPortraitDefault = mContext
 				.getString(R.string.management_number_of_gallery_columns_portrait_default);
 
-		recognitionTypeKey = mContext.getString(R.string.recognition_recognizer_type);
+		recognitionTypeKey = mContext
+				.getString(R.string.recognition_recognizer_type);
+		recognitionTypeDefault = mContext
+				.getString(R.string.recognition_recognizer_type_default);
+		recognitionTypes = mContext.getResources().getStringArray(
+				R.array.recognition_recognizer_type_entry_values);
 	}
 
 }

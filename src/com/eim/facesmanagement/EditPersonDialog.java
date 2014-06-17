@@ -34,24 +34,6 @@ public class EditPersonDialog extends DialogFragment {
 		editText.setText(oldName);
 		editText.setSelection(editText.getText().length());
 
-		// remove comment to enable IME action
-		// editText.setImeActionLabel(getString(R.string.alert_dialog_ok),
-		// ALERT_DIALOG_OK);
-		// editText.setOnEditorActionListener(new OnEditorActionListener() {
-		// @Override
-		// public boolean onEditorAction(TextView v, int actionId,
-		// KeyEvent event) {
-		// if (actionId == ALERT_DIALOG_OK) {
-		// dialogOnClickListener.onClick(getDialog(),
-		// DialogInterface.BUTTON_POSITIVE);
-		// getDialog().dismiss();
-		// return true;
-		// }
-		//
-		// return false;
-		// }
-		// });
-
 		AlertDialog.Builder builder = new AlertDialog.Builder(getActivity())
 				.setIcon(R.drawable.action_insert_person)
 				.setTitle(R.string.alert_dialog_insert_person).setView(v);

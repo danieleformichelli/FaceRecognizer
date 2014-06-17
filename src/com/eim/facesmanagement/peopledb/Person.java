@@ -1,6 +1,6 @@
 package com.eim.facesmanagement.peopledb;
 
-import android.util.LongSparseArray;
+import android.support.v4.util.LongSparseArray;
 
 /**
  * This class represent a person to be recognized. Each person has a name and

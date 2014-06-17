@@ -1,13 +1,11 @@
 package com.eim.facesmanagement;
 
-import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.LongSparseArray;
+import android.support.v4.util.LongSparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -18,7 +16,7 @@ import android.widget.Toast;
 
 import com.eim.R;
 import com.eim.facedetection.FaceDetectionActivity;
-import com.eim.facerecognition.LBPHFaceRecognizer;
+import com.eim.facerecognition.EIMFaceRecognizer;
 import com.eim.facesmanagement.PeopleAdapter.PeopleAdapterListener;
 import com.eim.facesmanagement.PhotoGallery.PhotoGalleryListener;
 import com.eim.facesmanagement.peopledb.PeopleDatabase;
@@ -29,7 +27,6 @@ import com.eim.utilities.FaceRecognizerMainActivity.OnOpenCVLoaded;
 import com.eim.utilities.PhotoAdapter;
 import com.eim.utilities.Swipeable;
 
-@TargetApi(Build.VERSION_CODES.JELLY_BEAN)
 public class FacesManagementFragment extends Fragment implements Swipeable,
 		OnOpenCVLoaded {
 	private static final String TAG = "FacesManagementFragment";
@@ -40,7 +37,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 	private PeopleAdapter mPeopleAdapter;
 	private TextView addPerson, noPeopleMessage;
 	private View mainLayout;
-	private LBPHFaceRecognizer mFaceRecognizer;
+	private EIMFaceRecognizer mFaceRecognizer;
+	private EIMFaceRecognizer.Type mFaceRecognizerType = EIMFaceRecognizer.Type.LBPH;
 
 	private PeopleDatabase mPeopleDatabase;
 	private boolean mOpenCVLoaded = false;
@@ -81,7 +79,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			noPeopleMessage.setVisibility(View.VISIBLE);
 
 		if (mOpenCVLoaded)
-			mFaceRecognizer = LBPHFaceRecognizer.getInstance(mActivity);
+			mFaceRecognizer = EIMFaceRecognizer.getInstance(mActivity, mFaceRecognizerType);
 	}
 
 	@Override
@@ -92,7 +90,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		// OnActivityCreated()
 		mOpenCVLoaded = true;
 		if (mActivity != null)
-			mFaceRecognizer = LBPHFaceRecognizer.getInstance(mActivity);
+			mFaceRecognizer = EIMFaceRecognizer.getInstance(mActivity, mFaceRecognizerType);
 	}
 
 	@Override

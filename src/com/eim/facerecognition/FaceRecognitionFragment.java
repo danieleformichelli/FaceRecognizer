@@ -6,7 +6,6 @@ import java.util.List;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.android.Utils;
-import org.opencv.contrib.FaceRecognizer;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
@@ -30,6 +29,7 @@ import com.eim.facedetection.FaceDetector;
 import com.eim.facesmanagement.peopledb.PeopleDatabase;
 import com.eim.facesmanagement.peopledb.Person;
 import com.eim.utilities.FaceRecognizerMainActivity.OnOpenCVLoaded;
+import com.eim.utilities.EIMPreferences;
 import com.eim.utilities.Swipeable;
 
 public class FaceRecognitionFragment extends Fragment implements Swipeable,
@@ -38,11 +38,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private static final Scalar FACE_RECT_COLOR = new Scalar(255, 192, 100, 255);
 	private static final Double CONFIDENCE_THRESHOLD = 0.0;
 
-
-	public enum Type {
-		EIGEN, FISHER, LBPH
-	}	
-	
 	private Activity activity;
 
 	private ControlledJavaCameraView mCameraView;
@@ -56,7 +51,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private int mThumbnailSize = 25;
 
 	private FaceDetector mFaceDetector;
-	private FaceRecognizer mFaceRecognizer;
+	private EIMFaceRecognizer mFaceRecognizer;
+	private EIMFaceRecognizer.Type mFaceRecognizerType;
 	private PeopleDatabase mPeopleDatabase;
 
 	@Override
@@ -126,7 +122,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		Utils.bitmapToMat(thumb, thumbnail);
 		mTestThumbnail = new Mat();
 
-		double absoluteFaceSize = height * mFaceDetector.getMinRelativeFaceSize();
+		double absoluteFaceSize = height
+				* mFaceDetector.getMinRelativeFaceSize();
 		mThumbnailSize = (int) (absoluteFaceSize * 0.6);
 		Core.subtract(thumbnail, new Scalar(0, 0, 0, 100), transparentThumbnail);
 
@@ -232,7 +229,10 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	private void setupFaceDetection() {
 		mFaceDetector = new FaceDetector(activity);
-		mFaceRecognizer = LBPHFaceRecognizer.getInstance(activity);
+		mFaceRecognizerType = EIMPreferences.getInstance(activity)
+				.recognitionType();
+		mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
+				mFaceRecognizerType);
 		mPeopleDatabase = PeopleDatabase.getInstance(activity);
 	}
 

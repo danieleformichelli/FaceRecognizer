@@ -1,6 +1,6 @@
 package com.eim.facesmanagement.peopledb;
 
-import com.eim.facerecognition.LBPHFaceRecognizer;
+import com.eim.facerecognition.EIMFaceRecognizer;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
@@ -38,7 +38,7 @@ public class PeopleDBOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		LBPHFaceRecognizer.resetModel();
+		EIMFaceRecognizer.resetModel();
 		db.execSQL("DROP TABLE IF EXISTS " + FacesContract.Faces.TABLE);
 		db.execSQL("DROP TABLE IF EXISTS " + FacesContract.People.TABLE);
 		onCreate(db);

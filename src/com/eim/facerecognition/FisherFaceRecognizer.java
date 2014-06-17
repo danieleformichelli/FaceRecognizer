@@ -2,7 +2,7 @@ package com.eim.facerecognition;
 
 import org.opencv.contrib.FaceRecognizer;
 
-public class FisherFaceRecognizer extends FaceRecognizer {
+class FisherFaceRecognizer extends FaceRecognizer {
 
 	private static native long createFisherFaceRecognizer_0();
 
@@ -11,7 +11,7 @@ public class FisherFaceRecognizer extends FaceRecognizer {
 	private static native long createFisherFaceRecognizer_2(int num_components,
 			double threshold);
 	
-	private FisherFaceRecognizer() {
+	FisherFaceRecognizer() {
 		super(createFisherFaceRecognizer_0());
 	}
 
