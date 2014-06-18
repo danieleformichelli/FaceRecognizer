@@ -1,6 +1,6 @@
 package com.eim.facesmanagement.peopledb;
 
-import android.support.v4.util.LongSparseArray;
+import android.util.SparseArray;
 
 /**
  * This class represent a person to be recognized. Each person has a name and
@@ -10,12 +10,12 @@ import android.support.v4.util.LongSparseArray;
 public class Person implements Comparable<Person> {
 
 	private String name;
-	private LongSparseArray<Photo> photos;
+	private SparseArray<Photo> photos;
 
-	public Person(String name, LongSparseArray<Photo> photos) {
+	public Person(String name, SparseArray<Photo> photos) {
 		setName(name);
 
-		this.photos = new LongSparseArray<Photo>();
+		this.photos = new SparseArray<Photo>();
 		setPhotos(photos);
 	}
 
@@ -26,16 +26,16 @@ public class Person implements Comparable<Person> {
 	public void setName(String name) {
 		if (name == null || name.length() == 0)
 			throw new IllegalArgumentException(
-					"name must be at least 1 character long");
+					"name must be at least 1 character int");
 
 		this.name = name;
 	}
 
-	public LongSparseArray<Photo> getPhotos() {
+	public SparseArray<Photo> getPhotos() {
 		return photos;
 	}
 
-	public void setPhotos(LongSparseArray<Photo> photos) {
+	public void setPhotos(SparseArray<Photo> photos) {
 		if (photos == null)
 			this.photos.clear();
 		else
@@ -51,14 +51,14 @@ public class Person implements Comparable<Person> {
 			}
 	}
 
-	public void addPhoto(long id, Photo photo) {
+	public void addPhoto(int id, Photo photo) {
 		if (photo == null)
 			throw new IllegalArgumentException("photo cannot be null");
 
 		photos.put(id, photo);
 	}
 
-	public void removePhoto(long id) {
+	public void removePhoto(int id) {
 		photos.remove(id);
 	}
 

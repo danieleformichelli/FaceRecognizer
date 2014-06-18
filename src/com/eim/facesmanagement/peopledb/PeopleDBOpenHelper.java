@@ -39,6 +39,10 @@ public class PeopleDBOpenHelper extends SQLiteOpenHelper {
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 		EIMFaceRecognizer.resetModel();
+		clear(db);
+	}
+
+	public void clear(SQLiteDatabase db) {
 		db.execSQL("DROP TABLE IF EXISTS " + FacesContract.Faces.TABLE);
 		db.execSQL("DROP TABLE IF EXISTS " + FacesContract.People.TABLE);
 		onCreate(db);

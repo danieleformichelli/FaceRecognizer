@@ -56,7 +56,7 @@ public class FaceDetectionActivity extends Activity {
 
 	private FaceDetector mFaceDetector;
 
-	private long personId = -1;
+	private int personId = -1;
 	private String mLabelName = "Unknown";
 
 	private boolean mAlreadyStarted = false;
@@ -75,7 +75,7 @@ public class FaceDetectionActivity extends Activity {
 		if (extras == null)
 			finish();
 
-		personId = extras.getLong(PERSON_ID);
+		personId = extras.getInt(PERSON_ID);
 		mLabelName = extras.getString(PERSON_NAME);
 	}
 

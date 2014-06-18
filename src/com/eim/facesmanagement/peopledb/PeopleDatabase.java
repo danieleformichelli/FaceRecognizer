@@ -6,19 +6,21 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.v4.util.LongSparseArray;
+import android.util.SparseArray;
 
 /**
  * This class manages the Database containing people and their photos
  */
 public class PeopleDatabase {
 	private static PeopleDatabase instance;
+	private static PeopleDBOpenHelper pdboh;
 	private static SQLiteDatabase db;
 
 	public static PeopleDatabase getInstance(Context mContext) {
 		if (instance == null) {
 			instance = new PeopleDatabase();
-			db = new PeopleDBOpenHelper(mContext).getWritableDatabase();
+			pdboh = new PeopleDBOpenHelper(mContext);
+			db = pdboh.getWritableDatabase();
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 				public void run() {
 					db.close();
@@ -40,7 +42,7 @@ public class PeopleDatabase {
 	 * @param newName
 	 *            - new name
 	 */
-	public void editPersonName(long id, String newName) {
+	public void editPersonName(int id, String newName) {
 		ContentValues values = new ContentValues();
 		values.put(FacesContract.People.NAME, newName);
 		String whereClause = FacesContract.People._ID + " = ?";
@@ -55,7 +57,7 @@ public class PeopleDatabase {
 	 * @param id
 	 *            identifier of the person
 	 */
-	public void removePerson(long id) {
+	public void removePerson(int id) {
 		String query = "SELECT " + FacesContract.Faces.PHOTO_URL + " FROM "
 				+ FacesContract.Faces.TABLE + " WHERE "
 				+ FacesContract.Faces.PERSON_ID + " = ?";
@@ -85,11 +87,11 @@ public class PeopleDatabase {
 	 *            name of the person
 	 * @return the identifier of the inserted person
 	 */
-	public long addPerson(String name) {
+	public int addPerson(String name) {
 		ContentValues values = new ContentValues();
 		values.put(FacesContract.People.NAME, name);
 
-		return db.insert(FacesContract.People.TABLE, null, values);
+		return (int) db.insert(FacesContract.People.TABLE, null, values);
 	}
 
 	/**
@@ -101,14 +103,12 @@ public class PeopleDatabase {
 	 *            url of the photo to be added
 	 * @return the identifier of the photo added
 	 */
-	public long addPhoto(long personId, String photoUrl) {
+	public int addPhoto(int personId, String photoUrl) {
 		ContentValues values = new ContentValues();
 		values.put(FacesContract.Faces.PERSON_ID, personId);
 		values.put(FacesContract.Faces.PHOTO_URL, photoUrl);
 
-		long x = db.insert(FacesContract.Faces.TABLE, null, values);
-		android.util.Log.e("ASD", "" + x);
-		return x;
+		return (int) db.insert(FacesContract.Faces.TABLE, null, values);
 	}
 
 	/**
@@ -117,7 +117,7 @@ public class PeopleDatabase {
 	 * @param id
 	 *            identifier of the photo to remove
 	 */
-	public void removePhoto(long id) {
+	public void removePhoto(int id) {
 
 		String query = "SELECT " + FacesContract.Faces.PHOTO_URL + " FROM "
 				+ FacesContract.Faces.TABLE + " WHERE "
@@ -145,7 +145,7 @@ public class PeopleDatabase {
 	 * @param id
 	 * @return the Person object, null if the person does not exist
 	 */
-	public Person getPerson(long id) {
+	public Person getPerson(int id) {
 		Person selectedPerson;
 
 		String query = "SELECT " + FacesContract.Faces.TABLE + "."
@@ -171,7 +171,7 @@ public class PeopleDatabase {
 		selectedPerson = new Person(c.getString(personNameIndex), null);
 
 		do {
-			long photoId = c.getLong(photoIdIndex);
+			int photoId = c.getInt(photoIdIndex);
 			String photoUrl = c.getString(photoUrlIndex);
 
 			selectedPerson.addPhoto(photoId, new Photo(photoUrl));
@@ -187,10 +187,10 @@ public class PeopleDatabase {
 	 * @return a sparse array in which each key is the identifier of the person
 	 *         stored in the correspondent value
 	 */
-	public LongSparseArray<Person> getPeople() {
-		long currentId = -1;
+	public SparseArray<Person> getPeople() {
+		int currentId = -1;
 		Person currentPerson = null;
-		LongSparseArray<Person> people = new LongSparseArray<Person>();
+		SparseArray<Person> people = new SparseArray<Person>();
 
 		final String query = "SELECT " + FacesContract.People.TABLE + "."
 				+ FacesContract.People._ID + " AS personId, "
@@ -211,7 +211,7 @@ public class PeopleDatabase {
 		int photoUrlIndex = c.getColumnIndex(FacesContract.Faces.PHOTO_URL);
 
 		while (c.moveToNext()) {
-			long personId = c.getLong(personIdIndex);
+			int personId = c.getInt(personIdIndex);
 			String name = c.getString(personNameIndex);
 
 			// add a new Person if it is the first time we found it
@@ -222,7 +222,7 @@ public class PeopleDatabase {
 			}
 
 			if (!c.isNull(photoIdIndex)) {
-				long photoId = c.getLong(photoIdIndex);
+				int photoId = c.getInt(photoIdIndex);
 				String photoUrl = c.getString(photoUrlIndex);
 
 				currentPerson.addPhoto(photoId, new Photo(photoUrl));
@@ -249,7 +249,6 @@ public class PeopleDatabase {
 				photoFile.delete();
 		}
 
-		db.delete(FacesContract.People.TABLE, null, null);
-		db.delete(FacesContract.Faces.TABLE, null, null);
+		pdboh.clear(db);
 	}
 }

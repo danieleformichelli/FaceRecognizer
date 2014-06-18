@@ -16,7 +16,7 @@ import com.eim.facesmanagement.peopledb.Photo;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.support.v4.util.LongSparseArray;
+import android.util.SparseArray;
 
 public class EIMFaceRecognizer {
 
@@ -35,7 +35,7 @@ public class EIMFaceRecognizer {
 	private static Type mRecognizerType;
 	private static String mModelPath;
 	private static boolean isTrained;
-	LongSparseArray<Person> dataset;
+	SparseArray<Person> dataset;
 
 	public static EIMFaceRecognizer getInstance(Context mContext, Type mType) {
 		if (mContext == null)
@@ -129,12 +129,12 @@ public class EIMFaceRecognizer {
 	 * Train with the specified dataset. If the dataset contains no faces the
 	 * model is reset
 	 * 
-	 * @param dataset
+	 * @param sparseArray
 	 *            faces dataset, keys are the labels and faces are contained in
 	 *            the field Photos of the value
 	 */
-	public void train(LongSparseArray<Person> dataset) {
-		if (!isDatasetValid(dataset)) {
+	public void train(SparseArray<Person> sparseArray) {
+		if (!isDatasetValid(sparseArray)) {
 			resetModel();
 			return;
 		}
@@ -143,10 +143,10 @@ public class EIMFaceRecognizer {
 		Mat labels = new Mat(0, 0, CvType.CV_32SC1);
 		int counter = 0;
 
-		for (int i = 0, l = dataset.size(); i < l; i++) {
-			long label = dataset.keyAt(i);
-			Person person = dataset.valueAt(i);
-			LongSparseArray<Photo> photos = person.getPhotos();
+		for (int i = 0, l = sparseArray.size(); i < l; i++) {
+			int label = sparseArray.keyAt(i);
+			Person person = sparseArray.valueAt(i);
+			SparseArray<Photo> photos = person.getPhotos();
 
 			for (int j = 0, k = photos.size(); j < k; j++) {
 				Photo mPhoto = photos.valueAt(j);
@@ -166,7 +166,7 @@ public class EIMFaceRecognizer {
 		mFaceRecognizer.save(mModelPath);
 	}
 
-	private boolean isDatasetValid(LongSparseArray<Person> dataset) {
+	private boolean isDatasetValid(SparseArray<Person> dataset) {
 		if (dataset == null)
 			return false;
 
