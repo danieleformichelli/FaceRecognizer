@@ -43,7 +43,7 @@
 	    <item>Native</item>
 	</string-array>
     <string name="detector_type_title">Detector type</string>
-    <string name="detector_type_default">Java</string>
+    <string name="detector_type_default">Native</string>
     <string name="detection_scale_factor">detection_scale_factor</string>
     <string name="detection_scale_factor_default">1.1</string>
     <string name="detection_scale_factor_title">Scale Factor</string>

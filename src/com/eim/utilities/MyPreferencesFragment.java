@@ -46,15 +46,6 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 		activity = getActivity();
 
-		// TODO do it in xml
-		ListPreference recognizerType = (ListPreference) mPreferenceScreen
-				.findPreference(activity
-						.getString(R.string.recognition_recognizer_type));
-		if (recognizerType.getValue() == null) {
-			recognizerType.setValueIndex(2);
-			recognizerType.setSummary(recognizerType.getEntry());
-		}
-
 		clearDatabaseKey = activity.getString(R.string.general_clear_database);
 		restorePreferencesKey = activity
 				.getString(R.string.general_restore_default_preferences);
