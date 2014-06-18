@@ -1,7 +1,9 @@
 package com.eim.facerecognition;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
@@ -54,6 +56,14 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private EIMFaceRecognizer mFaceRecognizer;
 	private EIMFaceRecognizer.Type mFaceRecognizerType;
 	private PeopleDatabase mPeopleDatabase;
+	
+	/*
+	 * A Map data structure that improve the speed of our application
+	 * The Map contains <Integer, LabelledRect> pairs. These pairs holds all the
+	 * fundamental information to insert in the list recgnizedPeople
+	 * of the method recognizedFace.
+	 */
+	private Cache mCache;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -72,6 +82,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mCameraView = (ControlledJavaCameraView) activity
 				.findViewById(R.id.face_recognition_surface_view);
 		mCameraView.setCvCameraViewListener(this);
+		
+		mCache = new Cache();
 	}
 
 	@Override
@@ -212,15 +224,36 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 			int[] predictedLabel = new int[1];
 			double[] confidence = new double[1];
 			mFaceRecognizer.predict(face, predictedLabel, confidence);
+			
 			if (confidence[0] > CONFIDENCE_THRESHOLD) {
 				// LabelledRect l = getInfoFromLabel(prediction.first);
+				
+				Person guess = null;
+				int pl = predictedLabel[0];
+				LabelledRect lr  = mCache.searchPersonOnCache(pl);
+			
+				if (lr == null) {
+					
+					// No cached, search in DB and save
+					
+					guess = mPeopleDatabase.getPerson(pl);
+					if (guess != null) {
+						lr = new LabelledRect(faceRect, guess
+								.getName(), guess.getPhotos().get(0));
+						mCache.savePersonOnCache(pl, lr);
+					}
+				}
+				else {
+					// The only information to update is rect data field.
+					// The other ones are fixed
+					lr.rect = faceRect;
+				}
 
-				Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
-				Log.d(TAG, "Prediction: " + predictedLabel[0] + " ("
-						+ confidence[0] + ")");
-				if (guess != null)
-					recognizedPeople.add(new LabelledRect(faceRect, guess
-							.getName(), guess.getPhotos().get(0)));
+				Log.d(TAG, "Prediction: " + pl + " (" + confidence[0] + ")");
+				
+				if (lr != null)
+					recognizedPeople.add(lr);
+					
 			}
 		}
 
@@ -247,5 +280,34 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		public Rect rect;
 		public String text;
 		public Object thumbnail;
+	}
+	
+	public class Cache {
+
+		private Map<Integer, LabelledRect> cache;
+		private static final int MAX_SAVED = 10;
+		
+		/*
+		 * LRU policy
+		 */
+		
+		public Cache() {
+			cache = new LinkedHashMap<Integer, LabelledRect>() {
+				@Override
+				protected boolean removeEldestEntry(Map.Entry eldest) {
+					return size() > MAX_SAVED;
+				}
+			};
+		}
+		
+		public LabelledRect searchPersonOnCache(int label) {
+			return cache.get(Integer.valueOf(label));
+		}
+		
+		private void savePersonOnCache(int label, LabelledRect labelledRect) {
+			cache.put(Integer.valueOf(label), labelledRect);
+			
+		}
+		
 	}
 }
