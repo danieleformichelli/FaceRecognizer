@@ -16,13 +16,14 @@ public class PeopleDatabase {
 	private static PeopleDBOpenHelper pdboh;
 	private static SQLiteDatabase db;
 
-	private boolean modifiedFlag;
-	
+	static private SparseArray<Person> people;
+
 	public static PeopleDatabase getInstance(Context mContext) {
 		if (instance == null) {
 			instance = new PeopleDatabase();
 			pdboh = new PeopleDBOpenHelper(mContext);
 			db = pdboh.getWritableDatabase();
+			people = _getPeople();
 			Runtime.getRuntime().addShutdownHook(new Thread() {
 				public void run() {
 					db.close();
@@ -31,10 +32,6 @@ public class PeopleDatabase {
 		}
 
 		return instance;
-	}
-
-	private PeopleDatabase() {
-		modifiedFlag = true;
 	}
 
 	/**
@@ -46,14 +43,20 @@ public class PeopleDatabase {
 	 *            - new name
 	 */
 	public void editPersonName(int id, String newName) {
+		Person mPerson = people.get(id);
+		if (mPerson == null)
+			return;
+
 		ContentValues values = new ContentValues();
 		values.put(FacesContract.People.NAME, newName);
 		String whereClause = FacesContract.People._ID + " = ?";
 		String[] whereArgs = { String.valueOf(id) };
 
-		db.update(FacesContract.People.TABLE, values, whereClause, whereArgs);
-		
-		modifiedFlag = true;
+		int ok = db.update(FacesContract.People.TABLE, values, whereClause,
+				whereArgs);
+
+		if (ok == 1)
+			mPerson.setName(newName);
 	}
 
 	/**
@@ -63,28 +66,24 @@ public class PeopleDatabase {
 	 *            identifier of the person
 	 */
 	public void removePerson(int id) {
-		String query = "SELECT " + FacesContract.Faces.PHOTO_URL + " FROM "
-				+ FacesContract.Faces.TABLE + " WHERE "
-				+ FacesContract.Faces.PERSON_ID + " = ?";
+		Person mPerson = people.get(id);
+		if (mPerson == null)
+			return;
+
+		// remove his photos from the disk
+		SparseArray<Photo> photos = mPerson.getPhotos();
+		for (int i = 0, l = photos.size(); i < l; i++) {
+			File photoFile = new File(photos.valueAt(i).getUrl());
+			if (photoFile != null)
+				photoFile.delete();
+		}
+
+		String whereClause = FacesContract.People._ID + " = ?";
 		String[] whereArgs = { String.valueOf(id) };
 
-		Cursor c = db.rawQuery(query, whereArgs);
+		db.delete(FacesContract.People.TABLE, whereClause, whereArgs);
 
-		if (c.moveToNext()) {
-			int photoUrlIndex = c.getColumnIndex(FacesContract.Faces.PHOTO_URL);
-			while (c.moveToNext()) {
-				String photoUrl = c.getString(photoUrlIndex);
-				File photoFile = new File(photoUrl);
-				if (photoFile != null)
-					photoFile.delete();
-			}
-
-			String whereClause = FacesContract.People._ID + " = ?";
-
-			db.delete(FacesContract.People.TABLE, whereClause, whereArgs);
-		}
-		
-		modifiedFlag = true;
+		people.remove(id);
 	}
 
 	/**
@@ -98,9 +97,13 @@ public class PeopleDatabase {
 		ContentValues values = new ContentValues();
 		values.put(FacesContract.People.NAME, name);
 
-		modifiedFlag = true;
-		
-		return (int) db.insert(FacesContract.People.TABLE, null, values);
+		int personId = (int) db
+				.insert(FacesContract.People.TABLE, null, values);
+
+		if (personId != -1)
+			people.append(personId, new Person(name));
+
+		return personId;
 	}
 
 	/**
@@ -113,12 +116,19 @@ public class PeopleDatabase {
 	 * @return the identifier of the photo added
 	 */
 	public int addPhoto(int personId, String photoUrl) {
+		Person mPerson = people.get(personId);
+		if (mPerson == null)
+			return -1;
+
 		ContentValues values = new ContentValues();
 		values.put(FacesContract.Faces.PERSON_ID, personId);
 		values.put(FacesContract.Faces.PHOTO_URL, photoUrl);
 
-		modifiedFlag = true;
-		return (int) db.insert(FacesContract.Faces.TABLE, null, values);
+		int photoId = (int) db.insert(FacesContract.Faces.TABLE, null, values);
+
+		mPerson.addPhoto(photoId, new Photo(photoUrl));
+
+		return photoId;
 	}
 
 	/**
@@ -127,11 +137,11 @@ public class PeopleDatabase {
 	 * @param id
 	 *            identifier of the photo to remove
 	 */
-	public void removePhoto(int id) {
+	public void removePhoto(int personId, int photoId) {
 
 		String query = "SELECT " + FacesContract.Faces.PHOTO_URL + " FROM "
 				+ FacesContract.Faces.TABLE + " WHERE "
-				+ FacesContract.Faces._ID + " = " + id;
+				+ FacesContract.Faces._ID + " = " + photoId;
 
 		Cursor c = db.rawQuery(query, null);
 		int photoUrlIndex = c.getColumnIndex(FacesContract.Faces.PHOTO_URL);
@@ -143,12 +153,10 @@ public class PeopleDatabase {
 				photoFile.delete();
 
 			String whereClause = FacesContract.Faces._ID + " = ?";
-			String[] whereArgs = { String.valueOf(id) };
+			String[] whereArgs = { String.valueOf(photoId) };
 
 			db.delete(FacesContract.Faces.TABLE, whereClause, whereArgs);
 		}
-
-		modifiedFlag = true;
 	}
 
 	/**
@@ -158,40 +166,7 @@ public class PeopleDatabase {
 	 * @return the Person object, null if the person does not exist
 	 */
 	public Person getPerson(int id) {
-		Person selectedPerson;
-
-		String query = "SELECT " + FacesContract.Faces.TABLE + "."
-				+ FacesContract.Faces._ID + " AS photoId, "
-				+ FacesContract.People.NAME + ", "
-				+ FacesContract.Faces.PHOTO_URL + " FROM "
-				+ FacesContract.People.TABLE + " LEFT JOIN "
-				+ FacesContract.Faces.TABLE + " WHERE "
-				+ FacesContract.People.TABLE + "." + FacesContract.People._ID
-				+ " = ?";
-		String[] whereArgs = new String[] { String.valueOf(id) };
-
-		Cursor c = db.rawQuery(query, whereArgs);
-
-		int personNameIndex = c.getColumnIndex(FacesContract.People.NAME);
-		int photoIdIndex = c.getColumnIndex("photoId");
-		int photoUrlIndex = c.getColumnIndex(FacesContract.Faces.PHOTO_URL);
-
-		if (!c.moveToNext()) {
-			c.close();
-			return null;
-		}
-
-		selectedPerson = new Person(c.getString(personNameIndex), null);
-
-		do {
-			int photoId = c.getInt(photoIdIndex);
-			String photoUrl = c.getString(photoUrlIndex);
-
-			selectedPerson.addPhoto(photoId, new Photo(photoUrl));
-		} while (c.moveToNext());
-
-		c.close();
-		return selectedPerson;
+		return people.get(id);
 	}
 
 	/**
@@ -201,6 +176,10 @@ public class PeopleDatabase {
 	 *         stored in the correspondent value
 	 */
 	public SparseArray<Person> getPeople() {
+		return people;
+	}
+
+	static private SparseArray<Person> _getPeople() {
 		int currentId = -1;
 		Person currentPerson = null;
 		SparseArray<Person> people = new SparseArray<Person>();
@@ -250,27 +229,17 @@ public class PeopleDatabase {
 	 * Deletes all the entries from the database and the photos on the disk
 	 */
 	public void clear() {
-		String query = "SELECT " + FacesContract.Faces.PHOTO_URL + " FROM "
-				+ FacesContract.Faces.TABLE;
-
-		Cursor c = db.rawQuery(query, null);
-		int photoUrlIndex = c.getColumnIndex(FacesContract.Faces.PHOTO_URL);
-		while (c.moveToNext()) {
-			String photoUrl = c.getString(photoUrlIndex);
-			File photoFile = new File(photoUrl);
-			if (photoFile != null)
-				photoFile.delete();
+		// remove from disk all photos of all people
+		for (int i = 0, l = people.size(); i < l; i++) {
+			SparseArray<Photo> photos = people.valueAt(i).getPhotos();
+			for (int j = 0, k = photos.size(); j < k; j++) {
+				File photoFile = new File(photos.valueAt(j).getUrl());
+				if (photoFile != null)
+					photoFile.delete();
+			}
 		}
 		
-		modifiedFlag = true;
 		pdboh.clear(db);
-	}
-	
-	public boolean isModified() {
-		return modifiedFlag;
-	}
-	
-	public void clearModifiedFlag() {
-		modifiedFlag = false;
+		people.clear();
 	}
 }

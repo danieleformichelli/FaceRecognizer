@@ -1,18 +1,19 @@
 package com.eim.facesmanagement.peopledb;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 
 public class Photo {
 	private String url;
-	private Bitmap bitmap;
+	private Bitmap mBitmap;
 
-	public Photo(String url, Bitmap bitmap) {
-		if (url == null && bitmap == null)
+	public Photo(String url, Bitmap mBitmap) {
+		if (url == null && mBitmap == null)
 			throw new IllegalArgumentException(
 					"url and bitmap cannot be both null");
 
 		this.url = url;
-		this.bitmap = bitmap;
+		this.mBitmap = mBitmap;
 	}
 
 	public Photo(String url) {
@@ -28,7 +29,7 @@ public class Photo {
 			throw new IllegalArgumentException(
 					"bitmap cannot be null");
 
-		this.bitmap = bitmap;
+		this.mBitmap = bitmap;
 	}
 
 	public String getUrl() {
@@ -36,7 +37,7 @@ public class Photo {
 	}
 
 	public void setUrl(String url) {
-		if (url == null && bitmap == null)
+		if (url == null && mBitmap == null)
 			throw new IllegalArgumentException(
 					"url and bitmap cannot be both null");
 
@@ -44,15 +45,17 @@ public class Photo {
 	}
 
 	public Bitmap getBitmap() {
-		return bitmap;
+		if (mBitmap == null)
+			mBitmap = BitmapFactory.decodeFile(getUrl());
+		return mBitmap;
 	}
 
-	public void setBitmap(Bitmap bitmap) {
-		if (url == null && bitmap == null)
+	public void setBitmap(Bitmap mBitmap) {
+		if (url == null && mBitmap == null)
 			throw new IllegalArgumentException(
 					"url and bitmap cannot be both null");
 
-		this.bitmap = bitmap;
+		this.mBitmap = mBitmap;
 	}
 
 }

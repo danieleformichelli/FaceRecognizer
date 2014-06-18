@@ -12,6 +12,11 @@ public class Person implements Comparable<Person> {
 	private String name;
 	private SparseArray<Photo> photos;
 
+	public Person(String name) {
+		setName(name);
+		photos = new SparseArray<Photo>();
+	}
+	
 	public Person(String name, SparseArray<Photo> photos) {
 		setName(name);
 

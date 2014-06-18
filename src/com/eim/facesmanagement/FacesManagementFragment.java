@@ -162,7 +162,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 				return;
 			}
 
-			mPeopleAdapter.addPerson(id, new Person(name, null));
+			mPeopleAdapter.addPerson(id, new Person(name));
 
 			if (mPeopleAdapter.getGroupCount() != 0)
 				noPeopleMessage.setVisibility(View.GONE);
@@ -207,7 +207,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		@Override
 		public void removePhoto(int personId, int photoId) {
 			mPeopleAdapter.removePhoto(personId, photoId);
-			mPeopleDatabase.removePhoto(photoId);
+			mPeopleDatabase.removePhoto(personId, photoId);
 
 			// A photo has been removed: retrain the entire network
 			mFaceRecognizer.train(mPeopleAdapter.getPeople());

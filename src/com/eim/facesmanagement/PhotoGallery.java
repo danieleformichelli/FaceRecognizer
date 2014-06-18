@@ -95,15 +95,12 @@ public class PhotoGallery extends NoScrollGridView implements
 	 * @return view of the added image
 	 */
 	public void addPhoto(String path) {
-		addPhoto(new Photo(path, BitmapFactory.decodeFile(path)));
+		addPhoto(new Photo(path, null));
 	}
 
 	public void addPhoto(Photo photo) {
 		if (photo == null)
 			throw new IllegalArgumentException("photo cannot be null");
-
-		if (photo.getBitmap() == null)
-			photo.setBitmap(BitmapFactory.decodeFile(photo.getUrl()));
 
 		galleryAdapter.addPhoto(photo);
 		photoCount++;
