@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="face_detection_add_photo_title">Aggiungi foto</string>
+    <string name="face_detection_retry_add_photo_title">Nessuna faccia trovata. Riprova.</string>
+    <string name="face_detection_choose_face">Scegli la faccia da riconoscere</string>
+
+    <string-array name="face_detection_add_photo_options">
+        <item>Scatta istantanea</item>
+        <item>Scegli foto dalla galleria</item>
+        <item>Scatta istantanea (con detection)</item>
+    </string-array>
+
+</resources>
