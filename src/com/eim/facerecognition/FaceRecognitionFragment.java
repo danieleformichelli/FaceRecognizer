@@ -25,21 +25,27 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SeekBar;
 
 import com.eim.R;
 import com.eim.facedetection.FaceDetector;
 import com.eim.facesmanagement.peopledb.PeopleDatabase;
 import com.eim.facesmanagement.peopledb.Person;
-import com.eim.utilities.FaceRecognizerMainActivity.OnOpenCVLoaded;
 import com.eim.utilities.EIMPreferences;
+import com.eim.utilities.FaceRecognizerMainActivity.OnOpenCVLoaded;
 import com.eim.utilities.Swipeable;
 
 public class FaceRecognitionFragment extends Fragment implements Swipeable,
-		OnOpenCVLoaded, CvCameraViewListener2 {
+		OnOpenCVLoaded, CvCameraViewListener2, SeekBar.OnSeekBarChangeListener {
 	private static final String TAG = "FaceRecognitionFragment";
 	private static final Scalar FACE_RECT_COLOR = new Scalar(255, 192, 100, 255);
-	private static final Double CONFIDENCE_THRESHOLD = 0.0;
+	
+	private static Double CONFIDENCE_THRESHOLD = 0.0;
 
+	public enum Type {
+		EIGEN, FISHER, LBPH
+	}	
+	
 	private Activity activity;
 
 	private ControlledJavaCameraView mCameraView;
@@ -56,7 +62,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private EIMFaceRecognizer mFaceRecognizer;
 	private EIMFaceRecognizer.Type mFaceRecognizerType;
 	private PeopleDatabase mPeopleDatabase;
-	
 	/*
 	 * A Map data structure that improve the speed of our application
 	 * The Map contains <Integer, LabelledRect> pairs. These pairs holds all the
@@ -64,6 +69,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	 * of the method recognizedFace.
 	 */
 	private Cache mCache;
+	private SeekBar mThresholdBar;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -84,6 +90,9 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mCameraView.setCvCameraViewListener(this);
 		
 		mCache = new Cache();
+		mThresholdBar = (SeekBar) activity
+				.findViewById(R.id.threshold_bar);
+		mThresholdBar.setOnSeekBarChangeListener(this);
 	}
 
 	@Override
@@ -310,4 +319,15 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		}
 		
 	}
+
+	@Override
+	public void onProgressChanged(SeekBar arg0, int arg1, boolean arg2) {
+		CONFIDENCE_THRESHOLD = Double.valueOf(arg1);
+	}
+
+	@Override
+	public void onStartTrackingTouch(SeekBar arg0) {}
+
+	@Override
+	public void onStopTrackingTouch(SeekBar arg0) {}
 }

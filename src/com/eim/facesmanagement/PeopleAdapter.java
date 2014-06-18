@@ -7,7 +7,7 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
-import android.support.v4.util.LongSparseArray;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -28,7 +28,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 	private static final String TAG = "PeopleAdapter";
 
 	private Activity context;
-	private LongSparseArray<Person> people;
+	private SparseArray<Person> people;
 	private int groupResource, childResource;
 	private PeopleAdapterListener peopleAdapterListener;
 	private PhotoGalleryListener photoGalleryListener;
@@ -52,7 +52,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 	 *            will be added as a tag to the associated view
 	 */
 	public PeopleAdapter(Activity context, int groupResource,
-			int childResource, LongSparseArray<Person> people,
+			int childResource, SparseArray<Person> people,
 			PeopleAdapterListener peopleAdapterListener,
 			PhotoGalleryListener photoGalleryListener) {
 
@@ -61,7 +61,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		this.groupResource = groupResource;
 		this.childResource = childResource;
 
-		this.people = new LongSparseArray<Person>();
+		this.people = new SparseArray<Person>();
 		setPeople(people);
 
 		this.peopleAdapterListener = peopleAdapterListener;
@@ -78,7 +78,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 			convertView = inflater.inflate(groupResource, parent, false);
 		}
 
-		long id = people.keyAt(groupPosition);
+		int id = people.keyAt(groupPosition);
 		Person person = people.get(id);
 
 		TextView name = (TextView) convertView
@@ -121,10 +121,10 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		}
 
 		// set the id as tag so it can be retrieved later
-		long id = people.keyAt(groupPosition);
+		int id = people.keyAt(groupPosition);
 		mPhotoGallery.setTag(id);
 
-		LongSparseArray<Photo> photos = people.get(id).getPhotos();
+		SparseArray<Photo> photos = people.get(id).getPhotos();
 		for (int i = 0, l = photos.size(); i < l; i++) {
 			Photo photo = photos.valueAt(i);
 			mPhotoGallery.addPhoto(photo);
@@ -173,11 +173,11 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		return childPosition;
 	}
 
-	public LongSparseArray<Person> getPeople() {
+	public SparseArray<Person> getPeople() {
 		return people;
 	}
 
-	public Person getPersonById(long id) {
+	public Person getPersonById(int id) {
 		return people.get(id);
 	}
 
@@ -191,7 +191,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 	 * @param person
 	 *            person to add
 	 */
-	public void addPerson(long id, Person person) {
+	public void addPerson(int id, Person person) {
 		if (person == null)
 			throw new IllegalArgumentException("person cannot be null");
 
@@ -205,7 +205,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 	 * @param id
 	 *            id of the person to be removed
 	 */
-	public boolean removePerson(long id) {
+	public boolean removePerson(int id) {
 		Person mPerson = people.get(id);
 		if (mPerson == null)
 			return false;
@@ -221,7 +221,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 	 * @param people
 	 *            new people of the ExpandableListView
 	 */
-	public void setPeople(LongSparseArray<Person> people) {
+	public void setPeople(SparseArray<Person> people) {
 		this.people.clear();
 
 		if (people != null) {
@@ -244,7 +244,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 	 *            new name
 	 * @return true if the person exists, false otherwise
 	 */
-	public boolean editPersonName(long id, String newName) {
+	public boolean editPersonName(int id, String newName) {
 		if (newName == null)
 			throw new IllegalArgumentException("newName cannot be null");
 
@@ -266,7 +266,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 	 *            id of the photo
 	 * @return true if both the person and the photo exist, false otherwise
 	 */
-	public boolean removePhoto(long personId, long photoId) {
+	public boolean removePhoto(int personId, int photoId) {
 		Person mPerson = people.get(personId);
 		if (mPerson == null)
 			return false;
@@ -292,7 +292,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 	 *            photo to be added
 	 * @return true if both the person and the photo exist, false otherwise
 	 */
-	public boolean addPhoto(long personId, long photoId, Photo photo) {
+	public boolean addPhoto(int personId, int photoId, Photo photo) {
 		if (photo == null)
 			throw new IllegalArgumentException("photo cannot be null");
 
@@ -307,11 +307,11 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 
 	private OnClickListener editPersonOnClickListener = new OnClickListener() {
 		EditPersonDialog mEditPersonDialog;
-		long id;
+		int id;
 
 		@Override
 		public void onClick(View v) {
-			id = (long) v.getTag();
+			id = (int) v.getTag();
 
 			mEditPersonDialog = new EditPersonDialog(people.get(id).getName(),
 					editPersonListener, editPersonListener, editPersonListener);
@@ -336,7 +336,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 			}
 		};
 
-		private void askForPersonDeletion(final long id) {
+		private void askForPersonDeletion(final int id) {
 			new DialogFragment() {
 				@Override
 				public Dialog onCreateDialog(Bundle savedInstanceState) {
@@ -386,7 +386,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		 * @param newName
 		 *            new name of the person
 		 */
-		public void editPersonName(long id, String newName);
+		public void editPersonName(int id, String newName);
 
 		/**
 		 * A person has been removed from the list
@@ -394,7 +394,7 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		 * @param id
 		 *            name of the removed person
 		 */
-		public void removePerson(long id);
+		public void removePerson(int id);
 
 		/**
 		 * A photo has been added to a person
@@ -404,14 +404,14 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		 * @param photo
 		 *            url of the photo
 		 */
-		public void addPhoto(long personId, Photo photo);
+		public void addPhoto(int personId, Photo photo);
 
 		/**
 		 * A photo has been deleted
 		 * 
 		 * @param photoId
 		 */
-		public void removePhoto(long personId, long photoId);
+		public void removePhoto(int personId, int photoId);
 	}
 
 }

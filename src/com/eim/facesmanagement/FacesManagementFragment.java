@@ -5,7 +5,7 @@ import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.util.LongSparseArray;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -129,10 +129,10 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 	};
 
 	/**
-	 * Remove all the poeple people
+	 * Remove all the people
 	 */
 	public void clearPeople() {
-		LongSparseArray<Person> people = mPeopleAdapter.getPeople();
+		SparseArray<Person> people = mPeopleAdapter.getPeople();
 		for (int i = 0, l = people.size(); i < l; i++)
 			mPeopleAdapterListener.removePerson(people.keyAt(i));
 
@@ -151,7 +151,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 				return;
 			}
 
-			long id = mPeopleDatabase.addPerson(name);
+			int id = mPeopleDatabase.addPerson(name);
 
 			if (id == -1) {
 				Toast.makeText(
@@ -169,7 +169,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		}
 
 		@Override
-		public void editPersonName(long id, String newName) {
+		public void editPersonName(int id, String newName) {
 			if (mPeopleAdapter.editPersonName(id, newName) == false) {
 				Toast.makeText(
 						mActivity,
@@ -183,7 +183,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		}
 
 		@Override
-		public void removePerson(long id) {
+		public void removePerson(int id) {
 			mPeopleAdapter.removePerson(id);
 			if (mPeopleAdapter.getGroupCount() == 0)
 				noPeopleMessage.setVisibility(View.VISIBLE);
@@ -195,8 +195,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		}
 
 		@Override
-		public void addPhoto(long personId, Photo photo) {
-			long photoId = mPeopleDatabase.addPhoto(personId, photo.getUrl());
+		public void addPhoto(int personId, Photo photo) {
+			int photoId = mPeopleDatabase.addPhoto(personId, photo.getUrl());
 
 			mPeopleAdapter.addPhoto(personId, photoId, photo);
 
@@ -205,7 +205,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		}
 
 		@Override
-		public void removePhoto(long personId, long photoId) {
+		public void removePhoto(int personId, int photoId) {
 			mPeopleAdapter.removePhoto(personId, photoId);
 			mPeopleDatabase.removePhoto(photoId);
 
@@ -218,7 +218,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 
 		@Override
 		public void addPhoto(PhotoGallery gallery) {
-			long id = (long) gallery.getTag();
+			int id = (int) gallery.getTag();
 			String name = mPeopleAdapter.getPersonById(id).getName();
 
 			Intent mIntent = new Intent(mActivity, FaceDetectionActivity.class);
@@ -233,8 +233,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			// i = 0 is add/delete
 			for (int i = 1, l = mPhotoAdapter.getCount(); i < l; i++)
 				if (mPhotoAdapter.isSelected(i)) {
-					final long personId = (long) gallery.getTag();
-					final long photoId = mPeopleAdapter.getPersonById(personId)
+					final int personId = (int) gallery.getTag();
+					final int photoId = mPeopleAdapter.getPersonById(personId)
 							.getPhotos().keyAt(i - 1);
 					mPeopleAdapterListener.removePhoto(personId, photoId);
 				}
@@ -253,7 +253,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			if (extras == null)
 				return;
 
-			long personId = extras.getLong(FaceDetectionActivity.PERSON_ID);
+			int personId = extras.getInt(FaceDetectionActivity.PERSON_ID);
 			String photoPath = data.getExtras().getString(
 					FaceDetectionActivity.PHOTO_PATH);
 			mPeopleAdapterListener.addPhoto(personId,
