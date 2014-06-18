@@ -8,6 +8,16 @@
         <Preference
             android:key="@string/general_restore_default_preferences"
             android:title="@string/general_restore_default_preferences_title" />
+        <EditTextPreference
+            android:defaultValue="@string/management_number_of_gallery_columns_landscape_default"
+            android:inputType="number"
+            android:key="@string/management_number_of_gallery_columns_landscape"
+            android:title="@string/management_number_of_gallery_columns_landscape_title" />
+        <EditTextPreference
+            android:defaultValue="@string/management_number_of_gallery_columns_portrait_default"
+            android:inputType="number"
+            android:key="@string/management_number_of_gallery_columns_portrait"
+            android:title="@string/management_number_of_gallery_columns_portrait_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_recognition" >
         <ListPreference
@@ -45,17 +55,4 @@
             android:key="@string/detection_max_relative_face_size"
             android:title="@string/detection_max_relative_face_size_title" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/preference_management" >
-        <EditTextPreference
-            android:defaultValue="@string/management_number_of_gallery_columns_landscape_default"
-            android:inputType="number"
-            android:key="@string/management_number_of_gallery_columns_landscape"
-            android:title="@string/management_number_of_gallery_columns_landscape_title" />
-        <EditTextPreference
-            android:defaultValue="@string/management_number_of_gallery_columns_portrait_default"
-            android:inputType="number"
-            android:key="@string/management_number_of_gallery_columns_portrait"
-            android:title="@string/management_number_of_gallery_columns_portrait_title" />
-    </PreferenceCategory>
-
 </PreferenceScreen>
