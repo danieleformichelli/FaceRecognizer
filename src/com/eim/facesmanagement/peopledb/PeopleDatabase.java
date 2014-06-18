@@ -166,11 +166,12 @@ public class PeopleDatabase {
 				+ FacesContract.Faces.PHOTO_URL + " FROM "
 				+ FacesContract.People.TABLE + " LEFT JOIN "
 				+ FacesContract.Faces.TABLE + " WHERE "
-				+ FacesContract.Faces.TABLE + "." + FacesContract.People._ID
+				+ FacesContract.People.TABLE + "." + FacesContract.People._ID
 				+ " = ?";
 		String[] whereArgs = new String[] { String.valueOf(id) };
 
 		Cursor c = db.rawQuery(query, whereArgs);
+
 		int personNameIndex = c.getColumnIndex(FacesContract.People.NAME);
 		int photoIdIndex = c.getColumnIndex("photoId");
 		int photoUrlIndex = c.getColumnIndex(FacesContract.Faces.PHOTO_URL);
