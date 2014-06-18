@@ -81,11 +81,15 @@ public class EIMPreferences {
 
 	private String detectorTypeKey;
 	private String detectorTypeDefault;
+	private String[] detectorTypes;
 
 	public FaceDetector.Type detectorType() {
-		return (Boolean.valueOf(mSharedPreferences.getString(detectorTypeKey,
-				detectorTypeDefault)) ? FaceDetector.Type.JAVA
-				: FaceDetector.Type.NATIVE);
+		String mType = mSharedPreferences.getString(detectorTypeKey,
+				detectorTypeDefault);
+		if (detectorTypes[0].equals(mType))
+			return FaceDetector.Type.JAVA;
+		else
+			return FaceDetector.Type.NATIVE;
 	}
 
 	private String recognitionTypeKey;
@@ -126,9 +130,11 @@ public class EIMPreferences {
 		detectionMaxRelativeFaceSizeDefault = mContext
 				.getString(R.string.detection_max_relative_face_size_default);
 
-		detectorTypeKey = mContext.getString(R.string.detection_detector_type);
+		detectorTypeKey = mContext.getString(R.string.detector_type);
 		detectorTypeDefault = mContext
-				.getString(R.string.detection_detector_type_on);
+				.getString(R.string.detector_type_default);
+		detectorTypes = mContext.getResources().getStringArray(
+				R.array.detector_type_entry_values);
 
 		numberOfGalleryColumnsLandscapeKey = mContext
 				.getString(R.string.management_number_of_gallery_columns_landscape);

@@ -31,13 +31,19 @@
     </string-array>
 
     <!-- Detection -->
-
+	
     <string name="preference_detection">Detection</string>
-    <string name="detection_detector_type">detection_detector_type</string>
-    <string name="detection_detector_type_title">Detector Type</string>
-    <string name="detection_detector_type_on">Java</string>
-    <string name="detection_detector_type_off">Native</string>
-    <string name="detection_detector_type_default">Native</string>
+	<string name="detector_type">detector_type</string>
+	<string-array name="detector_type_entries">
+	    <item>Java</item>
+	    <item>Native</item>
+	</string-array>
+	<string-array name="detector_type_entry_values">
+	    <item>Java</item>
+	    <item>Native</item>
+	</string-array>
+    <string name="detector_type_title">Detector type</string>
+    <string name="detector_type_default">Java</string>
     <string name="detection_scale_factor">detection_scale_factor</string>
     <string name="detection_scale_factor_default">1.1</string>
     <string name="detection_scale_factor_title">Scale Factor</string>

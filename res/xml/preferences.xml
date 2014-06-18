@@ -18,13 +18,12 @@
             android:title="@string/recognition_recognizer_type_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_detection" >
-        <SwitchPreference
-            android:defaultValue="@string/detection_detector_type_default"
-            android:key="@string/detection_detector_type"
-            android:switchTextOff="@string/detection_detector_type_off"
-            android:switchTextOn="@string/detection_detector_type_on"
-            android:title="@string/detection_detector_type_title" />
-
+        <ListPreference
+            android:defaultValue="@string/detector_type_default"
+            android:key="@string/detector_type"
+            android:title="@string/detector_type_title" 
+            android:entries="@array/detector_type_entries"
+            android:entryValues="@array/detector_type_entry_values"/>
         <EditTextPreference
             android:defaultValue="@string/detection_scale_factor_default"
             android:inputType="numberDecimal"

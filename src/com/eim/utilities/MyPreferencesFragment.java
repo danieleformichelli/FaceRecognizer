@@ -255,8 +255,8 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	private void restorePreferences() {
 		setPreference(R.string.recognition_recognizer_type,
 				R.string.recognition_recognizer_type_default);
-		setPreference(R.string.detection_detector_type,
-				R.string.detection_detector_type_default);
+		setPreference(R.string.detector_type,
+				R.string.detector_type_default);
 		setPreference(R.string.detection_scale_factor,
 				R.string.detection_scale_factor_default);
 		setPreference(R.string.detection_min_neighbors,
