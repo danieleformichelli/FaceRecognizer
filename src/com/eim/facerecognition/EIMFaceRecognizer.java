@@ -24,7 +24,7 @@ public class EIMFaceRecognizer {
 	public enum Type {
 		EIGEN, FISHER, LBPH;
 
-		boolean isIncrementable() {
+		public boolean isIncrementable() {
 			return this == LBPH;
 		}
 
@@ -244,5 +244,9 @@ public class EIMFaceRecognizer {
 
 		if (isTrained[index])
 			faceRecognizers[index].predict(src, label, confidence);
+	}
+
+	public Type getType() {
+		return type;
 	}
 }
