@@ -16,6 +16,8 @@ public class PeopleDatabase {
 	private static PeopleDBOpenHelper pdboh;
 	private static SQLiteDatabase db;
 
+	private boolean modifiedFlag;
+	
 	public static PeopleDatabase getInstance(Context mContext) {
 		if (instance == null) {
 			instance = new PeopleDatabase();
@@ -32,6 +34,7 @@ public class PeopleDatabase {
 	}
 
 	private PeopleDatabase() {
+		modifiedFlag = true;
 	}
 
 	/**
@@ -49,6 +52,8 @@ public class PeopleDatabase {
 		String[] whereArgs = { String.valueOf(id) };
 
 		db.update(FacesContract.People.TABLE, values, whereClause, whereArgs);
+		
+		modifiedFlag = true;
 	}
 
 	/**
@@ -78,6 +83,8 @@ public class PeopleDatabase {
 
 			db.delete(FacesContract.People.TABLE, whereClause, whereArgs);
 		}
+		
+		modifiedFlag = true;
 	}
 
 	/**
@@ -91,6 +98,8 @@ public class PeopleDatabase {
 		ContentValues values = new ContentValues();
 		values.put(FacesContract.People.NAME, name);
 
+		modifiedFlag = true;
+		
 		return (int) db.insert(FacesContract.People.TABLE, null, values);
 	}
 
@@ -108,6 +117,7 @@ public class PeopleDatabase {
 		values.put(FacesContract.Faces.PERSON_ID, personId);
 		values.put(FacesContract.Faces.PHOTO_URL, photoUrl);
 
+		modifiedFlag = true;
 		return (int) db.insert(FacesContract.Faces.TABLE, null, values);
 	}
 
@@ -137,6 +147,8 @@ public class PeopleDatabase {
 
 			db.delete(FacesContract.Faces.TABLE, whereClause, whereArgs);
 		}
+
+		modifiedFlag = true;
 	}
 
 	/**
@@ -248,7 +260,16 @@ public class PeopleDatabase {
 			if (photoFile != null)
 				photoFile.delete();
 		}
-
+		
+		modifiedFlag = true;
 		pdboh.clear(db);
+	}
+	
+	public boolean isModified() {
+		return modifiedFlag;
+	}
+	
+	public void clearModifiedFlag() {
+		modifiedFlag = false;
 	}
 }

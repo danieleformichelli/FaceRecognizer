@@ -89,7 +89,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				.findViewById(R.id.face_recognition_surface_view);
 		mCameraView.setCvCameraViewListener(this);
 		
-		mCache = new Cache();
 		mThresholdBar = (SeekBar) activity
 				.findViewById(R.id.threshold_bar);
 		mThresholdBar.setOnSeekBarChangeListener(this);
@@ -105,6 +104,11 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	public void swipeIn(boolean right) {
 		if (mCameraView != null)
 			mCameraView.enableView();
+		
+		if (mCache == null || mPeopleDatabase.isModified()) {
+			mCache = new Cache();
+			mPeopleDatabase.clearModifiedFlag();
+		}
 	}
 
 	@Override
@@ -275,7 +279,14 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				.recognitionType();
 		mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
 				mFaceRecognizerType);
+		
 		mPeopleDatabase = PeopleDatabase.getInstance(activity);
+		
+		if (mCache == null || mPeopleDatabase.isModified()) {
+			mCache = new Cache();
+			mPeopleDatabase.clearModifiedFlag();
+		}
+		
 	}
 
 	public class LabelledRect {
