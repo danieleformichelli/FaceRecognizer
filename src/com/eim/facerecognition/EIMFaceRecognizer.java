@@ -10,13 +10,14 @@ import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.imgproc.Imgproc;
 
-import com.eim.facesmanagement.peopledb.Person;
-import com.eim.facesmanagement.peopledb.Photo;
-
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 import android.util.SparseArray;
+
+import com.eim.facesmanagement.peopledb.Person;
+import com.eim.facesmanagement.peopledb.Photo;
 
 public class EIMFaceRecognizer {
 
@@ -27,6 +28,8 @@ public class EIMFaceRecognizer {
 			return this == LBPH;
 		}
 	}
+
+	private static final String TAG = "EIMFaceRecognizer";
 
 	private static String MODEL_FILE_NAME = "trainedModel.xml";
 
@@ -140,7 +143,8 @@ public class EIMFaceRecognizer {
 		}
 
 		List<Mat> faces = new ArrayList<Mat>();
-		Mat labels = new Mat(0, 0, CvType.CV_32SC1);
+		List<Integer> labels = new ArrayList<Integer>(); 
+
 		int counter = 0;
 
 		for (int i = 0, l = sparseArray.size(); i < l; i++) {
@@ -157,12 +161,23 @@ public class EIMFaceRecognizer {
 					face = BitmapFactory.decodeFile(mPhoto.getUrl());
 
 				Utils.bitmapToMat(face, mMat);
+				Imgproc.cvtColor(mMat, mMat, Imgproc.COLOR_RGB2GRAY);
 				faces.add(mMat);
-				labels.put(counter++, 0, new int[] { (int) label });
+				labels.add((int) label);
+				
+				Log.d(TAG, "Inserting " + label + ":" + mPhoto.getUrl());
+				
+				// labels.put(counter++, 0, new int[] { (int) label });
 			}
 		}
+		
+		Mat labelsMat = new Mat(labels.size(), 1, CvType.CV_32SC1);
+		for (counter = 0; counter < labelsMat.rows(); counter++)
+			labelsMat.put(counter, 0, new int[] { labels.get(counter) });
+		
+		Log.i(TAG, labelsMat.dump());
 
-		mFaceRecognizer.train(faces, labels);
+		mFaceRecognizer.train(faces, labelsMat);
 		mFaceRecognizer.save(mModelPath);
 	}
 
