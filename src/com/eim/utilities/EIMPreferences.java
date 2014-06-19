@@ -113,6 +113,8 @@ public class EIMPreferences {
 	private String recognitionThresholdDefault;
 
 	public double recognitionThreshold() {
+		android.util.Log.e("ASD",""+Double.parseDouble(mSharedPreferences.getString(
+				recognitionThresholdKey, recognitionThresholdDefault)));
 		return Double.parseDouble(mSharedPreferences.getString(
 				recognitionThresholdKey, recognitionThresholdDefault));
 	}
@@ -166,5 +168,4 @@ public class EIMPreferences {
 		recognitionThresholdDefault = mContext
 				.getString(R.string.recognition_threshold_default);
 	}
-
 }

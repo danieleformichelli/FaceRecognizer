@@ -187,7 +187,8 @@ public class FaceDetectionActivity extends Activity {
 					break;
 				case 2: // take photo from camera
 
-					Intent takeDetectedPictureIntent = new Intent(activity, TakePhotoWithDetectionActivity.class);
+					Intent takeDetectedPictureIntent = new Intent(activity,
+							TakePhotoWithDetectionActivity.class);
 
 					// check if camera activity is not available
 					if (takeDetectedPictureIntent.resolveActivity(activity
@@ -336,10 +337,10 @@ public class FaceDetectionActivity extends Activity {
 
 	private Bitmap[] detectFaces() {
 		loadScene();
-		
+
 		Mat gray = new Mat();
 		Imgproc.cvtColor(mScene, gray, Imgproc.COLOR_RGB2GRAY);
-		
+
 		Rect[] faceRegions = FaceDetector.getInstance(this).detect(gray);
 
 		Bitmap[] detectedFaces = new Bitmap[faceRegions.length];

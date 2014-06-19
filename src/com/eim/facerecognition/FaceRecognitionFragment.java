@@ -109,6 +109,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mThresholdTextView = (TextView) activity.findViewById(R.id.threshold_text);
 		mThresholdBar = (SeekBar) activity.findViewById(R.id.threshold_bar);
 		mThresholdBar.setOnSeekBarChangeListener(this);
+		mThresholdBar.setProgress(mConfidenceThreshold.intValue());
 	}
 
 	@Override
