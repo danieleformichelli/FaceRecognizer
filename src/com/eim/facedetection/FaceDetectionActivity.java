@@ -18,6 +18,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
+import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -339,8 +340,11 @@ public class FaceDetectionActivity extends Activity {
 	private Bitmap[] detectFaces() {
 		if (mFaceDetector == null)
 			initDetector();
-
-		Rect[] faceRegions = mFaceDetector.detect(mScene);
+		
+		Mat gray = new Mat();
+		Imgproc.cvtColor(mScene, gray, Imgproc.COLOR_RGB2GRAY);
+		
+		Rect[] faceRegions = mFaceDetector.detect(gray);
 
 		Bitmap[] detectedFaces = new Bitmap[faceRegions.length];
 
