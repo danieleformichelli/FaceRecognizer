@@ -55,8 +55,6 @@ public class FaceDetectionActivity extends Activity {
 	private File mSceneFile;
 	private Mat mScene;
 
-	private FaceDetector mFaceDetector;
-
 	private int personId = -1;
 	private String mLabelName = "Unknown";
 
@@ -326,8 +324,7 @@ public class FaceDetectionActivity extends Activity {
 		}
 	}
 
-	private void initDetector() {
-		mFaceDetector = FaceDetector.getInstance(this);
+	private void loadScene() {
 
 		Bitmap sceneBitmap = BitmapFactory.decodeFile(mSceneFile
 				.getAbsolutePath());
@@ -338,13 +335,12 @@ public class FaceDetectionActivity extends Activity {
 	}
 
 	private Bitmap[] detectFaces() {
-		if (mFaceDetector == null)
-			initDetector();
+		loadScene();
 		
 		Mat gray = new Mat();
 		Imgproc.cvtColor(mScene, gray, Imgproc.COLOR_RGB2GRAY);
 		
-		Rect[] faceRegions = mFaceDetector.detect(gray);
+		Rect[] faceRegions = FaceDetector.getInstance(this).detect(gray);
 
 		Bitmap[] detectedFaces = new Bitmap[faceRegions.length];
 
