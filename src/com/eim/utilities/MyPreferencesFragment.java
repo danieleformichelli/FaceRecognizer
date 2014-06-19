@@ -267,7 +267,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 			String key = mPreference.getKey();
 
 			if (key.equals(recognizerTypeKey)) {
-				EIMFaceRecognizer.Type mRecognizerType = EIMFaceRecognizer.Type
+				final EIMFaceRecognizer.Type mRecognizerType = EIMFaceRecognizer.Type
 						.valueOf(((ListPreference) mPreference).getValue());
 				mFaceRecognizer.setType(mRecognizerType);
 				mFaceRecognizer.train(mPeopleDatabase.getPeople());
@@ -276,8 +276,9 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 						.valueOf(((ListPreference) mPreference).getValue());
 				mFaceDetector.setDetectorType(mDetectorType);
 			} else if (key.equals(classifierKey)) {
-				// TODO
-				mFaceDetector.setClassifier(null);
+				final FaceDetector.Classifier mFaceDetectorClassifier = FaceDetector.Classifier
+						.valueOf(((ListPreference) mPreference).getValue());
+				mFaceDetector.setClassifier(mFaceDetectorClassifier);
 			} else if (key.equals(scaleFactorKey)) {
 				final double scaleFactor = Double
 						.valueOf(((EditTextPreference) mPreference).getText());

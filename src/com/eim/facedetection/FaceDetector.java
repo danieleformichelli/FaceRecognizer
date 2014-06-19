@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
@@ -23,12 +24,17 @@ public class FaceDetector {
 		JAVA, NATIVE
 	}
 
+	public enum Classifier {
+		LBPCASCADE_FRONTALFACE, HAARCASCADE_FRONTALFACE_DEFAULT, HAARCASCADE_FRONTALFACE_ALT, HAARCASCADE_FRONTALFACE_ALT2, HAARCASCADE_FRONTALFACE_ALT_TREE
+	}
+
 	private Context mContext;
 
 	private File mCascadeFile;
 	private CascadeClassifier mJavaDetector;
 	private DetectionBasedTracker mNativeDetector;
 	private Type mDetectorType = Type.NATIVE;
+	private Classifier mClassifier = Classifier.LBPCASCADE_FRONTALFACE;
 
 	private double mScaleFactor = 1.1;
 	private int mMinNeighbors = 2;
@@ -40,26 +46,44 @@ public class FaceDetector {
 	private double mMaxRelativeFaceSize = 1;
 
 	private static FaceDetector instance = null;
-	
+
 	public static FaceDetector getInstance(Context c) {
 		if (instance == null)
 			instance = new FaceDetector(c);
-		
+
 		return instance;
 	}
-	
+
 	protected FaceDetector(Context c) {
 		mContext = c;
 		initDetector();
 	}
 
 	private void initDetector() {
-		try {
-			File cascadeDir = mContext.getDir("cascade", Context.MODE_PRIVATE);
-			mCascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
+		loadCascadeFile();
 
-			if (!mCascadeFile.exists()) {
-				// load cascade file from application resources
+		mJavaDetector = new CascadeClassifier(mCascadeFile.getAbsolutePath());
+		if (mJavaDetector.empty()) {
+			Log.e(TAG, "Failed to load cascade classifier");
+			mJavaDetector = null;
+		} else
+			Log.i(TAG,
+					"Loaded cascade classifier from "
+							+ mCascadeFile.getAbsolutePath());
+
+		System.loadLibrary("nativedetector");
+		mNativeDetector = new DetectionBasedTracker(
+				mCascadeFile.getAbsolutePath(), 0);
+	}
+
+	private void loadCascadeFile() {
+		File cascadeDir = mContext.getDir("cascade", Context.MODE_PRIVATE);
+		mCascadeFile = new File(cascadeDir, mClassifier.toString()
+				.toLowerCase(Locale.US) + ".xml");
+
+		if (!mCascadeFile.exists()) {
+			// load cascade file from application resources
+			try {
 				InputStream is = mContext.getResources().openRawResource(
 						R.raw.lbpcascade_frontalface);
 
@@ -67,49 +91,33 @@ public class FaceDetector {
 
 				byte[] buffer = new byte[4096];
 				int bytesRead;
-				while ((bytesRead = is.read(buffer)) != -1) {
+				while ((bytesRead = is.read(buffer)) != -1)
 					os.write(buffer, 0, bytesRead);
-				}
+
 				is.close();
 				os.close();
+			} catch (IOException e) {
+				mCascadeFile.delete();
+				mCascadeFile = null;
+				e.printStackTrace();
 			}
-
-			mJavaDetector = new CascadeClassifier(
-					mCascadeFile.getAbsolutePath());
-			if (mJavaDetector.empty()) {
-				Log.e(TAG, "Failed to load cascade classifier");
-				mJavaDetector = null;
-			} else
-				Log.i(TAG,
-						"Loaded cascade classifier from "
-								+ mCascadeFile.getAbsolutePath());
-
-			System.loadLibrary("nativedetector");
-			mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0);
-			
-			cascadeDir.delete();
-
-		} catch (IOException e) {
-			e.printStackTrace();
-			Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
 		}
 	}
-	
-	// TODO
-	public Object getClassifier() {
-		return null;
+
+	public FaceDetector.Classifier Classifier() {
+		return mClassifier;
 	}
-	// TODO
+
 	public void setClassifier(Object classifier) {
-		return;
+		// this.mClassifier = classifier;
+		// initDetector();
 	}
 
 	public Type getDetectorType() {
 		return mDetectorType;
 	}
-	
+
 	public void setDetectorType(Type detectorType) {
-		android.util.Log.e("ASD",detectorType.toString());
 		mDetectorType = detectorType;
 	}
 
