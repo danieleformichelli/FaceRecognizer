@@ -25,6 +25,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.View.OnClickListener;
+import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -53,6 +55,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private ControlledJavaCameraView mCameraView;
 
 	private boolean mOpenCVLoaded = false;
+	private int mCurrentCameraIndex = ControlledJavaCameraView.CAMERA_ID_BACK;
 
 	private Mat mGray;
 	private Mat mRgba;
@@ -66,6 +69,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	private SeekBar mThresholdBar;
 	private TextView mThresholdTextView;
+	private ImageButton mSwitchButton;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -85,7 +89,23 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mCameraView = (ControlledJavaCameraView) activity
 				.findViewById(R.id.face_recognition_surface_view);
 		mCameraView.setCvCameraViewListener(this);
+		mCameraView.setCameraIndex(mCurrentCameraIndex);
+		
+		mSwitchButton = (ImageButton) activity.findViewById(R.id.switch_camera_button);
+		mSwitchButton.setOnClickListener(new OnClickListener() {
 
+			@Override
+			public void onClick(View v) {
+				if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_BACK)
+					mCurrentCameraIndex = ControlledJavaCameraView.CAMERA_ID_FRONT;
+				else
+					mCurrentCameraIndex = ControlledJavaCameraView.CAMERA_ID_BACK;
+				mCameraView.disableView();
+				mCameraView.setCameraIndex(mCurrentCameraIndex);
+				mCameraView.enableView();
+			}
+		});
+		
 		mThresholdTextView = (TextView) activity.findViewById(R.id.threshold_text);
 		mThresholdBar = (SeekBar) activity.findViewById(R.id.threshold_bar);
 		mThresholdBar.setOnSeekBarChangeListener(this);
@@ -161,6 +181,16 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
 		mRgba = inputFrame.rgba();
 		mGray = inputFrame.gray();
+		
+		if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT) {
+			Mat flippedRgba = mRgba;
+			mRgba = new Mat();
+			Core.flip(flippedRgba, mRgba, 1);
+			
+			Mat flippedGrey = mGray;
+			mGray = new Mat();
+			Core.flip(flippedGrey, mGray, 1);
+		}
 
 		Rect[] facesArray = mFaceDetector.detect(mGray);
 

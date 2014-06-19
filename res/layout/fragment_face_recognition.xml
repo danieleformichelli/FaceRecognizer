@@ -28,9 +28,20 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:layout_toLeftOf="@+id/switch_camera_button"
         android:layout_toRightOf="@+id/threshold_text"
         android:indeterminate="false"
         android:max="1000"
         android:progress="10" />
+
+    <ImageButton
+        android:id="@+id/switch_camera_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/threshold_bar"
+        android:src="@android:drawable/ic_menu_rotate"
+        android:contentDescription="TODO"/>
 
 </RelativeLayout>
