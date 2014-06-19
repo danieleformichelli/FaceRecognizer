@@ -23,7 +23,7 @@ public class FaceDetector {
 	public enum Type {
 		JAVA, NATIVE
 	}
-	
+
 	private Context mContext;
 
 	private File mCascadeFile;
@@ -37,6 +37,10 @@ public class FaceDetector {
 
 	private double mMaxAbsoluteFaceSize = 0;
 	private double mMaxRelativeFaceSize = 1;
+
+	private Type mDetectorType = Type.NATIVE;
+
+	private DetectionBasedTracker mNativeDetector;
 
 	public FaceDetector(Context c) {
 		mContext = c;
@@ -74,9 +78,10 @@ public class FaceDetector {
 						"Loaded cascade classifier from "
 								+ mCascadeFile.getAbsolutePath());
 
-			// mNativeDetector = new
-			// DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0);
-			// cascadeDir.delete();
+			System.loadLibrary("nativedetector");
+			mNativeDetector = new DetectionBasedTracker(mCascadeFile.getAbsolutePath(), 0);
+			
+			cascadeDir.delete();
 
 			loadParamsFromPreferences();
 
@@ -92,8 +97,14 @@ public class FaceDetector {
 
 		setMinNeighbors(appPrefs.detectionMinNeighbors());
 		setMinRelativeFaceSize(appPrefs.detectionMinRelativeFaceSize());
-		// setMaxRelativeFaceSize(Double.parseDouble(appPrefs.showDetectionMaxRelativeFaceSize()));
+		setMaxRelativeFaceSize(appPrefs.detectionMaxRelativeFaceSize());
 		setScaleFactor(appPrefs.detectionScaleFactor());
+		setDetectorType(appPrefs.detectorType());
+
+	}
+
+	private void setDetectorType(Type detectorType) {
+		mDetectorType = detectorType;
 	}
 
 	public double getMinRelativeFaceSize() {
@@ -149,7 +160,7 @@ public class FaceDetector {
 				mMinAbsoluteFaceSize = Math
 						.round(height * mMinRelativeFaceSize);
 
-			// mNativeDetector.setMinFaceSize(mAbsoluteFaceSize);
+			mNativeDetector.setMinFaceSize((int) mMinAbsoluteFaceSize);
 		}
 
 		if (mMaxAbsoluteFaceSize == 0) {
@@ -159,24 +170,22 @@ public class FaceDetector {
 				mMaxAbsoluteFaceSize = Math
 						.round(height * mMaxRelativeFaceSize);
 
-			// mNativeDetector.setMinFaceSize(mAbsoluteFaceSize);
+			mNativeDetector.setMinFaceSize((int) mMinAbsoluteFaceSize);
 		}
 
-		if (true) {
+		if (mDetectorType == Type.JAVA) {
 			if (mJavaDetector != null)
 				mJavaDetector.detectMultiScale(scene, faces, mScaleFactor,
 						mMinNeighbors,
 						2, // TODO: objdetect.CV_HAAR_SCALE_IMAGE
 						new Size(mMinAbsoluteFaceSize, mMinAbsoluteFaceSize),
 						new Size(mMaxAbsoluteFaceSize, mMaxAbsoluteFaceSize));
+		} else if (mDetectorType == Type.NATIVE) {
+			if (mNativeDetector != null)
+				mNativeDetector.detect(scene, faces);
+		} else {
+			Log.e(TAG, "Detection method is not selected!");
 		}
-		// else if (mDetectorType == NATIVE_DETECTOR) {
-		// if (mNativeDetector != null)
-		// mNativeDetector.detect(mGray, faces);
-		// }
-		// else {
-		// Log.e(TAG, "Detection method is not selected!");
-		// }
 
 		return faces.toArray();
 
