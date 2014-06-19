@@ -84,10 +84,6 @@ public class EIMFaceRecognizer {
 		return instance;
 	}
 
-	public static EIMFaceRecognizer getInstance(Context mContext) {
-		return getInstance(mContext, Type.LBPH);
-	}
-
 	/**
 	 * Resets the trained model
 	 */

@@ -13,6 +13,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
@@ -25,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
+
 import com.eim.R;
 import com.eim.facedetection.FaceDetector;
 import com.eim.facesmanagement.peopledb.PeopleDatabase;
@@ -59,7 +61,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	private FaceDetector mFaceDetector;
 	private EIMFaceRecognizer mFaceRecognizer;
-	private EIMFaceRecognizer.Type mFaceRecognizerType;
 	private PeopleDatabase mPeopleDatabase;
 
 	private SeekBar mThresholdBar;
@@ -224,15 +225,17 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 			int[] predictedLabel = new int[1];
 			double[] confidence = new double[1];
 			mFaceRecognizer.predict(face, predictedLabel, confidence);
-			
+
 			if (confidence[0] > CONFIDENCE_THRESHOLD) {
 				Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
 				if (guess == null)
 					continue;
-				
-				recognizedPeople.add(new LabelledRect(faceRect, guess.getName(), guess.getPhotos().get(0)));
 
-				Log.d(TAG, "Prediction: " + guess.getName() + " (" + confidence[0] + ")");	
+				recognizedPeople.add(new LabelledRect(faceRect,
+						guess.getName(), guess.getPhotos().get(0)));
+
+				Log.d(TAG, "Prediction: " + guess.getName() + " ("
+						+ confidence[0] + ")");
 			}
 		}
 
@@ -241,10 +244,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	private void setupFaceDetection() {
 		mFaceDetector = FaceDetector.getInstance(activity);
-		mFaceRecognizerType = EIMPreferences.getInstance(activity)
-				.recognitionType();
 		mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
-				mFaceRecognizerType);
+				EIMPreferences.getInstance(activity).recognitionType());
 
 		mPeopleDatabase = PeopleDatabase.getInstance(activity);
 	}

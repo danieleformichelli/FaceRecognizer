@@ -80,6 +80,17 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		mPreferences = EIMPreferences.getInstance(activity);
 		mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
 				mPreferences.recognitionType());
+		initInstances();
+	}
+
+	private void initInstances() {
+		// Face detector initialization
+		mFaceDetector.setClassifier(null/*TODO*/);
+		mFaceDetector.setDetectorType(mPreferences.detectorType());
+		mFaceDetector.setScaleFactor(mPreferences.detectionScaleFactor());
+		mFaceDetector.setMinNeighbors(mPreferences.detectionMinNeighbors());
+		mFaceDetector.setMinRelativeFaceSize(mPreferences.detectionMinRelativeFaceSize());
+		mFaceDetector.setMaxRelativeFaceSize(mPreferences.detectionMaxRelativeFaceSize());
 	}
 
 	private void getKeys() {
@@ -118,16 +129,10 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 	@Override
 	public void swipeIn(boolean right) {
-		mPreferenceScreen.getSharedPreferences()
-				.registerOnSharedPreferenceChangeListener(
-						mOnSharedPreferenceChangeListener);
 	}
 
 	@Override
 	public void swipeOut(boolean right) {
-		mPreferenceScreen.getSharedPreferences()
-				.unregisterOnSharedPreferenceChangeListener(
-						mOnSharedPreferenceChangeListener);
 	}
 
 	private void initPreferences() {
@@ -164,8 +169,6 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		public void onSharedPreferenceChanged(
 				SharedPreferences sharedPreferences, String key) {
 			Preference mPreference = findPreference(key);
-
-			setPreferenceSummary(mPreference);
 
 			if (oldValue != null) {
 				int msgId;
@@ -204,8 +207,10 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				Toast.makeText(activity, getString(msgId), Toast.LENGTH_SHORT)
 						.show();
 				restoreValue(sharedPreferences, key);
+			} else if (mPreference instanceof ListPreference) {
+				setPreferenceSummary(mPreference);
+				updateInstances(mPreference);
 			}
-
 		}
 
 		private Validity isValid(SharedPreferences sharedPreferences) {
@@ -268,7 +273,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				mFaceRecognizer.train(mPeopleDatabase.getPeople());
 			} else if (key.equals(detectorTypeKey)) {
 				final FaceDetector.Type mDetectorType = FaceDetector.Type
-						.valueOf(((EditTextPreference) mPreference).getText());
+						.valueOf(((ListPreference) mPreference).getValue());
 				mFaceDetector.setDetectorType(mDetectorType);
 			} else if (key.equals(classifierKey)) {
 				// TODO

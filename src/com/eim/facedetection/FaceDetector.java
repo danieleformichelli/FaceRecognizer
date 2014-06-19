@@ -15,7 +15,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.eim.R;
-import com.eim.utilities.EIMPreferences;
 
 public class FaceDetector {
 	private static final String TAG = "FaceDetector";
@@ -45,6 +44,7 @@ public class FaceDetector {
 	public static FaceDetector getInstance(Context c) {
 		if (instance == null)
 			instance = new FaceDetector(c);
+		
 		return instance;
 	}
 	
@@ -89,25 +89,12 @@ public class FaceDetector {
 			
 			cascadeDir.delete();
 
-			loadParamsFromPreferences();
-
 		} catch (IOException e) {
 			e.printStackTrace();
 			Log.e(TAG, "Failed to load cascade. Exception thrown: " + e);
 		}
 	}
-
-	public void loadParamsFromPreferences() {
-
-		EIMPreferences appPrefs = EIMPreferences.getInstance(mContext);
-
-		setMinNeighbors(appPrefs.detectionMinNeighbors());
-		setMinRelativeFaceSize(appPrefs.detectionMinRelativeFaceSize());
-		setMaxRelativeFaceSize(appPrefs.detectionMaxRelativeFaceSize());
-		setScaleFactor(appPrefs.detectionScaleFactor());
-		setDetectorType(appPrefs.detectorType());
-
-	}
+	
 	// TODO
 	public Object getClassifier() {
 		return null;
@@ -122,6 +109,7 @@ public class FaceDetector {
 	}
 	
 	public void setDetectorType(Type detectorType) {
+		android.util.Log.e("ASD",detectorType.toString());
 		mDetectorType = detectorType;
 	}
 

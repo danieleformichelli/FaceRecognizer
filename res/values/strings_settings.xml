@@ -44,8 +44,8 @@
         <item>Native</item>
     </string-array>
     <string-array name="detection_detector_type_values">
-        <item>Java</item>
-        <item>Native</item>
+        <item>JAVA</item>
+        <item>NATIVE</item>
     </string-array>
 
     <string name="detection_detector_type_title">Detector type</string>
