@@ -80,7 +80,7 @@ public class FaceDetector {
 		File cascadeDir = mContext.getDir("cascade", Context.MODE_PRIVATE);
 		mCascadeFile = new File(cascadeDir, mClassifier.toString()
 				.toLowerCase(Locale.US) + ".xml");
-
+		
 		if (!mCascadeFile.exists()) {
 			// load cascade file from application resources
 			try {

@@ -38,6 +38,8 @@
 
     <string name="preference_detection">Detection</string>
     <string name="detection_detector_type">detector_type</string>
+    <string name="detection_detector_type_title">Detector type</string>
+    <string name="detection_detector_type_default">NATIVE</string>
 
     <string-array name="detection_detector_type_entries">
         <item>Java</item>
@@ -48,8 +50,6 @@
         <item>NATIVE</item>
     </string-array>
 
-    <string name="detection_detector_type_title">Detector type</string>
-    <string name="detection_detector_type_default">Native</string>
     <string name="detection_scale_factor">detection_scale_factor</string>
     <string name="detection_scale_factor_default">1.1</string>
     <string name="detection_scale_factor_title">Scale Factor</string>
