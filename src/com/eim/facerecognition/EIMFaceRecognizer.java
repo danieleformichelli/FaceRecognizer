@@ -39,7 +39,7 @@ public class EIMFaceRecognizer {
 	private boolean isTrained;
 	SparseArray<Person> dataset;
 
-	public EIMFaceRecognizer(Context mContext, Type mType) {
+	private EIMFaceRecognizer(Context mContext, Type mType) {
 
 		switch (mType) {
 		case EIGEN:
@@ -79,7 +79,7 @@ public class EIMFaceRecognizer {
 
 		System.loadLibrary("facerecognizer");
 
-		instance = new EIMFaceRecognizer(mContext, mType);
+		instance = new EIMFaceRecognizer(mContext.getApplicationContext(), mType);
 
 		return instance;
 	}

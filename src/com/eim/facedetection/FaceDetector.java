@@ -48,9 +48,9 @@ public class FaceDetector {
 
 	private static FaceDetector instance = null;
 
-	public static FaceDetector getInstance(Context c) {
+	public static FaceDetector getInstance(Context mContext) {
 		if (instance == null)
-			instance = new FaceDetector(c);
+			instance = new FaceDetector(mContext.getApplicationContext());
 
 		return instance;
 	}

@@ -21,7 +21,7 @@ public class PeopleDatabase {
 	public static PeopleDatabase getInstance(Context mContext) {
 		if (instance == null) {
 			instance = new PeopleDatabase();
-			pdboh = new PeopleDBOpenHelper(mContext);
+			pdboh = new PeopleDBOpenHelper(mContext.getApplicationContext());
 			db = pdboh.getWritableDatabase();
 			people = _getPeople();
 			Runtime.getRuntime().addShutdownHook(new Thread() {

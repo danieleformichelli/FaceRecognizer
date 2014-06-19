@@ -15,7 +15,7 @@ public class EIMPreferences {
 
 	public static EIMPreferences getInstance(Context mContext) {
 		if (instance == null)
-			instance = new EIMPreferences(mContext);
+			instance = new EIMPreferences(mContext.getApplicationContext());
 
 		return instance;
 	}
