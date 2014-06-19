@@ -61,8 +61,11 @@ public class FaceDetector {
 		mClassifier = EIMPreferences.getInstance(c).detectorClassifier();
 		mScaleFactor = EIMPreferences.getInstance(c).detectionScaleFactor();
 		mMinNeighbors = EIMPreferences.getInstance(c).detectionMinNeighbors();
-		mMinRelativeFaceSize = EIMPreferences.getInstance(c).detectionMinRelativeFaceSize();
-		mMaxRelativeFaceSize = EIMPreferences.getInstance(c).detectionMaxRelativeFaceSize();;
+		mMinRelativeFaceSize = EIMPreferences.getInstance(c)
+				.detectionMinRelativeFaceSize();
+		mMaxRelativeFaceSize = EIMPreferences.getInstance(c)
+				.detectionMaxRelativeFaceSize();
+
 		initDetector();
 	}
 
@@ -85,14 +88,37 @@ public class FaceDetector {
 
 	private void loadCascadeFile() {
 		File cascadeDir = mContext.getDir("cascade", Context.MODE_PRIVATE);
-		mCascadeFile = new File(cascadeDir, mClassifier.toString()
-				.toLowerCase(Locale.US) + ".xml");
-		
+		mCascadeFile = new File(cascadeDir, mClassifier.toString().toLowerCase(
+				Locale.US)
+				+ ".xml");
+
 		if (!mCascadeFile.exists()) {
 			// load cascade file from application resources
 			try {
-				InputStream is = mContext.getResources().openRawResource(
-						R.raw.lbpcascade_frontalface);
+				int resId;
+
+				switch (mClassifier) {
+				case HAARCASCADE_FRONTALFACE_ALT:
+					resId = R.raw.haarcascade_frontalface_alt;
+					break;
+				case HAARCASCADE_FRONTALFACE_ALT2:
+					resId = R.raw.haarcascade_frontalface_alt2;
+					break;
+				case HAARCASCADE_FRONTALFACE_ALT_TREE:
+					resId = R.raw.haarcascade_frontalface_alt_tree;
+					break;
+				case HAARCASCADE_FRONTALFACE_DEFAULT:
+					resId = R.raw.haarcascade_frontalface_default;
+					break;
+				case LBPCASCADE_FRONTALFACE:
+					resId = R.raw.lbpcascade_frontalface;
+					break;
+				default:
+					Log.e(TAG, "classifier is null!");
+					return;
+				}
+
+				InputStream is = mContext.getResources().openRawResource(resId);
 
 				FileOutputStream os = new FileOutputStream(mCascadeFile);
 
@@ -116,8 +142,8 @@ public class FaceDetector {
 	}
 
 	public void setClassifier(Classifier classifier) {
-		 this.mClassifier = classifier;
-		 initDetector();
+		this.mClassifier = classifier;
+		initDetector();
 	}
 
 	public Type getDetectorType() {
@@ -194,18 +220,18 @@ public class FaceDetector {
 			mNativeDetector.setMinFaceSize((int) mMinAbsoluteFaceSize);
 		}
 
-		if (mDetectorType == Type.JAVA) {
+		switch (mDetectorType) {
+		case JAVA:
 			if (mJavaDetector != null)
 				mJavaDetector.detectMultiScale(scene, faces, mScaleFactor,
-						mMinNeighbors,
-						0,
-						new Size(mMinAbsoluteFaceSize, mMinAbsoluteFaceSize),
-						new Size(mMaxAbsoluteFaceSize, mMaxAbsoluteFaceSize));
-		} else if (mDetectorType == Type.NATIVE) {
+						mMinNeighbors, 0, new Size(mMinAbsoluteFaceSize,
+								mMinAbsoluteFaceSize), new Size(
+								mMaxAbsoluteFaceSize, mMaxAbsoluteFaceSize));
+			break;
+		case NATIVE:
 			if (mNativeDetector != null)
 				mNativeDetector.detect(scene, faces);
-		} else {
-			Log.e(TAG, "Detection method is not selected!");
+			break;
 		}
 
 		return faces.toArray();

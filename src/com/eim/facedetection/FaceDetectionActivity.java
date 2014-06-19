@@ -326,13 +326,10 @@ public class FaceDetectionActivity extends Activity {
 	}
 
 	private void loadScene() {
-
 		Bitmap sceneBitmap = BitmapFactory.decodeFile(mSceneFile
 				.getAbsolutePath());
 		mScene = new Mat();
 		Utils.bitmapToMat(sceneBitmap, mScene);
-		sceneBitmap = null; // free bitmap memory
-
 	}
 
 	private Bitmap[] detectFaces() {
