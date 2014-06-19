@@ -42,9 +42,11 @@ import com.eim.utilities.Swipeable;
 public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		OnOpenCVLoaded, CvCameraViewListener2, SeekBar.OnSeekBarChangeListener {
 	private static final String TAG = "FaceRecognitionFragment";
-	private static final Scalar FACE_RECT_COLOR = new Scalar(255, 192, 100, 255);
+	private static final Scalar FACE_RECT_COLOR = new Scalar(23, 150, 0, 255);
+	private static final Scalar FACE_UNKNOWN_RECT_COLOR = new Scalar(240, 44,
+			0, 255);
 
-	private static Double mConfidenceThreshold = 0.0;
+	private static Double mDistanceThreshold = 0.0;
 
 	public enum Type {
 		EIGEN, FISHER, LBPH
@@ -84,14 +86,16 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		super.onActivityCreated(savedInstanceState);
 
 		activity = getActivity();
-		mConfidenceThreshold = EIMPreferences.getInstance(activity).recognitionThreshold();
-		
+		mDistanceThreshold = EIMPreferences.getInstance(activity)
+				.recognitionThreshold();
+
 		mCameraView = (ControlledJavaCameraView) activity
 				.findViewById(R.id.face_recognition_surface_view);
 		mCameraView.setCvCameraViewListener(this);
 		mCameraView.setCameraIndex(mCurrentCameraIndex);
-		
-		mSwitchButton = (ImageButton) activity.findViewById(R.id.switch_camera_button);
+
+		mSwitchButton = (ImageButton) activity
+				.findViewById(R.id.switch_camera_button);
 		mSwitchButton.setOnClickListener(new OnClickListener() {
 
 			@Override
@@ -105,11 +109,12 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				mCameraView.enableView();
 			}
 		});
-		
-		mThresholdTextView = (TextView) activity.findViewById(R.id.threshold_text);
+
+		mThresholdTextView = (TextView) activity
+				.findViewById(R.id.threshold_text);
 		mThresholdBar = (SeekBar) activity.findViewById(R.id.threshold_bar);
 		mThresholdBar.setOnSeekBarChangeListener(this);
-		mThresholdBar.setProgress(mConfidenceThreshold.intValue());
+		mThresholdBar.setProgress(mDistanceThreshold.intValue());
 	}
 
 	@Override
@@ -182,12 +187,12 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
 		mRgba = inputFrame.rgba();
 		mGray = inputFrame.gray();
-		
+
 		if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT) {
 			Mat flippedRgba = mRgba;
 			mRgba = new Mat();
 			Core.flip(flippedRgba, mRgba, 1);
-			
+
 			Mat flippedGrey = mGray;
 			mGray = new Mat();
 			Core.flip(flippedGrey, mGray, 1);
@@ -205,49 +210,56 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	private void drawLabel(Mat frame, LabelledRect info) {
 
+		boolean unknownFace = (info.text == null);
+		Scalar boundingBoxColor;
+
+		boundingBoxColor = (unknownFace) ? FACE_UNKNOWN_RECT_COLOR
+				: FACE_RECT_COLOR;
+
 		// Bounding box
-		Core.rectangle(frame, info.rect.tl(), info.rect.br(), FACE_RECT_COLOR,
+		Core.rectangle(frame, info.rect.tl(), info.rect.br(), boundingBoxColor,
 				3);
+		if (!unknownFace) {
+			// Text...
+			double fontScale = 6;
+			int fontFace = Core.FONT_HERSHEY_PLAIN;
+			int thickness = 3;
 
-		// Text...
-		double fontScale = 6;
-		int fontFace = Core.FONT_HERSHEY_PLAIN;
-		int thickness = 3;
+			Size textSize = Core.getTextSize(info.text, fontFace, fontScale,
+					thickness, null);
 
-		Size textSize = Core.getTextSize(info.text, fontFace, fontScale,
-				thickness, null);
+			// ... under the box centered ...
+			Point textOrigin = new Point();
+			textOrigin.x = info.rect.tl().x
+					- (textSize.width - info.rect.width) / 2;
+			textOrigin.y = info.rect.br().y + textSize.height + 20;
 
-		// ... under the box centered ...
-		Point textOrigin = new Point();
-		textOrigin.x = info.rect.tl().x - (textSize.width - info.rect.width)
-				/ 2;
-		textOrigin.y = info.rect.br().y + textSize.height + 20;
+			// ... with semi-transparent white background rectngle
+			double padding = 20;
+			Point rectangleTL = new Point(textOrigin.x, textOrigin.y
+					- textSize.height);
+			Point rectangleBR = new Point(textOrigin.x + textSize.width,
+					textOrigin.y);
 
-		// ... with semi-transparent white background rectngle
-		double padding = 20;
-		Point rectangleTL = new Point(textOrigin.x, textOrigin.y
-				- textSize.height);
-		Point rectangleBR = new Point(textOrigin.x + textSize.width,
-				textOrigin.y);
+			rectangleTL.x -= padding;
+			rectangleTL.y -= padding;
 
-		rectangleTL.x -= padding;
-		rectangleTL.y -= padding;
+			rectangleBR.x += padding;
+			rectangleBR.y += padding;
 
-		rectangleBR.x += padding;
-		rectangleBR.y += padding;
+			Core.rectangle(frame, rectangleTL, rectangleBR, new Scalar(255,
+					255, 255, 150), Core.FILLED);
 
-		Core.rectangle(frame, rectangleTL, rectangleBR, new Scalar(255, 255,
-				255, 150), Core.FILLED);
+			Core.putText(frame, info.text, textOrigin, fontFace, fontScale,
+					FACE_RECT_COLOR, thickness);
 
-		Core.putText(frame, info.text, textOrigin, fontFace, fontScale,
-				FACE_RECT_COLOR, thickness);
+			// Thumbnail
 
-		// Thumbnail
+			Rect thumbnailPosition = new Rect(info.rect.x, info.rect.y,
+					mThumbnailSize, mThumbnailSize);
 
-		Rect thumbnailPosition = new Rect(info.rect.x, info.rect.y,
-				mThumbnailSize, mThumbnailSize);
-
-		mTestThumbnail.copyTo(frame.submat(thumbnailPosition));
+			mTestThumbnail.copyTo(frame.submat(thumbnailPosition));
+		}
 
 	}
 
@@ -258,10 +270,13 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		for (Rect faceRect : facesArray) {
 			Mat face = mGray.submat(faceRect);
 			int[] predictedLabel = new int[1];
-			double[] confidence = new double[1];
-			mFaceRecognizer.predict(face, predictedLabel, confidence);
+			double[] distance = new double[1];
+			mFaceRecognizer.predict(face, predictedLabel, distance);
 
-			if (confidence[0] > mConfidenceThreshold) {
+			Log.d(TAG, "predict(): " + predictedLabel[0] + " (" + distance[0]
+					+ ")");
+
+			if (distance[0] < mDistanceThreshold) {
 				Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
 				if (guess == null)
 					continue;
@@ -270,8 +285,9 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 						guess.getName(), guess.getPhotos().get(0)));
 
 				Log.d(TAG, "Prediction: " + guess.getName() + " ("
-						+ confidence[0] + ")");
-			}
+						+ distance[0] + ")");
+			} else
+				recognizedPeople.add(new LabelledRect(faceRect, null, null));
 		}
 
 		return recognizedPeople;
@@ -300,8 +316,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	@Override
 	public void onProgressChanged(SeekBar arg0, int arg1, boolean arg2) {
-		mConfidenceThreshold = Double.valueOf(arg1);
-		mThresholdTextView.setText(mConfidenceThreshold.toString());
+		mDistanceThreshold = Double.valueOf(arg1);
+		mThresholdTextView.setText(mDistanceThreshold.toString());
 	}
 
 	@Override
