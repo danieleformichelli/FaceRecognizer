@@ -157,7 +157,12 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 		}
 
 		mGray = inputFrame.gray();
-
+		if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT) {
+			Mat flippedGrey = mGray;
+			mGray = new Mat();
+			Core.flip(flippedGrey, mGray, 1);
+		}
+		
 		Rect[] facesArray = mFaceDetector.detect(mGray);
 
 		for (Rect face : facesArray)
