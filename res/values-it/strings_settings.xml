@@ -14,9 +14,10 @@
     
 
     <!-- Recognition -->
-
-    <string name="preference_recognition">Recognition</string>
-    <string name="recognition_recognizer_type_title">Tipo riconoscitore</string>
+	
+    <string name="preference_recognition">Riconoscimento</string>
+    <string name="recognition_recognizer_type_title">Tipo di riconoscitore</string>
+    <string name="recognition_invalid_threshold">La soglia deve essere contenuta nel range [0:1000]</string>
     
     <string-array name="recognition_recognizer_type_entries">
         <item>Eigen Faces</item>
@@ -27,12 +28,12 @@
     <!-- Detection -->
 
     <string name="preference_detection">Detection</string>
-    <string name="detection_detector_type_title">Tipo detector</string>
+    <string name="detection_detector_type_title">Tipo di detector</string>
     <string name="detection_scale_factor_title">Fattore di scala</string>
-    <string name="detection_min_neighbors_title">Minimo numero di facce riconosciute sovrapposte</string>
-    <string name="detection_min_relative_face_size_title">Dimensione relativa minima della faccia</string>
-    <string name="detection_max_relative_face_size_title">Dimensione relativa massima della faccia</string>
-    <string name="detection_invalid_min_neighbors">Il numero minimo di facce sovrapposte deve essere positivo</string>
+    <string name="detection_min_neighbors_title">Minimo numero di vicini</string>
+    <string name="detection_min_relative_face_size_title">Dimensione relativa minima</string>
+    <string name="detection_max_relative_face_size_title">Dimensione relativa massima</string>
+    <string name="detection_invalid_min_neighbors">Il numero minimo di vicini deve essere positivo</string>
     <string name="detection_invalid_min_relative_face_size">La dimensione relativa minima della faccia deve essere nel range [0,1]</string>
     <string name="detection_invalid_max_relative_face_size">La dimensione relativa massima della faccia deve essere nel range [0,1]</string>
     <string name="detection_invalid_relative_face_size_ratio">La dimensione relativa massima deve essere maggiore della minima</string>

@@ -2,12 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
     <PreferenceCategory android:title="@string/preference_general" >
-        <Preference
-            android:key="@string/general_clear_database"
-            android:title="@string/general_clear_database_title" />
-        <Preference
-            android:key="@string/general_restore_default_preferences"
-            android:title="@string/general_restore_default_preferences_title" />
         <EditTextPreference
             android:defaultValue="@string/management_number_of_gallery_columns_landscape_default"
             android:inputType="number"
@@ -18,6 +12,12 @@
             android:inputType="number"
             android:key="@string/management_number_of_gallery_columns_portrait"
             android:title="@string/management_number_of_gallery_columns_portrait_title" />
+        <Preference
+            android:key="@string/general_clear_database"
+            android:title="@string/general_clear_database_title" />
+        <Preference
+            android:key="@string/general_restore_default_preferences"
+            android:title="@string/general_restore_default_preferences_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_recognition" >
         <ListPreference
@@ -26,6 +26,11 @@
             android:entryValues="@array/recognition_recognizer_type_entry_values"
             android:key="@string/recognition_recognizer_type"
             android:title="@string/recognition_recognizer_type_title" />
+        <EditTextPreference
+            android:defaultValue="@string/recognition_threshold_default"
+            android:inputType="numberDecimal"
+            android:key="@string/recognition_threshold"
+            android:title="@string/recognition_threshold_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_detection" >
         <ListPreference

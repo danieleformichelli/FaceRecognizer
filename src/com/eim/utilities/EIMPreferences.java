@@ -78,6 +78,15 @@ public class EIMPreferences {
 				numberOfGalleryColumnsPortraitKey,
 				numberOfGalleryColumnsPortraitDefault));
 	}
+	
+	private String recognitionThresholdKey;
+	private String recognitionThresholdDefault;
+	
+	public double recognitionThreshold() {
+		return Double.parseDouble(mSharedPreferences.getString(
+				recognitionThresholdKey,
+				recognitionThresholdDefault));
+	}
 
 	private String detectorTypeKey;
 	private String detectorTypeDefault;
@@ -146,6 +155,11 @@ public class EIMPreferences {
 		numberOfGalleryColumnsPortraitDefault = mContext
 				.getString(R.string.management_number_of_gallery_columns_portrait_default);
 
+		recognitionThresholdKey = mContext
+				.getString(R.string.recognition_threshold);
+		recognitionThresholdDefault = mContext
+				.getString(R.string.recognition_threshold_default);
+		
 		recognitionTypeKey = mContext
 				.getString(R.string.recognition_recognizer_type);
 		recognitionTypeDefault = mContext

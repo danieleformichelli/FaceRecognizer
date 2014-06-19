@@ -26,7 +26,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	private String clearDatabaseKey, restorePreferencesKey;
 
 	private enum Validity {
-		VALID, NOT_VALID_DETECTION_SCALE_FACTOR, NOT_VALID_DETECTION_MIN_NEIGHBORS, NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE
+		VALID, NOT_VALID_DETECTION_SCALE_FACTOR, NOT_VALID_DETECTION_MIN_NEIGHBORS, NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE, NOT_VALID_RECOGNITION_THRESHOLD
 	}
 
 	@Override
@@ -127,6 +127,9 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				case VALID:
 					setPreferenceSummary(mPreference);
 					return;
+				case NOT_VALID_RECOGNITION_THRESHOLD:
+					msgId = R.string.;
+					break;
 				case NOT_VALID_DETECTION_SCALE_FACTOR:
 					msgId = R.string.detection_invalid_scale_factor;
 					break;
@@ -159,35 +162,31 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 		private Validity isValid(SharedPreferences sharedPreferences) {
 			EIMPreferences mPreferences = EIMPreferences.getInstance(activity);
-
-			android.util.Log.e("ASD", "0");
+			
+			if (mPreferences.recognitionThreshold() > 1000 || mPreferences.recognitionThreshold() < 0)
+				return Validity.NOT_VALID_RECOGNITION_THRESHOLD;
+			
 			if (mPreferences.detectionScaleFactor() <= 1)
 				return Validity.NOT_VALID_DETECTION_SCALE_FACTOR;
 
-			android.util.Log.e("ASD", "1");
 			if (mPreferences.detectionMinNeighbors() < 1)
 				return Validity.NOT_VALID_DETECTION_MIN_NEIGHBORS;
 
-			android.util.Log.e("ASD", "2");
 			if (mPreferences.detectionMinRelativeFaceSize() < 0
 					|| mPreferences.detectionMinRelativeFaceSize() > 1)
 				return Validity.NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE;
 
-			android.util.Log.e("ASD", "3");
 			if (mPreferences.detectionMaxRelativeFaceSize() < 0
 					|| mPreferences.detectionMaxRelativeFaceSize() > 1)
 				return Validity.NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE;
 
-			android.util.Log.e("ASD", "4");
 			if (mPreferences.detectionMinRelativeFaceSize() >= mPreferences
 					.detectionMaxRelativeFaceSize())
 				return Validity.NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO;
 
-			android.util.Log.e("ASD", "5");
 			if (mPreferences.numberOfGalleryColumnsPortrait() < 1)
 				return Validity.NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT;
 
-			android.util.Log.e("ASD", "6");
 			if (mPreferences.numberOfGalleryColumnsLandscape() < 1)
 				return Validity.NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE;
 
@@ -246,8 +245,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	private void restorePreferences() {
 		setPreference(R.string.recognition_recognizer_type,
 				R.string.recognition_recognizer_type_default);
-		setPreference(R.string.detector_type,
-				R.string.detector_type_default);
+		setPreference(R.string.detector_type, R.string.detector_type_default);
 		setPreference(R.string.detection_scale_factor,
 				R.string.detection_scale_factor_default);
 		setPreference(R.string.detection_min_neighbors,
@@ -260,6 +258,8 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				R.string.management_number_of_gallery_columns_landscape_default);
 		setPreference(R.string.management_number_of_gallery_columns_portrait,
 				R.string.management_number_of_gallery_columns_portrait_default);
+		setPreference(R.string.recognition_threshold,
+				R.string.recognition_threshold_default);
 	}
 
 	private void setPreference(int preferenceId, int defaultValue) {
