@@ -55,11 +55,11 @@
     <string name="detection_face_classifier_default">LBPCASCADE_FRONTALFACE</string>
 
     <string-array name="detection_face_classifier_entries">
-        <item> lbpcascade_frontalface.xml </item>
-        <item> haarcascade_frontalface_default.xml </item>
-        <item> haarcascade_frontalface_alt.xml </item>
-        <item> haarcascade_frontalface_alt2.xml </item>
-        <item> haarcascade_frontalface_alt_tree.xml </item>
+        <item> lbpcascade_frontalface </item>
+        <item> haarcascade_frontalface_default </item>
+        <item> haarcascade_frontalface_alt </item>
+        <item> haarcascade_frontalface_alt2 </item>
+        <item> haarcascade_frontalface_alt_tree </item>
     </string-array>
     <string-array name="detection_face_classifier_entry_values">
         <item> LBPCASCADE_FRONTALFACE </item>

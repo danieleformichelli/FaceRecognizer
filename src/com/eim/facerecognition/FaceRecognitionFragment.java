@@ -18,10 +18,10 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -62,8 +62,9 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private Mat mGray;
 	private Mat mRgba;
 
-	private Mat mTestThumbnail;
+	private SparseArray<Mat> thumbnails;
 	private int mThumbnailSize = 25;
+	private int height;
 
 	private FaceDetector mFaceDetector;
 	private EIMFaceRecognizer mFaceRecognizer;
@@ -115,12 +116,19 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mThresholdBar = (SeekBar) activity.findViewById(R.id.threshold_bar);
 		mThresholdBar.setOnSeekBarChangeListener(this);
 		mThresholdBar.setProgress(mDistanceThreshold.intValue());
+
+		thumbnails = new SparseArray<Mat>();
 	}
 
 	@Override
 	public void swipeOut(boolean right) {
 		if (mCameraView != null)
 			mCameraView.disableView();
+
+		for (int i = 0, l = thumbnails.size(); i < l; i++)
+			thumbnails.valueAt(i).release();
+
+		thumbnails.clear();
 	}
 
 	@Override
@@ -157,30 +165,13 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mGray = new Mat();
 		mRgba = new Mat();
 
-		// TEST THUMBNAIL LOADING
-		Bitmap thumb = BitmapFactory.decodeResource(getResources(),
-				R.drawable.barbetta);
-		Mat thumbnail = new Mat();
-		Mat transparentThumbnail = new Mat();
-		Utils.bitmapToMat(thumb, thumbnail);
-		mTestThumbnail = new Mat();
-
-		double absoluteFaceSize = height
-				* mFaceDetector.getMinRelativeFaceSize();
-		mThumbnailSize = (int) (absoluteFaceSize * 0.6);
-		Core.subtract(thumbnail, new Scalar(0, 0, 0, 100), transparentThumbnail);
-
-		Imgproc.resize(transparentThumbnail, mTestThumbnail, new Size(
-				mThumbnailSize, mThumbnailSize));
-		thumbnail.release();
-		transparentThumbnail.release();
+		this.height = height;
 	}
 
 	@Override
 	public void onCameraViewStopped() {
 		mGray.release();
 		mRgba.release();
-		mTestThumbnail.release();
 	}
 
 	@Override
@@ -258,7 +249,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 			Rect thumbnailPosition = new Rect(info.rect.x, info.rect.y,
 					mThumbnailSize, mThumbnailSize);
 
-			mTestThumbnail.copyTo(frame.submat(thumbnailPosition));
+			info.thumbnail.copyTo(frame.submat(thumbnailPosition));
 		}
 
 	}
@@ -292,7 +283,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 					continue;
 
 				recognizedPeople.add(new LabelledRect(faceRect,
-						guess.getName(), guess.getPhotos().get(0)));
+						guess.getName(), getThumbnail(predictedLabel[0])));
 
 				Log.d(TAG, "Prediction: " + guess.getName() + " ("
 						+ distance[0] + ")");
@@ -301,6 +292,32 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		}
 
 		return recognizedPeople;
+	}
+
+	private Mat getThumbnail(int id) {
+		if (thumbnails.get(id) != null)
+			return thumbnails.get(id);
+
+		// TEST THUMBNAIL LOADING
+		Bitmap mBitmap = PeopleDatabase.getInstance(activity).getPerson(id)
+				.getPhotos().valueAt(0).getBitmap();
+		Mat thumbnail = new Mat();
+		Mat transparentThumbnail = new Mat();
+		Utils.bitmapToMat(mBitmap, thumbnail);
+		Mat newThumbnail = new Mat();
+
+		double absoluteFaceSize = height
+				* mFaceDetector.getMinRelativeFaceSize();
+		mThumbnailSize = (int) (absoluteFaceSize * 0.6);
+		Core.subtract(thumbnail, new Scalar(0, 0, 0, 100), transparentThumbnail);
+
+		Imgproc.resize(transparentThumbnail, newThumbnail, new Size(
+				mThumbnailSize, mThumbnailSize));
+		thumbnail.release();
+		transparentThumbnail.release();
+
+		thumbnails.put(id, newThumbnail);
+		return newThumbnail;
 	}
 
 	private void setupFaceDetection() {
@@ -312,7 +329,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	}
 
 	public class LabelledRect {
-		public LabelledRect(Rect rect, String text, Object thumbnail) {
+		public LabelledRect(Rect rect, String text, Mat thumbnail) {
 			super();
 			this.rect = rect;
 			this.text = text;
@@ -321,7 +338,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 		public Rect rect;
 		public String text;
-		public Object thumbnail;
+		public Mat thumbnail;
 	}
 
 	@Override
