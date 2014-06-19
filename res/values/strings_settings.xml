@@ -50,6 +50,25 @@
         <item>NATIVE</item>
     </string-array>
 
+    <string name="detection_face_classifier">detection_face_classifier</string>
+    <string name="detection_face_classifier_title">Face classifier</string>
+    <string name="detection_face_classifier_default">LBPCASCADE_FRONTALFACE</string>
+
+    <string-array name="detection_face_classifier_entries">
+        <item> lbpcascade_frontalface.xml </item>
+        <item> haarcascade_frontalface_default.xml </item>
+        <item> haarcascade_frontalface_alt.xml </item>
+        <item> haarcascade_frontalface_alt2.xml </item>
+        <item> haarcascade_frontalface_alt_tree.xml </item>
+    </string-array>
+    <string-array name="detection_face_classifier_entry_values">
+        <item> LBPCASCADE_FRONTALFACE </item>
+        <item> HAARCASCADE_FRONTALFACE_DEFAULT </item>
+        <item> HAARCASCADE_FRONTALFACE_ALT </item>
+        <item> HAARCASCADE_FRONTALFACE_ALT2 </item>
+        <item> HAARCASCADE_FRONTALFACE_ALT_TREE </item>
+    </string-array>
+
     <string name="detection_scale_factor">detection_scale_factor</string>
     <string name="detection_scale_factor_default">1.1</string>
     <string name="detection_scale_factor_title">Scale Factor</string>

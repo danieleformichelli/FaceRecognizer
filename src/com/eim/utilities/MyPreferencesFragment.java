@@ -35,8 +35,9 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 	private String clearDatabaseKey, restorePreferencesKey;
 	private String recognizerTypeKey;
-	private String faceClassifierKey, detectorTypeKey, classifierKey, scaleFactorKey,
-			minNeighborsKey, minRelativeFaceSizeKey, maxRelativeFaceSizeKey;
+	private String detectorClassifierKey, detectorTypeKey, classifierKey,
+			scaleFactorKey, minNeighborsKey, minRelativeFaceSizeKey,
+			maxRelativeFaceSizeKey;
 
 	private enum Validity {
 		VALID, NOT_VALID_RECOGNITION_THRESHOLD, NOT_VALID_DETECTION_SCALE_FACTOR, NOT_VALID_DETECTION_MIN_NEIGHBORS, NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE
@@ -84,8 +85,8 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 	private void getKeys() {
 		detectorTypeKey = activity.getString(R.string.detection_detector_type);
-		faceClassifierKey=activity.getString(R.string.detection_face_classifier);
-		// classifierKey = activity.getString(R.string.detection_classifier);
+		detectorClassifierKey = activity
+				.getString(R.string.detection_face_classifier);
 		scaleFactorKey = activity.getString(R.string.detection_scale_factor);
 		minNeighborsKey = activity.getString(R.string.detection_min_neighbors);
 		minRelativeFaceSizeKey = activity
@@ -265,6 +266,10 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				final FaceDetector.Type mDetectorType = FaceDetector.Type
 						.valueOf(((ListPreference) mPreference).getValue());
 				mFaceDetector.setDetectorType(mDetectorType);
+			} else if (key.equals(detectorClassifierKey)) {
+				final FaceDetector.Classifier mClassifier = FaceDetector.Classifier
+						.valueOf(((ListPreference) mPreference).getValue());
+				mFaceDetector.setClassifier(mClassifier);
 			} else if (key.equals(classifierKey)) {
 				final FaceDetector.Classifier mFaceDetectorClassifier = FaceDetector.Classifier
 						.valueOf(((ListPreference) mPreference).getValue());

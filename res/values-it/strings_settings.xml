@@ -27,30 +27,14 @@
     
     <!-- Detection -->
 	
-	<string name="detection_face_classifier">detection_face_classifier</string>
-	<string name="detection_face_classifier_title">Face classifier</string>
-	<string name="detection_face_classifier_default"></string>
-	<string-array name="detection_face_classifier_entries">
-	    <item> haarcascade_frontalface_alt.xml </item>
-	    <item> haarcascade_frontalface_alt2.xml </item>
-	    <item> haarcascade_frontalface_alt_tree.xml </item>
-	    <item> haarcascade_frontalface_default.xml </item>
-	    <item> lbpcascade_frontalface.xml</item>
-	</string-array>
-	<string-array name="detection_face_classifier_entry_values">
-	    <item> haarcascade_frontalface_alt.xml </item>
-	    <item> haarcascade_frontalface_alt2.xml </item>
-	    <item> haarcascade_frontalface_alt_tree.xml </item>
-	    <item> haarcascade_frontalface_default.xml </item>
-	    <item> lbpcascade_frontalface.xml</item>
-	</string-array>
-	
     <string name="preference_detection">Detection</string>
     <string name="detection_detector_type_title">Tipo di detector</string>
 	<string-array name="detection_detector_type_entries">
 	    <item>Java</item>
 	    <item>Nativo</item>
 	</string-array>
+	
+	<string name="detection_face_classifier_title">Tipo di classificatore</string>
     <string name="detection_scale_factor_title">Fattore di scala</string>
     <string name="detection_min_neighbors_title">Minimo numero di vicini</string>
     <string name="detection_min_relative_face_size_title">Dimensione relativa minima</string>

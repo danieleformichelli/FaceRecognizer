@@ -198,7 +198,7 @@ public class FaceDetector {
 			if (mJavaDetector != null)
 				mJavaDetector.detectMultiScale(scene, faces, mScaleFactor,
 						mMinNeighbors,
-						2, // TODO: objdetect.CV_HAAR_SCALE_IMAGE
+						0,
 						new Size(mMinAbsoluteFaceSize, mMinAbsoluteFaceSize),
 						new Size(mMaxAbsoluteFaceSize, mMaxAbsoluteFaceSize));
 		} else if (mDetectorType == Type.NATIVE) {

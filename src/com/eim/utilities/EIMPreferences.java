@@ -81,15 +81,20 @@ public class EIMPreferences {
 
 	private String detectorTypeKey;
 	private String detectorTypeDefault;
-	private String[] detectorTypes;
 
 	public FaceDetector.Type detectorType() {
 		String mType = mSharedPreferences.getString(detectorTypeKey,
 				detectorTypeDefault);
-		if (detectorTypes[0].equals(mType))
-			return FaceDetector.Type.JAVA;
-		else
-			return FaceDetector.Type.NATIVE;
+		return FaceDetector.Type.valueOf(mType);
+	}
+
+	private String detectorClassifierKey;
+	private String detectorClassifierDefault;
+
+	public FaceDetector.Classifier detectorClassifier() {
+		String mClassifier = mSharedPreferences.getString(
+				detectorClassifierKey, detectorClassifierDefault);
+		return FaceDetector.Classifier.valueOf(mClassifier);
 	}
 
 	private String recognitionTypeKey;
@@ -141,9 +146,12 @@ public class EIMPreferences {
 		detectorTypeKey = mContext.getString(R.string.detection_detector_type);
 		detectorTypeDefault = mContext
 				.getString(R.string.detection_detector_type_default);
-		detectorTypes = mContext.getResources().getStringArray(
-				R.array.detection_detector_type_values);
 
+		detectorClassifierKey = mContext
+				.getString(R.string.detection_face_classifier);
+		detectorClassifierDefault = mContext
+				.getString(R.string.detection_face_classifier_default);
+		
 		numberOfGalleryColumnsLandscapeKey = mContext
 				.getString(R.string.management_number_of_gallery_columns_landscape);
 		numberOfGalleryColumnsLandscapeDefault = mContext
@@ -165,10 +173,5 @@ public class EIMPreferences {
 				.getString(R.string.recognition_threshold);
 		recognitionThresholdDefault = mContext
 				.getString(R.string.recognition_threshold_default);
-	}
-
-	public FaceDetector.Classifier detectorClassifier() {
-		// TODO farla per bene prendendo il valore dalle preferences
-		return FaceDetector.Classifier.HAARCASCADE_FRONTALFACE_DEFAULT;
 	}
 }

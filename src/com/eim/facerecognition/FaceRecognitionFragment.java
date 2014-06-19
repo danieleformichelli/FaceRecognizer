@@ -268,6 +268,16 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		List<LabelledRect> recognizedPeople = new ArrayList<LabelledRect>();
 
 		for (Rect faceRect : facesArray) {
+
+			if (faceRect.x < 0) {
+				faceRect.width += faceRect.x;
+				faceRect.x = 0;
+			}
+			if (faceRect.y < 0) {
+				faceRect.height += faceRect.y;
+				faceRect.y = 0;
+			}
+
 			Mat face = mGray.submat(faceRect);
 			int[] predictedLabel = new int[1];
 			double[] distance = new double[1];
