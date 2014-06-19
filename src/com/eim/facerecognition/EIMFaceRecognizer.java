@@ -30,28 +30,16 @@ public class EIMFaceRecognizer {
 	}
 
 	private static final String TAG = "EIMFaceRecognizer";
-
 	private static String MODEL_FILE_NAME = "trainedModel.xml";
 
 	private static EIMFaceRecognizer instance;
-	private static FaceRecognizer mFaceRecognizer;
-	private static Type mRecognizerType;
-	private static String mModelPath;
-	private static boolean isTrained;
+	private FaceRecognizer mFaceRecognizer;
+	private Type mRecognizerType;
+	private String mModelPath;
+	private boolean isTrained;
 	SparseArray<Person> dataset;
 
-	public static EIMFaceRecognizer getInstance(Context mContext, Type mType) {
-		if (mContext == null)
-			throw new IllegalArgumentException("mContext cannot be null");
-		if (mType == null)
-			throw new IllegalArgumentException("mType cannot be null");
-
-		if (instance != null)
-			return instance;
-
-		instance = new EIMFaceRecognizer();
-
-		System.loadLibrary("facerecognizer");
+	public EIMFaceRecognizer(Context mContext, Type mType) {
 
 		switch (mType) {
 		case EIGEN:
@@ -77,14 +65,33 @@ public class EIMFaceRecognizer {
 			isTrained = true;
 		} else
 			isTrained = false;
-		
+
+	}
+
+	public static EIMFaceRecognizer getInstance(Context mContext, Type mType) {
+		if (mContext == null)
+			throw new IllegalArgumentException("mContext cannot be null");
+		if (mType == null)
+			throw new IllegalArgumentException("mType cannot be null");
+
+		if (instance != null)
+			return instance;
+
+		System.loadLibrary("facerecognizer");
+
+		instance = new EIMFaceRecognizer(mContext, mType);
+
 		return instance;
+	}
+
+	public static EIMFaceRecognizer getInstance(Context mContext) {
+		return getInstance(mContext, Type.LBPH);
 	}
 
 	/**
 	 * Resets the trained model
 	 */
-	public static void resetModel() {
+	public void resetModel() {
 		File mModelFile = new File(mModelPath);
 		if (mModelFile != null)
 			mModelFile.delete();
@@ -143,7 +150,7 @@ public class EIMFaceRecognizer {
 		}
 
 		List<Mat> faces = new ArrayList<Mat>();
-		List<Integer> labels = new ArrayList<Integer>(); 
+		List<Integer> labels = new ArrayList<Integer>();
 
 		int counter = 0;
 
@@ -164,17 +171,17 @@ public class EIMFaceRecognizer {
 				Imgproc.cvtColor(mMat, mMat, Imgproc.COLOR_RGB2GRAY);
 				faces.add(mMat);
 				labels.add((int) label);
-				
+
 				Log.d(TAG, "Inserting " + label + ":" + mPhoto.getUrl());
-				
+
 				// labels.put(counter++, 0, new int[] { (int) label });
 			}
 		}
-		
+
 		Mat labelsMat = new Mat(labels.size(), 1, CvType.CV_32SC1);
 		for (counter = 0; counter < labelsMat.rows(); counter++)
 			labelsMat.put(counter, 0, new int[] { labels.get(counter) });
-		
+
 		Log.i(TAG, labelsMat.dump());
 
 		mFaceRecognizer.train(faces, labelsMat);
@@ -201,11 +208,11 @@ public class EIMFaceRecognizer {
 		return mRecognizerType;
 	}
 
-	public static void setType(Type mRecognizerType) {
+	public void setType(Type mRecognizerType) {
 		if (mRecognizerType == null)
 			return;
-		
-		EIMFaceRecognizer.mRecognizerType = mRecognizerType;
+
+		this.mRecognizerType = mRecognizerType;
 		resetModel();
 	}
 }

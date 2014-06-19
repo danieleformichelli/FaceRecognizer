@@ -32,7 +32,7 @@ public class FaceRecognizerMainActivity extends Activity {
 	private SectionsPagerAdapter mSectionsPagerAdapter;
 	private FaceRecognitionFragment mFaceRecognitionFragment;
 	private FacesManagementFragment mFacesManagementFragment;
-	private MyPreferencesFragment mSettingsFragment;
+	private MyPreferencesFragment mPreferencesFragment;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -42,13 +42,13 @@ public class FaceRecognizerMainActivity extends Activity {
 		// Instantiate the fragments
 		mFaceRecognitionFragment = new FaceRecognitionFragment();
 		mFacesManagementFragment = new FacesManagementFragment();
-		mSettingsFragment = new MyPreferencesFragment();
+		mPreferencesFragment = new MyPreferencesFragment();
 
 		// Create the sections of the adapter
 		sections = new ArrayList<Fragment>();
 		sections.add(mFaceRecognitionFragment);
 		sections.add(mFacesManagementFragment);
-		sections.add(mSettingsFragment);
+		sections.add(mPreferencesFragment);
 
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the activity.
@@ -71,6 +71,7 @@ public class FaceRecognizerMainActivity extends Activity {
 							Log.i(TAG, "OpenCV loaded successfully");
 							mFaceRecognitionFragment.onOpenCVLoaded();
 							mFacesManagementFragment.onOpenCVLoaded();
+							mPreferencesFragment.onOpenCVLoaded();
 							break;
 						default:
 							Log.i(TAG, "OpenCV connection error: " + status);

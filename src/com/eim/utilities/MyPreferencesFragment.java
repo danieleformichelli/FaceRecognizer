@@ -19,9 +19,10 @@ import com.eim.R;
 import com.eim.facedetection.FaceDetector;
 import com.eim.facerecognition.EIMFaceRecognizer;
 import com.eim.facesmanagement.peopledb.PeopleDatabase;
+import com.eim.utilities.FaceRecognizerMainActivity.OnOpenCVLoaded;
 
 public class MyPreferencesFragment extends PreferenceFragment implements
-		Swipeable {
+		OnOpenCVLoaded, Swipeable {
 	private Activity activity;
 	private PreferenceScreen mPreferenceScreen;
 	private String oldValue;
@@ -29,11 +30,13 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	private PeopleDatabase mPeopleDatabase;
 	private EIMPreferences mPreferences;
 	private EIMFaceRecognizer mFaceRecognizer;
+	private FaceDetector mFaceDetector;
+	private boolean mOpenCVLoaded = false;
 
 	private String clearDatabaseKey, restorePreferencesKey;
 	private String recognizerTypeKey;
-	private String detectorTypeKey, classifierKey, scaleFactor, minNeighbors,
-			minRelativeFaceSizeKey, maxRelativeFaceSizeKey;
+	private String detectorTypeKey, classifierKey, scaleFactorKey,
+			minNeighborsKey, minRelativeFaceSizeKey, maxRelativeFaceSizeKey;
 
 	private enum Validity {
 		VALID, NOT_VALID_RECOGNITION_THRESHOLD, NOT_VALID_DETECTION_SCALE_FACTOR, NOT_VALID_DETECTION_MIN_NEIGHBORS, NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE
@@ -56,21 +59,34 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 		activity = getActivity();
 
-		mPeopleDatabase = PeopleDatabase.getInstance(activity);
-		mPreferences = EIMPreferences.getInstance(activity);
-		// mFaceDetector = FaceDetector.getInstance(activity);
-		mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
-				mPreferences.recognitionType());
+		if (mOpenCVLoaded && mFaceRecognizer == null)
+			// opencv is loaded before the fragment
+			getInstances();
 
 		getKeys();
 	}
 
+	public void onOpenCVLoaded() {
+		mOpenCVLoaded = true;
+
+		if (activity != null)
+			// activity is already loaded
+			getInstances();
+	}
+
+	private void getInstances() {
+		mPeopleDatabase = PeopleDatabase.getInstance(activity);
+		mFaceDetector = FaceDetector.getInstance(activity);
+		mPreferences = EIMPreferences.getInstance(activity);
+		mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
+				mPreferences.recognitionType());
+	}
+
 	private void getKeys() {
 		detectorTypeKey = activity.getString(R.string.detection_detector_type);
-		// classifierKey = activity
-		// .getString(R.string.detection_classifier);, detectorClassifierKey,
-		// detectorScaleFactor,
-		minNeighbors = activity.getString(R.string.detection_min_neighbors);
+		// classifierKey = activity.getString(R.string.detection_classifier);
+		scaleFactorKey = activity.getString(R.string.detection_scale_factor);
+		minNeighborsKey = activity.getString(R.string.detection_min_neighbors);
 		minRelativeFaceSizeKey = activity
 				.getString(R.string.detection_min_relative_face_size);
 		maxRelativeFaceSizeKey = activity
@@ -150,7 +166,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 			Preference mPreference = findPreference(key);
 
 			setPreferenceSummary(mPreference);
-			
+
 			if (oldValue != null) {
 				int msgId;
 
@@ -248,32 +264,31 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 			if (key.equals(recognizerTypeKey)) {
 				EIMFaceRecognizer.Type mRecognizerType = EIMFaceRecognizer.Type
 						.valueOf(((ListPreference) mPreference).getValue());
-				EIMFaceRecognizer.setType(mRecognizerType);
+				mFaceRecognizer.setType(mRecognizerType);
 				mFaceRecognizer.train(mPeopleDatabase.getPeople());
 			} else if (key.equals(detectorTypeKey)) {
 				final FaceDetector.Type mDetectorType = FaceDetector.Type
 						.valueOf(((EditTextPreference) mPreference).getText());
-				// FaceDetector.setDetectorType(mDetectorType);
+				mFaceDetector.setDetectorType(mDetectorType);
 			} else if (key.equals(classifierKey)) {
-				// TODO FaceDetector.setClassifier();
-			} else if (key.equals(scaleFactor)) {
+				// TODO
+				mFaceDetector.setClassifier(null);
+			} else if (key.equals(scaleFactorKey)) {
 				final double scaleFactor = Double
 						.valueOf(((EditTextPreference) mPreference).getText());
-				// TODO FaceDetector.setScaleFactor(scaleFactor);
-			} else if (key.equals(minNeighbors)) {
+				mFaceDetector.setScaleFactor(scaleFactor);
+			} else if (key.equals(minNeighborsKey)) {
 				final int minNeighbors = Integer
 						.valueOf(((EditTextPreference) mPreference).getText());
-				// TODO FaceDetector.setNeighbors(minNeighbors);
+				mFaceDetector.setMinNeighbors(minNeighbors);
 			} else if (key.equals(minRelativeFaceSizeKey)) {
 				final double minRelativeFaceSize = Double
 						.valueOf(((EditTextPreference) mPreference).getText());
-				// TODO
-				// FaceDetector.setMinRelativeFaceSize(minRelativeFaceSize);
+				mFaceDetector.setMinRelativeFaceSize(minRelativeFaceSize);
 			} else if (key.equals(maxRelativeFaceSizeKey)) {
 				final double maxRelativeFaceSize = Double
 						.valueOf(((EditTextPreference) mPreference).getText());
-				// TODO
-				// FaceDetector.setMaxRelativeFaceSize(maxRelativeFaceSize);
+				mFaceDetector.setMaxRelativeFaceSize(maxRelativeFaceSize);
 			}
 		}
 	};
