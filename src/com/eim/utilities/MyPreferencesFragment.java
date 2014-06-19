@@ -35,7 +35,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 	private String clearDatabaseKey, restorePreferencesKey;
 	private String recognizerTypeKey;
-	private String detectorTypeKey, classifierKey, scaleFactorKey,
+	private String faceClassifierKey, detectorTypeKey, classifierKey, scaleFactorKey,
 			minNeighborsKey, minRelativeFaceSizeKey, maxRelativeFaceSizeKey;
 
 	private enum Validity {
@@ -84,6 +84,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 	private void getKeys() {
 		detectorTypeKey = activity.getString(R.string.detection_detector_type);
+		faceClassifierKey=activity.getString(R.string.detection_face_classifier);
 		// classifierKey = activity.getString(R.string.detection_classifier);
 		scaleFactorKey = activity.getString(R.string.detection_scale_factor);
 		minNeighborsKey = activity.getString(R.string.detection_min_neighbors);

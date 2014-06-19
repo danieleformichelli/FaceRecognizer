@@ -18,7 +18,6 @@
     <string name="preference_recognition">Riconoscimento</string>
     <string name="recognition_recognizer_type_title">Tipo di riconoscitore</string>
     <string name="recognition_invalid_threshold">La soglia deve essere contenuta nel range [0:1000]</string>
-    <string name="recognition_recognizer_type_title">Tipo riconoscitore</string>
     
     <string-array name="recognition_recognizer_type_entries">
         <item>Eigen Faces</item>
@@ -27,7 +26,25 @@
     </string-array>
     
     <!-- Detection -->
-
+	
+	<string name="detection_face_classifier">detection_face_classifier</string>
+	<string name="detection_face_classifier_title">Face classifier</string>
+	<string name="detection_face_classifier_default"></string>
+	<string-array name="detection_face_classifier_entries">
+	    <item> haarcascade_frontalface_alt.xml </item>
+	    <item> haarcascade_frontalface_alt2.xml </item>
+	    <item> haarcascade_frontalface_alt_tree.xml </item>
+	    <item> haarcascade_frontalface_default.xml </item>
+	    <item> lbpcascade_frontalface.xml</item>
+	</string-array>
+	<string-array name="detection_face_classifier_entry_values">
+	    <item> haarcascade_frontalface_alt.xml </item>
+	    <item> haarcascade_frontalface_alt2.xml </item>
+	    <item> haarcascade_frontalface_alt_tree.xml </item>
+	    <item> haarcascade_frontalface_default.xml </item>
+	    <item> lbpcascade_frontalface.xml</item>
+	</string-array>
+	
     <string name="preference_detection">Detection</string>
     <string name="detection_detector_type_title">Tipo di detector</string>
 	<string-array name="detection_detector_type_entries">

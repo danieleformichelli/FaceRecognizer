@@ -17,12 +17,17 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_detection" >
         <ListPreference
+            android:key="@string/detection_face_classifier"
+            android:title="@string/detection_face_classifier_title"
+            android:entries="@array/detection_face_classifier_entries"
+            android:entryValues="@array/detection_face_classifier_entry_values" 
+            android:defaultValue="@string/detection_face_classifier_default"/>
+        <ListPreference
             android:defaultValue="@string/detection_detector_type_default"
             android:entries="@array/detection_detector_type_entries"
             android:entryValues="@array/detection_detector_type_values"
             android:key="@string/detection_detector_type"
             android:title="@string/detection_detector_type_title" />
-
         <EditTextPreference
             android:defaultValue="@string/detection_scale_factor_default"
             android:inputType="numberDecimal"
