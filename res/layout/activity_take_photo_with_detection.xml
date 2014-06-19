@@ -17,8 +17,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
-        android:layout_marginRight="24dp"
-        android:src="@android:drawable/ic_menu_add" />
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="20dp"
+        android:layout_marginTop="20dp"
+        android:src="@android:drawable/ic_menu_camera" />
+
+    <ImageButton
+        android:id="@+id/switch_camera_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/take_photo_button"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="20dp"
+        android:src="@android:drawable/ic_menu_rotate" />
 
 </RelativeLayout>

@@ -27,7 +27,7 @@ import com.eim.R;
 import com.eim.facerecognition.ControlledJavaCameraView;
 
 public class TakePhotoWithDetectionActivity extends Activity implements
-		CvCameraViewListener2, OnClickListener {
+		CvCameraViewListener2 {
 	private static final String TAG = "TakePhotoWithDetectionActivity";
 	private static final Scalar FACE_RECT_COLOR = new Scalar(255, 192, 100, 255);
 
@@ -40,6 +40,8 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 	private FaceDetector mFaceDetector;
 	private boolean mTakePhotoNow = false;
 	private Uri mOutputUri;
+	private ImageButton mSwitchButton;
+	private int mCurrentCameraIndex = ControlledJavaCameraView.CAMERA_ID_BACK;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -57,9 +59,30 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 		setContentView(R.layout.activity_take_photo_with_detection);
 		mCameraView = (ControlledJavaCameraView) findViewById(R.id.camera_preview_detection_surface_view);
 		mCameraView.setCvCameraViewListener(this);
+		mCameraView.setCameraIndex(mCurrentCameraIndex);
 
 		mButton = (ImageButton) findViewById(R.id.take_photo_button);
-		mButton.setOnClickListener(this);
+		mButton.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				mTakePhotoNow = true;
+			}
+		});
+		
+		mSwitchButton = (ImageButton) findViewById(R.id.switch_camera_button);
+		mSwitchButton.setOnClickListener(new OnClickListener() {
+
+			@Override
+			public void onClick(View v) {
+				if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_BACK)
+					mCurrentCameraIndex = ControlledJavaCameraView.CAMERA_ID_FRONT;
+				else mCurrentCameraIndex = ControlledJavaCameraView.CAMERA_ID_BACK;
+				mCameraView.disableView();
+				mCameraView.setCameraIndex(mCurrentCameraIndex);
+				mCameraView.enableView();
+				Log.d(TAG, "index: " + mCurrentCameraIndex);
+			}
+		});
 	}
 
 	@Override
@@ -139,10 +162,5 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 	private void drawBoundingBox(Mat frame, Rect info) {
 		// Bounding box
 		Core.rectangle(frame, info.tl(), info.br(), FACE_RECT_COLOR, 3);
-	}
-
-	@Override
-	public void onClick(View v) {
-		mTakePhotoNow = true;
 	}
 }
