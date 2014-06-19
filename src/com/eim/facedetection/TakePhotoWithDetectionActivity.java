@@ -68,7 +68,7 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 				mTakePhotoNow = true;
 			}
 		});
-		
+
 		mSwitchButton = (ImageButton) findViewById(R.id.switch_camera_button);
 		mSwitchButton.setOnClickListener(new OnClickListener() {
 
@@ -76,7 +76,8 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 			public void onClick(View v) {
 				if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_BACK)
 					mCurrentCameraIndex = ControlledJavaCameraView.CAMERA_ID_FRONT;
-				else mCurrentCameraIndex = ControlledJavaCameraView.CAMERA_ID_BACK;
+				else
+					mCurrentCameraIndex = ControlledJavaCameraView.CAMERA_ID_BACK;
 				mCameraView.disableView();
 				mCameraView.setCameraIndex(mCurrentCameraIndex);
 				mCameraView.enableView();
@@ -130,6 +131,12 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 	@Override
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
 		mRgba = inputFrame.rgba();
+
+		if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT) {
+			Mat flippedRgba = mRgba;
+			mRgba = new Mat();
+			Core.flip(flippedRgba, mRgba, 1);
+		}
 
 		if (mTakePhotoNow) {
 			Bitmap bmp = Bitmap.createBitmap(mRgba.cols(), mRgba.rows(),
