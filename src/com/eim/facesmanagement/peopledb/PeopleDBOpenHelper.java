@@ -38,7 +38,7 @@ public class PeopleDBOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		EIMFaceRecognizer.resetModels();
+		EIMFaceRecognizer.resetModel();
 		clear(db);
 	}
 

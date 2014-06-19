@@ -16,6 +16,7 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.util.SparseArray;
 
+import com.eim.facerecognition.EIMFaceRecognizer.Type;
 import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;
 
@@ -27,33 +28,18 @@ public class EIMFaceRecognizer {
 		public boolean isIncrementable() {
 			return this == LBPH;
 		}
-
-		int toInt() {
-			switch (this) {
-			case EIGEN:
-				return 0;
-			case FISHER:
-				return 1;
-			case LBPH:
-				return 2;
-			default:
-				return -1;
-			}
-		}
 	}
 
 	private static final String TAG = "EIMFaceRecognizer";
 
 	private static String MODEL_FILE_NAME = "trainedModel.xml";
 
-	private final static int typesCount = Type.values().length;
-	
-	private static EIMFaceRecognizer[] instances = new EIMFaceRecognizer[typesCount];
-	private static FaceRecognizer[] faceRecognizers = new FaceRecognizer[typesCount];
-	private static String[] modelPaths = new String[typesCount];
-	private static boolean[] isTrained = new boolean[typesCount];
+	private static EIMFaceRecognizer instance;
+	private static FaceRecognizer mFaceRecognizer;
+	private static Type mRecognizerType;
+	private static String mModelPath;
+	private static boolean isTrained;
 	SparseArray<Person> dataset;
-	Type type;
 
 	public static EIMFaceRecognizer getInstance(Context mContext, Type mType) {
 		if (mContext == null)
@@ -61,78 +47,49 @@ public class EIMFaceRecognizer {
 		if (mType == null)
 			throw new IllegalArgumentException("mType cannot be null");
 
+		if (instance != null)
+			return instance;
+
+		instance = new EIMFaceRecognizer();
+
 		System.loadLibrary("facerecognizer");
 
-		int index;
 		switch (mType) {
 		case EIGEN:
-			index = 0;
-
-			if (instances[index] != null)
-				return instances[index];
-
-			instances[index] = new EIMFaceRecognizer();
-			instances[index].type = Type.EIGEN;
-			faceRecognizers[index] = new EigenFaceRecognizer();
+			mFaceRecognizer = new EigenFaceRecognizer();
 			break;
 		case FISHER:
-			index = 1;
-
-			if (instances[index] != null)
-				return instances[index];
-
-			instances[index] = new EIMFaceRecognizer();
-			instances[index].type = Type.FISHER;
-			faceRecognizers[index] = new FisherFaceRecognizer();
+			mFaceRecognizer = new FisherFaceRecognizer();
 			break;
 		case LBPH:
-			index = 2;
-
-			if (instances[index] != null)
-				return instances[index];
-
-			instances[index] = new EIMFaceRecognizer();
-			instances[index].type = Type.LBPH;
-			faceRecognizers[index] = new LBPHFaceRecognizer();
+			mFaceRecognizer = new LBPHFaceRecognizer();
 			break;
 		default:
 			throw new IllegalArgumentException("Invalid mType");
 		}
 
-		modelPaths[index] = mContext.getExternalFilesDir(null)
-				.getAbsolutePath() + "/" + index + "_" + MODEL_FILE_NAME;
+		mRecognizerType = mType;
 
-		if (new File(modelPaths[index]).exists()) {
-			faceRecognizers[index].load(modelPaths[index]);
-			isTrained[index] = true;
+		mModelPath = mContext.getExternalFilesDir(null).getAbsolutePath() + "/"
+				+ MODEL_FILE_NAME;
+
+		if (new File(mModelPath).exists()) {
+			mFaceRecognizer.load(mModelPath);
+			isTrained = true;
 		} else
-			isTrained[index] = false;
-
-		return instances[index];
+			isTrained = false;
+		
+		return instance;
 	}
 
 	/**
 	 * Resets the trained model
 	 */
-	public static void resetModels() {
-		for (int i = 0; i < typesCount; i++) {
-			File mModelFile = new File(modelPaths[i]);
-			if (mModelFile != null)
-				mModelFile.delete();
-			isTrained[i] = false;
-		}
-	}
-
-	/**
-	 * Resets the trained model
-	 */
-	public void resetModel() {
-		int index = type.toInt();
-
-		File mModelFile = new File(modelPaths[index]);
+	public static void resetModel() {
+		File mModelFile = new File(mModelPath);
 		if (mModelFile != null)
 			mModelFile.delete();
-		isTrained[index] = false;
+		isTrained = false;
 	}
 
 	/**
@@ -144,11 +101,10 @@ public class EIMFaceRecognizer {
 	 *            the id of the person related to the new face
 	 */
 	public void incrementalTrain(String newFacePath, int label) {
-		int index = type.toInt();
-
-		if (!type.isIncrementable())
+		if (!mRecognizerType.isIncrementable())
 			throw new IllegalStateException("Face detector of type "
-					+ type.toString() + "cannot be trained incrementally");
+					+ mRecognizerType.toString()
+					+ "cannot be trained incrementally");
 
 		List<Mat> newFaces = new ArrayList<Mat>();
 		Mat labels = new Mat(1, 1, CvType.CV_32SC1);
@@ -165,12 +121,12 @@ public class EIMFaceRecognizer {
 		newFaces.add(newFaceMat);
 		labels.put(0, 0, new int[] { label });
 
-		if (isTrained[index])
-			faceRecognizers[index].update(newFaces, labels);
+		if (isTrained)
+			mFaceRecognizer.update(newFaces, labels);
 		else
-			faceRecognizers[index].train(newFaces, labels);
+			mFaceRecognizer.train(newFaces, labels);
 
-		faceRecognizers[index].save(modelPaths[index]);
+		mFaceRecognizer.save(mModelPath);
 	}
 
 	/**
@@ -182,15 +138,13 @@ public class EIMFaceRecognizer {
 	 *            the field Photos of the value
 	 */
 	public void train(SparseArray<Person> sparseArray) {
-		int index = type.toInt();
-
 		if (!isDatasetValid(sparseArray)) {
 			resetModel();
 			return;
 		}
 
 		List<Mat> faces = new ArrayList<Mat>();
-		List<Integer> labels = new ArrayList<Integer>();
+		List<Integer> labels = new ArrayList<Integer>(); 
 
 		int counter = 0;
 
@@ -211,21 +165,21 @@ public class EIMFaceRecognizer {
 				Imgproc.cvtColor(mMat, mMat, Imgproc.COLOR_RGB2GRAY);
 				faces.add(mMat);
 				labels.add((int) label);
-
+				
 				Log.d(TAG, "Inserting " + label + ":" + mPhoto.getUrl());
-
+				
 				// labels.put(counter++, 0, new int[] { (int) label });
 			}
 		}
-
+		
 		Mat labelsMat = new Mat(labels.size(), 1, CvType.CV_32SC1);
 		for (counter = 0; counter < labelsMat.rows(); counter++)
 			labelsMat.put(counter, 0, new int[] { labels.get(counter) });
-
+		
 		Log.i(TAG, labelsMat.dump());
 
-		faceRecognizers[index].train(faces, labelsMat);
-		faceRecognizers[index].save(modelPaths[index]);
+		mFaceRecognizer.train(faces, labelsMat);
+		mFaceRecognizer.save(mModelPath);
 	}
 
 	private boolean isDatasetValid(SparseArray<Person> dataset) {
@@ -240,13 +194,19 @@ public class EIMFaceRecognizer {
 	}
 
 	public void predict(Mat src, int[] label, double[] confidence) {
-		int index = type.toInt();
-
-		if (isTrained[index])
-			faceRecognizers[index].predict(src, label, confidence);
+		if (isTrained)
+			mFaceRecognizer.predict(src, label, confidence);
 	}
 
 	public Type getType() {
-		return type;
+		return mRecognizerType;
+	}
+
+	public static void setType(Type mRecognizerType) {
+		if (mRecognizerType == null)
+			return;
+		
+		EIMFaceRecognizer.mRecognizerType = mRecognizerType;
+		resetModel();
 	}
 }
