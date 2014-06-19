@@ -13,18 +13,18 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
-
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
-
 import com.eim.R;
 import com.eim.facedetection.FaceDetector;
 import com.eim.facesmanagement.peopledb.PeopleDatabase;
@@ -33,6 +33,7 @@ import com.eim.utilities.EIMPreferences;
 import com.eim.utilities.FaceRecognizerMainActivity.OnOpenCVLoaded;
 import com.eim.utilities.Swipeable;
 
+@TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
 public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		OnOpenCVLoaded, CvCameraViewListener2, SeekBar.OnSeekBarChangeListener {
 	private static final String TAG = "FaceRecognitionFragment";
@@ -239,7 +240,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	}
 
 	private void setupFaceDetection() {
-		mFaceDetector = new FaceDetector(activity);
+		mFaceDetector = FaceDetector.getInstance(activity);
 		mFaceRecognizerType = EIMPreferences.getInstance(activity)
 				.recognitionType();
 		mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,

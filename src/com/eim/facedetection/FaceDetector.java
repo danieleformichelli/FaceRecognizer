@@ -28,6 +28,8 @@ public class FaceDetector {
 
 	private File mCascadeFile;
 	private CascadeClassifier mJavaDetector;
+	private DetectionBasedTracker mNativeDetector;
+	private Type mDetectorType = Type.NATIVE;
 
 	private double mScaleFactor = 1.1;
 	private int mMinNeighbors = 2;
@@ -38,11 +40,15 @@ public class FaceDetector {
 	private double mMaxAbsoluteFaceSize = 0;
 	private double mMaxRelativeFaceSize = 1;
 
-	private Type mDetectorType = Type.NATIVE;
-
-	private DetectionBasedTracker mNativeDetector;
-
-	public FaceDetector(Context c) {
+	private static FaceDetector instance = null;
+	
+	public static FaceDetector getInstance(Context c) {
+		if (instance == null)
+			instance = new FaceDetector(c);
+		return instance;
+	}
+	
+	protected FaceDetector(Context c) {
 		mContext = c;
 		initDetector();
 	}
@@ -102,8 +108,20 @@ public class FaceDetector {
 		setDetectorType(appPrefs.detectorType());
 
 	}
+	// TODO
+	public Object getClassifier() {
+		return null;
+	}
+	// TODO
+	public void setClassifier(Object classifier) {
+		return;
+	}
 
-	private void setDetectorType(Type detectorType) {
+	public Type getDetectorType() {
+		return mDetectorType;
+	}
+	
+	public void setDetectorType(Type detectorType) {
 		mDetectorType = detectorType;
 	}
 

@@ -326,7 +326,7 @@ public class FaceDetectionActivity extends Activity {
 	}
 
 	private void initDetector() {
-		mFaceDetector = new FaceDetector(this);
+		mFaceDetector = FaceDetector.getInstance(this);
 
 		Bitmap sceneBitmap = BitmapFactory.decodeFile(mSceneFile
 				.getAbsolutePath());
