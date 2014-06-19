@@ -54,7 +54,7 @@ public class FaceDetector {
 		return instance;
 	}
 
-	protected FaceDetector(Context c) {
+	private FaceDetector(Context c) {
 		mContext = c;
 		initDetector();
 	}

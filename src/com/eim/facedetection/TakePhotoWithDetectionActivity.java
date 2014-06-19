@@ -115,7 +115,7 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 
 	@Override
 	public void onCameraViewStarted(int width, int height) {
-		mFaceDetector = new FaceDetector(this);
+		mFaceDetector = FaceDetector.getInstance(this);
 
 		mGray = new Mat();
 		mRgba = new Mat();
