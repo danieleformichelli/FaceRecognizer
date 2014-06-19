@@ -149,6 +149,8 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				SharedPreferences sharedPreferences, String key) {
 			Preference mPreference = findPreference(key);
 
+			setPreferenceSummary(mPreference);
+			
 			if (oldValue != null) {
 				int msgId;
 

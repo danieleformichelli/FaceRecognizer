@@ -17,7 +17,7 @@
     <string name="preference_recognition">Recognition</string>
     <string name="recognition_recognizer_type">recognition_type</string>
     <string name="recognition_recognizer_type_title">Recognition type</string>
-    <string name="recognition_recognizer_type_default">LocalBinaryPatternHistogram</string>
+    <string name="recognition_recognizer_type_default">LBPH</string>
     <string name="recognition_threshold">recognition_threshold</string>
     <string name="recognition_threshold_title">Recognition threshold</string>
     <string name="recognition_threshold_default">70.5</string>
