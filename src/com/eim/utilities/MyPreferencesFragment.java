@@ -16,6 +16,9 @@ import android.preference.SwitchPreference;
 import android.widget.Toast;
 
 import com.eim.R;
+import com.eim.facedetection.FaceDetector;
+import com.eim.facerecognition.EIMFaceRecognizer;
+import com.eim.facesmanagement.peopledb.PeopleDatabase;
 
 public class MyPreferencesFragment extends PreferenceFragment implements
 		Swipeable {
@@ -23,10 +26,17 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	private PreferenceScreen mPreferenceScreen;
 	private String oldValue;
 
+	private PeopleDatabase mPeopleDatabase;
+	private EIMPreferences mPreferences;
+	private EIMFaceRecognizer mFaceRecognizer;
+
 	private String clearDatabaseKey, restorePreferencesKey;
+	private String recognizerTypeKey;
+	private String detectorTypeKey, classifierKey, scaleFactor, minNeighbors,
+			minRelativeFaceSizeKey, maxRelativeFaceSizeKey;
 
 	private enum Validity {
-		VALID, NOT_VALID_DETECTION_SCALE_FACTOR, NOT_VALID_DETECTION_MIN_NEIGHBORS, NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE, NOT_VALID_RECOGNITION_THRESHOLD
+		VALID, NOT_VALID_RECOGNITION_THRESHOLD, NOT_VALID_DETECTION_SCALE_FACTOR, NOT_VALID_DETECTION_MIN_NEIGHBORS, NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE
 	}
 
 	@Override
@@ -45,6 +55,29 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		super.onActivityCreated(savedInstanceState);
 
 		activity = getActivity();
+
+		mPeopleDatabase = PeopleDatabase.getInstance(activity);
+		mPreferences = EIMPreferences.getInstance(activity);
+		// mFaceDetector = FaceDetector.getInstance(activity);
+		mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
+				mPreferences.recognitionType());
+
+		getKeys();
+	}
+
+	private void getKeys() {
+		detectorTypeKey = activity.getString(R.string.detection_detector_type);
+		// classifierKey = activity
+		// .getString(R.string.detection_classifier);, detectorClassifierKey,
+		// detectorScaleFactor,
+		minNeighbors = activity.getString(R.string.detection_min_neighbors);
+		minRelativeFaceSizeKey = activity
+				.getString(R.string.detection_min_relative_face_size);
+		maxRelativeFaceSizeKey = activity
+				.getString(R.string.detection_max_relative_face_size);
+
+		recognizerTypeKey = activity
+				.getString(R.string.recognition_recognizer_type);
 
 		clearDatabaseKey = activity.getString(R.string.general_clear_database);
 		restorePreferencesKey = activity
@@ -116,19 +149,16 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				SharedPreferences sharedPreferences, String key) {
 			Preference mPreference = findPreference(key);
 
-			if (!(mPreference instanceof EditTextPreference))
-				setPreferenceSummary(mPreference);
-
-			// avoid to reevaluate settings after a restore
 			if (oldValue != null) {
 				int msgId;
 
 				switch (isValid(sharedPreferences)) {
 				case VALID:
 					setPreferenceSummary(mPreference);
+					updateInstances(mPreference);
 					return;
 				case NOT_VALID_RECOGNITION_THRESHOLD:
-					msgId = R.string.;
+					msgId = R.string.recognition_invalid_threshold;
 					break;
 				case NOT_VALID_DETECTION_SCALE_FACTOR:
 					msgId = R.string.detection_invalid_scale_factor;
@@ -162,10 +192,11 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 		private Validity isValid(SharedPreferences sharedPreferences) {
 			EIMPreferences mPreferences = EIMPreferences.getInstance(activity);
-			
-			if (mPreferences.recognitionThreshold() > 1000 || mPreferences.recognitionThreshold() < 0)
+
+			if (mPreferences.recognitionThreshold() > 1000
+					|| mPreferences.recognitionThreshold() < 0)
 				return Validity.NOT_VALID_RECOGNITION_THRESHOLD;
-			
+
 			if (mPreferences.detectionScaleFactor() <= 1)
 				return Validity.NOT_VALID_DETECTION_SCALE_FACTOR;
 
@@ -208,6 +239,41 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 			mEditor.commit();
 
 		}
+
+		private void updateInstances(Preference mPreference) {
+			String key = mPreference.getKey();
+
+			if (key.equals(recognizerTypeKey)) {
+				EIMFaceRecognizer.Type mRecognizerType = EIMFaceRecognizer.Type
+						.valueOf(((ListPreference) mPreference).getValue());
+				EIMFaceRecognizer.setType(mRecognizerType);
+				mFaceRecognizer.train(mPeopleDatabase.getPeople());
+			} else if (key.equals(detectorTypeKey)) {
+				final FaceDetector.Type mDetectorType = FaceDetector.Type
+						.valueOf(((EditTextPreference) mPreference).getText());
+				// FaceDetector.setDetectorType(mDetectorType);
+			} else if (key.equals(classifierKey)) {
+				// TODO FaceDetector.setClassifier();
+			} else if (key.equals(scaleFactor)) {
+				final double scaleFactor = Double
+						.valueOf(((EditTextPreference) mPreference).getText());
+				// TODO FaceDetector.setScaleFactor(scaleFactor);
+			} else if (key.equals(minNeighbors)) {
+				final int minNeighbors = Integer
+						.valueOf(((EditTextPreference) mPreference).getText());
+				// TODO FaceDetector.setNeighbors(minNeighbors);
+			} else if (key.equals(minRelativeFaceSizeKey)) {
+				final double minRelativeFaceSize = Double
+						.valueOf(((EditTextPreference) mPreference).getText());
+				// TODO
+				// FaceDetector.setMinRelativeFaceSize(minRelativeFaceSize);
+			} else if (key.equals(maxRelativeFaceSizeKey)) {
+				final double maxRelativeFaceSize = Double
+						.valueOf(((EditTextPreference) mPreference).getText());
+				// TODO
+				// FaceDetector.setMaxRelativeFaceSize(maxRelativeFaceSize);
+			}
+		}
 	};
 
 	OnPreferenceClickListener mOnPreferenceClickListener = new OnPreferenceClickListener() {
@@ -245,7 +311,10 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	private void restorePreferences() {
 		setPreference(R.string.recognition_recognizer_type,
 				R.string.recognition_recognizer_type_default);
-		setPreference(R.string.detector_type, R.string.detector_type_default);
+		setPreference(R.string.recognition_threshold,
+				R.string.recognition_threshold_default);
+		setPreference(R.string.detection_detector_type,
+				R.string.detection_detector_type_default);
 		setPreference(R.string.detection_scale_factor,
 				R.string.detection_scale_factor_default);
 		setPreference(R.string.detection_min_neighbors,
@@ -258,8 +327,6 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				R.string.management_number_of_gallery_columns_landscape_default);
 		setPreference(R.string.management_number_of_gallery_columns_portrait,
 				R.string.management_number_of_gallery_columns_portrait_default);
-		setPreference(R.string.recognition_threshold,
-				R.string.recognition_threshold_default);
 	}
 
 	private void setPreference(int preferenceId, int defaultValue) {

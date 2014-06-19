@@ -1,31 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <PreferenceCategory android:title="@string/preference_general" >
-        <EditTextPreference
-            android:defaultValue="@string/management_number_of_gallery_columns_landscape_default"
-            android:inputType="number"
-            android:key="@string/management_number_of_gallery_columns_landscape"
-            android:title="@string/management_number_of_gallery_columns_landscape_title" />
-        <EditTextPreference
-            android:defaultValue="@string/management_number_of_gallery_columns_portrait_default"
-            android:inputType="number"
-            android:key="@string/management_number_of_gallery_columns_portrait"
-            android:title="@string/management_number_of_gallery_columns_portrait_title" />
-        <Preference
-            android:key="@string/general_clear_database"
-            android:title="@string/general_clear_database_title" />
-        <Preference
-            android:key="@string/general_restore_default_preferences"
-            android:title="@string/general_restore_default_preferences_title" />
-    </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_recognition" >
         <ListPreference
             android:defaultValue="@string/recognition_recognizer_type_default"
             android:entries="@array/recognition_recognizer_type_entries"
-            android:entryValues="@array/recognition_recognizer_type_entry_values"
+            android:entryValues="@array/recognition_recognizer_type_values"
             android:key="@string/recognition_recognizer_type"
             android:title="@string/recognition_recognizer_type_title" />
+
         <EditTextPreference
             android:defaultValue="@string/recognition_threshold_default"
             android:inputType="numberDecimal"
@@ -34,11 +17,12 @@
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_detection" >
         <ListPreference
-            android:defaultValue="@string/detector_type_default"
-            android:key="@string/detector_type"
-            android:title="@string/detector_type_title" 
-            android:entries="@array/detector_type_entries"
-            android:entryValues="@array/detector_type_entry_values"/>
+            android:defaultValue="@string/detection_detector_type_default"
+            android:entries="@array/detection_detector_type_entries"
+            android:entryValues="@array/detection_detector_type_values"
+            android:key="@string/detection_detector_type"
+            android:title="@string/detection_detector_type_title" />
+
         <EditTextPreference
             android:defaultValue="@string/detection_scale_factor_default"
             android:inputType="numberDecimal"
@@ -60,4 +44,24 @@
             android:key="@string/detection_max_relative_face_size"
             android:title="@string/detection_max_relative_face_size_title" />
     </PreferenceCategory>
+    <PreferenceCategory android:title="@string/preference_general" >
+        <EditTextPreference
+            android:defaultValue="@string/management_number_of_gallery_columns_landscape_default"
+            android:inputType="number"
+            android:key="@string/management_number_of_gallery_columns_landscape"
+            android:title="@string/management_number_of_gallery_columns_landscape_title" />
+        <EditTextPreference
+            android:defaultValue="@string/management_number_of_gallery_columns_portrait_default"
+            android:inputType="number"
+            android:key="@string/management_number_of_gallery_columns_portrait"
+            android:title="@string/management_number_of_gallery_columns_portrait_title" />
+
+        <Preference
+            android:key="@string/general_clear_database"
+            android:title="@string/general_clear_database_title" />
+        <Preference
+            android:key="@string/general_restore_default_preferences"
+            android:title="@string/general_restore_default_preferences_title" />
+    </PreferenceCategory>
+
 </PreferenceScreen>

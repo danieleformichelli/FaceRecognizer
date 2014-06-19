@@ -78,15 +78,6 @@ public class EIMPreferences {
 				numberOfGalleryColumnsPortraitKey,
 				numberOfGalleryColumnsPortraitDefault));
 	}
-	
-	private String recognitionThresholdKey;
-	private String recognitionThresholdDefault;
-	
-	public double recognitionThreshold() {
-		return Double.parseDouble(mSharedPreferences.getString(
-				recognitionThresholdKey,
-				recognitionThresholdDefault));
-	}
 
 	private String detectorTypeKey;
 	private String detectorTypeDefault;
@@ -118,6 +109,14 @@ public class EIMPreferences {
 
 	}
 
+	private String recognitionThresholdKey;
+	private String recognitionThresholdDefault;
+
+	public double recognitionThreshold() {
+		return Double.parseDouble(mSharedPreferences.getString(
+				recognitionThresholdKey, recognitionThresholdDefault));
+	}
+
 	private void getKeysAndDefaultValues(Context mContext) {
 		detectionScaleFactorKey = mContext
 				.getString(R.string.detection_scale_factor);
@@ -139,11 +138,11 @@ public class EIMPreferences {
 		detectionMaxRelativeFaceSizeDefault = mContext
 				.getString(R.string.detection_max_relative_face_size_default);
 
-		detectorTypeKey = mContext.getString(R.string.detector_type);
+		detectorTypeKey = mContext.getString(R.string.detection_detector_type);
 		detectorTypeDefault = mContext
-				.getString(R.string.detector_type_default);
+				.getString(R.string.detection_detector_type_default);
 		detectorTypes = mContext.getResources().getStringArray(
-				R.array.detector_type_entry_values);
+				R.array.detection_detector_type_values);
 
 		numberOfGalleryColumnsLandscapeKey = mContext
 				.getString(R.string.management_number_of_gallery_columns_landscape);
@@ -155,17 +154,17 @@ public class EIMPreferences {
 		numberOfGalleryColumnsPortraitDefault = mContext
 				.getString(R.string.management_number_of_gallery_columns_portrait_default);
 
-		recognitionThresholdKey = mContext
-				.getString(R.string.recognition_threshold);
-		recognitionThresholdDefault = mContext
-				.getString(R.string.recognition_threshold_default);
-		
 		recognitionTypeKey = mContext
 				.getString(R.string.recognition_recognizer_type);
 		recognitionTypeDefault = mContext
 				.getString(R.string.recognition_recognizer_type_default);
 		recognitionTypes = mContext.getResources().getStringArray(
-				R.array.recognition_recognizer_type_entry_values);
+				R.array.recognition_recognizer_type_values);
+
+		recognitionThresholdKey = mContext
+				.getString(R.string.recognition_threshold);
+		recognitionThresholdDefault = mContext
+				.getString(R.string.recognition_threshold_default);
 	}
 
 }

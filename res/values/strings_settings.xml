@@ -28,27 +28,28 @@
         <item>Fisher Faces</item>
         <item>Local Binary Pattern Histogram</item>
     </string-array>
-    <string-array name="recognition_recognizer_type_entry_values">
-        <item>EigenFaces</item>
-        <item>FisherFaces</item>
-        <item>LocalBinaryPatternHistogram</item>
+    <string-array name="recognition_recognizer_type_values">
+        <item>EIGEN</item>
+        <item>FISHER</item>
+        <item>LBPH</item>
     </string-array>
-    
 
     <!-- Detection -->
-	
+
     <string name="preference_detection">Detection</string>
-	<string name="detector_type">detector_type</string>
-	<string-array name="detector_type_entries">
-	    <item>Java</item>
-	    <item>Native</item>
-	</string-array>
-	<string-array name="detector_type_entry_values">
-	    <item>Java</item>
-	    <item>Native</item>
-	</string-array>
-    <string name="detector_type_title">Detector type</string>
-    <string name="detector_type_default">Native</string>
+    <string name="detection_detector_type">detector_type</string>
+
+    <string-array name="detection_detector_type_entries">
+        <item>Java</item>
+        <item>Native</item>
+    </string-array>
+    <string-array name="detection_detector_type_values">
+        <item>Java</item>
+        <item>Native</item>
+    </string-array>
+
+    <string name="detection_detector_type_title">Detector type</string>
+    <string name="detection_detector_type_default">Native</string>
     <string name="detection_scale_factor">detection_scale_factor</string>
     <string name="detection_scale_factor_default">1.1</string>
     <string name="detection_scale_factor_title">Scale Factor</string>

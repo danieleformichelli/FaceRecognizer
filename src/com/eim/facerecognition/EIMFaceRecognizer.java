@@ -16,7 +16,6 @@ import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.util.SparseArray;
 
-import com.eim.facerecognition.EIMFaceRecognizer.Type;
 import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;
 
