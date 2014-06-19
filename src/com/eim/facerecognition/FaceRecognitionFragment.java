@@ -273,7 +273,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 			double[] distance = new double[1];
 			mFaceRecognizer.predict(face, predictedLabel, distance);
 
-			Log.d(TAG, "predict(): " + predictedLabel[0] + " (" + distance[0]
+			Log.e(TAG, "predict(): " + predictedLabel[0] + " (" + distance[0]
 					+ ")");
 
 			if (distance[0] < mDistanceThreshold) {

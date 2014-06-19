@@ -80,17 +80,6 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		mPreferences = EIMPreferences.getInstance(activity);
 		mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
 				mPreferences.recognitionType());
-		initInstances();
-	}
-
-	private void initInstances() {
-		// Face detector initialization
-		mFaceDetector.setClassifier(null/*TODO*/);
-		mFaceDetector.setDetectorType(mPreferences.detectorType());
-		mFaceDetector.setScaleFactor(mPreferences.detectionScaleFactor());
-		mFaceDetector.setMinNeighbors(mPreferences.detectionMinNeighbors());
-		mFaceDetector.setMinRelativeFaceSize(mPreferences.detectionMinRelativeFaceSize());
-		mFaceDetector.setMaxRelativeFaceSize(mPreferences.detectionMaxRelativeFaceSize());
 	}
 
 	private void getKeys() {

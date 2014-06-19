@@ -40,9 +40,9 @@ public class FaceRecognizerMainActivity extends Activity {
 		setContentView(R.layout.activity_face_recognizer_main);
 
 		// Instantiate the fragments
+		mPreferencesFragment = new MyPreferencesFragment();
 		mFaceRecognitionFragment = new FaceRecognitionFragment();
 		mFacesManagementFragment = new FacesManagementFragment();
-		mPreferencesFragment = new MyPreferencesFragment();
 
 		// Create the sections of the adapter
 		sections = new ArrayList<Fragment>();

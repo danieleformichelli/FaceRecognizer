@@ -113,8 +113,6 @@ public class EIMPreferences {
 	private String recognitionThresholdDefault;
 
 	public double recognitionThreshold() {
-		android.util.Log.e("ASD",""+Double.parseDouble(mSharedPreferences.getString(
-				recognitionThresholdKey, recognitionThresholdDefault)));
 		return Double.parseDouble(mSharedPreferences.getString(
 				recognitionThresholdKey, recognitionThresholdDefault));
 	}
@@ -167,5 +165,10 @@ public class EIMPreferences {
 				.getString(R.string.recognition_threshold);
 		recognitionThresholdDefault = mContext
 				.getString(R.string.recognition_threshold_default);
+	}
+
+	public FaceDetector.Classifier detectorClassifier() {
+		// TODO farla per bene prendendo il valore dalle preferences
+		return FaceDetector.Classifier.HAARCASCADE_FRONTALFACE_DEFAULT;
 	}
 }

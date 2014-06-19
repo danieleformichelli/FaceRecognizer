@@ -16,6 +16,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.eim.R;
+import com.eim.utilities.EIMPreferences;
 
 public class FaceDetector {
 	private static final String TAG = "FaceDetector";
@@ -33,17 +34,17 @@ public class FaceDetector {
 	private File mCascadeFile;
 	private CascadeClassifier mJavaDetector;
 	private DetectionBasedTracker mNativeDetector;
-	private Type mDetectorType = Type.NATIVE;
-	private Classifier mClassifier = Classifier.LBPCASCADE_FRONTALFACE;
+	private Type mDetectorType;
+	private Classifier mClassifier;
 
-	private double mScaleFactor = 1.1;
-	private int mMinNeighbors = 2;
+	private double mScaleFactor;
+	private int mMinNeighbors;
 
 	private long mMinAbsoluteFaceSize = 0;
-	private double mMinRelativeFaceSize = 0.2;
+	private double mMinRelativeFaceSize;
 
 	private double mMaxAbsoluteFaceSize = 0;
-	private double mMaxRelativeFaceSize = 1;
+	private double mMaxRelativeFaceSize;
 
 	private static FaceDetector instance = null;
 
@@ -56,6 +57,12 @@ public class FaceDetector {
 
 	private FaceDetector(Context c) {
 		mContext = c;
+		mDetectorType = EIMPreferences.getInstance(c).detectorType();
+		mClassifier = EIMPreferences.getInstance(c).detectorClassifier();
+		mScaleFactor = EIMPreferences.getInstance(c).detectionScaleFactor();
+		mMinNeighbors = EIMPreferences.getInstance(c).detectionMinNeighbors();
+		mMinRelativeFaceSize = EIMPreferences.getInstance(c).detectionMinRelativeFaceSize();
+		mMaxRelativeFaceSize = EIMPreferences.getInstance(c).detectionMaxRelativeFaceSize();;
 		initDetector();
 	}
 
@@ -108,9 +115,9 @@ public class FaceDetector {
 		return mClassifier;
 	}
 
-	public void setClassifier(Object classifier) {
-		// this.mClassifier = classifier;
-		// initDetector();
+	public void setClassifier(Classifier classifier) {
+		 this.mClassifier = classifier;
+		 initDetector();
 	}
 
 	public Type getDetectorType() {
