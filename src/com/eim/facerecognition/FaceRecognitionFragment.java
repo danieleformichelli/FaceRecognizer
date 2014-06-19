@@ -26,6 +26,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
+import android.widget.TextView;
 
 import com.eim.R;
 import com.eim.facedetection.FaceDetector;
@@ -41,7 +42,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private static final String TAG = "FaceRecognitionFragment";
 	private static final Scalar FACE_RECT_COLOR = new Scalar(255, 192, 100, 255);
 
-	private static Double CONFIDENCE_THRESHOLD = 0.0;
+	private static Double mConfidenceThreshold = 0.0;
 
 	public enum Type {
 		EIGEN, FISHER, LBPH
@@ -64,6 +65,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private PeopleDatabase mPeopleDatabase;
 
 	private SeekBar mThresholdBar;
+	private TextView mThresholdTextView;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -78,11 +80,13 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		super.onActivityCreated(savedInstanceState);
 
 		activity = getActivity();
-
+		mConfidenceThreshold = EIMPreferences.getInstance(activity).recognitionThreshold();
+		
 		mCameraView = (ControlledJavaCameraView) activity
 				.findViewById(R.id.face_recognition_surface_view);
 		mCameraView.setCvCameraViewListener(this);
 
+		mThresholdTextView = (TextView) activity.findViewById(R.id.threshold_text);
 		mThresholdBar = (SeekBar) activity.findViewById(R.id.threshold_bar);
 		mThresholdBar.setOnSeekBarChangeListener(this);
 	}
@@ -226,7 +230,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 			double[] confidence = new double[1];
 			mFaceRecognizer.predict(face, predictedLabel, confidence);
 
-			if (confidence[0] > CONFIDENCE_THRESHOLD) {
+			if (confidence[0] > mConfidenceThreshold) {
 				Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
 				if (guess == null)
 					continue;
@@ -265,7 +269,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	@Override
 	public void onProgressChanged(SeekBar arg0, int arg1, boolean arg2) {
-		CONFIDENCE_THRESHOLD = Double.valueOf(arg1);
+		mConfidenceThreshold = Double.valueOf(arg1);
+		mThresholdTextView.setText(mConfidenceThreshold.toString());
 	}
 
 	@Override

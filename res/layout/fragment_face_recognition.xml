@@ -12,12 +12,23 @@
         opencv:camera_id="any"
         opencv:show_fps="true" />
 
+    <TextView
+        android:id="@+id/threshold_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignTop="@+id/threshold_bar"
+        android:gravity="center"
+        android:minWidth="50dp"
+        android:textColor="@android:color/white" />
+
     <SeekBar
         android:id="@+id/threshold_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
+        android:layout_toRightOf="@+id/threshold_text"
         android:indeterminate="false"
         android:max="1000"
         android:progress="10" />
