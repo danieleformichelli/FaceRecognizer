@@ -123,7 +123,7 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 	@Override
 	public void onCameraViewStarted(int width, int height) {
 		mFaceDetector = FaceDetector.getInstance(this);
-
+		mFaceDetector.resetSizes();
 		mGray = new Mat();
 		mRgba = new Mat();
 	}
