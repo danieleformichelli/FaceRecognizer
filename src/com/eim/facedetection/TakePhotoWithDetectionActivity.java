@@ -14,6 +14,7 @@ import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -66,6 +67,8 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 			@Override
 			public void onClick(View v) {
 				mTakePhotoNow = true;
+				ProgressDialog.show(TakePhotoWithDetectionActivity.this, "",
+						"Grabbing faces...", true);
 			}
 		});
 

@@ -22,6 +22,7 @@ import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
@@ -296,6 +297,8 @@ public class FaceDetectionActivity extends Activity {
 					int position, long id) {
 				// showConfirmDialog(detectedFaces[position]);
 				mChooserVisible = false;
+				ProgressDialog.show(FaceDetectionActivity.this, "", 
+	                    "Saving face...", true);
 				processFace(detectedFaces[position]);
 			}
 		});
