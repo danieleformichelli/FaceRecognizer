@@ -14,5 +14,6 @@
     </string-array>
 
     <string name="title_activity_take_photo_with_detection">TakePhotoWithDetectionActivity</string>
+    <string name="progress_dialog_saving_face">Saving face&#8230;</string>
 
 </resources>

@@ -1,5 +1,8 @@
 package com.eim.facesmanagement;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.DialogInterface;
@@ -234,14 +237,19 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		@Override
 		public void removeSelectedPhotos(PhotoGallery gallery) {
 			PhotoAdapter mPhotoAdapter = (PhotoAdapter) gallery.getAdapter();
+			List<Integer> toBeDeleted = new ArrayList<Integer>();
+
+			int personId = (int) gallery.getTag();
+			Person mPerson = mPeopleAdapter.getPersonById(personId);
+			SparseArray<Photo> photos = mPerson.getPhotos();
+			
 			// i = 0 is add/delete
 			for (int i = 1, l = mPhotoAdapter.getCount(); i < l; i++)
-				if (mPhotoAdapter.isSelected(i)) {
-					final int personId = (int) gallery.getTag();
-					final int photoId = mPeopleAdapter.getPersonById(personId)
-							.getPhotos().keyAt(i - 1);
-					mPeopleAdapterListener.removePhoto(personId, photoId);
-				}
+				if (mPhotoAdapter.isSelected(i))
+					toBeDeleted.add(photos.keyAt(i-1));
+
+			for (Integer i : toBeDeleted)
+				mPeopleAdapterListener.removePhoto(personId, i);
 		}
 
 	};
@@ -260,7 +268,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			int personId = extras.getInt(FaceDetectionActivity.PERSON_ID);
 			String[] photoPaths = data.getExtras().getStringArray(
 					FaceDetectionActivity.PHOTO_PATHS);
-			
+
 			for (String photoPath : photoPaths)
 				mPeopleAdapterListener.addPhoto(personId, new Photo(photoPath,
 						null));

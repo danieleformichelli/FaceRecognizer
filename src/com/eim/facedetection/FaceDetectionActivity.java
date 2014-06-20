@@ -67,6 +67,7 @@ public class FaceDetectionActivity extends Activity {
 	private List<String> mFacesResults;
 	
 	private ProgressDialog mProgressDialog;
+	private String savingFace;
 
 	private interface GenericCancelListener extends OnCancelListener,
 			OnDismissListener {
@@ -83,6 +84,8 @@ public class FaceDetectionActivity extends Activity {
 
 		personId = extras.getInt(PERSON_ID);
 		mLabelName = extras.getString(PERSON_NAME);
+		
+		savingFace = getString(R.string.progress_dialog_saving_face);
 	}
 
 	/**
@@ -309,7 +312,7 @@ public class FaceDetectionActivity extends Activity {
 					int position, long id) {
 				mChooserVisible = false;
 				mProgressDialog = ProgressDialog.show(FaceDetectionActivity.this, "", 
-	                    "Saving face...", true);
+	                    savingFace, true);
 				processFace(detectedFaces[position]);
 				finishWithResults();
 			}
@@ -320,7 +323,7 @@ public class FaceDetectionActivity extends Activity {
 			@Override
 			public void onClick(View arg0) {
 				mProgressDialog = ProgressDialog.show(FaceDetectionActivity.this, "", 
-	                    "Saving faces...", true);
+	                    savingFace, true);
 				
 				for (Bitmap face: detectedFaces)
 					processFace(face);

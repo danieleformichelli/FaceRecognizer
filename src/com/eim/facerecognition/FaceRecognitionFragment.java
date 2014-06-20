@@ -290,18 +290,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 		for (int i = 0; i < facesArray.length; i++) {
 			Rect faceRect = facesArray[i];
-			// if (faceRect.x < 0) {
-			// Log.e(TAG, "faceRect in " + faceRect.x + ", " + faceRect.y
-			// + " " + faceRect.width + "x" + faceRect.height);
-			// faceRect.width += faceRect.x;
-			// faceRect.x = 0;
-			// }
-			// if (faceRect.y < 0) {
-			// Log.e(TAG, "faceRect in " + faceRect.x + ", " + faceRect.y
-			// + " " + faceRect.width + "x" + faceRect.height);
-			// faceRect.height += faceRect.y;
-			// faceRect.y = 0;
-			// }
 
 			try {
 				Mat face = mGray.submat(faceRect);

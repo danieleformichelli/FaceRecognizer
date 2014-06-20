@@ -6,9 +6,11 @@
     <string name="face_detection_choose_face">Scegli la faccia da riconoscere</string>
 
     <string-array name="face_detection_add_photo_options">
-        <item>Scatta istantanea</item>
+        <item>Scatta foto</item>
         <item>Scegli foto dalla galleria</item>
-        <item>Scatta istantanea (con detection)</item>
+        <item>Scatta foto (con detection)</item>
     </string-array>
 
+    <string name="progress_dialog_saving_face">Salvataggio in corso&#8230;</string>
+    
 </resources>
