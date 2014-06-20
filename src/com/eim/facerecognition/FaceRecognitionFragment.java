@@ -1,8 +1,5 @@
 package com.eim.facerecognition;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.android.Utils;
@@ -24,8 +21,8 @@ import android.util.Log;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -62,9 +59,12 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private Mat mGray;
 	private Mat mRgba;
 
+	private Mat mSceneForRecognizer;
+	private LabelledRect[] mLabelsforDrawer;
+
 	private SparseArray<Mat> thumbnails;
 	private int mThumbnailSize = 25;
-	private int height;
+	private int mHeight;
 
 	private FaceDetector mFaceDetector;
 	private EIMFaceRecognizer mFaceRecognizer;
@@ -164,15 +164,33 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 		mGray = new Mat();
 		mRgba = new Mat();
-
-		this.height = height;
+		
+		mHeight = height;
+		
+		mSceneForRecognizer = mGray;
+		
+		mRecognitionThread = new Thread(mRecognitionWorker);
+		mRecognitionThread.start();
 	}
 
 	@Override
 	public void onCameraViewStopped() {
+		mRecognitionThread.interrupt();
+		mRecognitionThread = null;
 		mGray.release();
 		mRgba.release();
 	}
+	
+	private Thread mRecognitionThread = null;
+	private Runnable mRecognitionWorker = new Runnable() {
+		@Override
+		public void run() {
+			while (!Thread.interrupted()) {
+				Rect[] facesArray = mFaceDetector.detect(mSceneForRecognizer);
+				mLabelsforDrawer = recognizeFaces(facesArray);
+			}
+		}
+	};
 
 	@Override
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
@@ -183,17 +201,17 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 			Mat flippedRgba = mRgba;
 			mRgba = new Mat();
 			Core.flip(flippedRgba, mRgba, 1);
+			flippedRgba.release();
 
 			Mat flippedGrey = mGray;
 			mGray = new Mat();
 			Core.flip(flippedGrey, mGray, 1);
+			flippedGrey.release();
 		}
 
-		Rect[] facesArray = mFaceDetector.detect(mGray);
+		mSceneForRecognizer = mGray;
 
-		List<LabelledRect> labelledFaces = recognizeFaces(facesArray);
-
-		for (LabelledRect faceAndLabel : labelledFaces)
+		for (LabelledRect faceAndLabel : mLabelsforDrawer)
 			drawLabel(mRgba, faceAndLabel);
 
 		return mRgba;
@@ -254,19 +272,21 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	}
 
-	private List<LabelledRect> recognizeFaces(Rect[] facesArray) {
+	private LabelledRect[] recognizeFaces(Rect[] facesArray) {
 
-		List<LabelledRect> recognizedPeople = new ArrayList<LabelledRect>();
+		LabelledRect[] recognizedPeople = new LabelledRect[facesArray.length];
 
-		for (Rect faceRect : facesArray) {
-
+		for (int i = 0; i < facesArray.length; i++) {
+			Rect faceRect = facesArray[i];
 			if (faceRect.x < 0) {
-				Log.e(TAG, "faceRect in " + faceRect.x + ", " + faceRect.y + " " + faceRect.width + "x" + faceRect.height);
+				Log.e(TAG, "faceRect in " + faceRect.x + ", " + faceRect.y
+						+ " " + faceRect.width + "x" + faceRect.height);
 				faceRect.width += faceRect.x;
 				faceRect.x = 0;
 			}
 			if (faceRect.y < 0) {
-				Log.e(TAG, "faceRect in " + faceRect.x + ", " + faceRect.y + " " + faceRect.width + "x" + faceRect.height);
+				Log.e(TAG, "faceRect in " + faceRect.x + ", " + faceRect.y
+						+ " " + faceRect.width + "x" + faceRect.height);
 				faceRect.height += faceRect.y;
 				faceRect.y = 0;
 			}
@@ -281,16 +301,18 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 			if (distance[0] < mDistanceThreshold) {
 				Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
-				if (guess == null)
+				if (guess == null) {
+					recognizedPeople[i] = new LabelledRect(faceRect, null, null);
 					continue;
+				}
 
-				recognizedPeople.add(new LabelledRect(faceRect,
-						guess.getName(), getThumbnail(predictedLabel[0])));
+				recognizedPeople[i] = new LabelledRect(faceRect,
+						guess.getName(), getThumbnail(predictedLabel[0]));
 
 				Log.d(TAG, "Prediction: " + guess.getName() + " ("
 						+ distance[0] + ")");
 			} else
-				recognizedPeople.add(new LabelledRect(faceRect, null, null));
+				recognizedPeople[i] = new LabelledRect(faceRect, null, null);
 		}
 
 		return recognizedPeople;
@@ -308,7 +330,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		Utils.bitmapToMat(mBitmap, thumbnail);
 		Mat newThumbnail = new Mat();
 
-		double absoluteFaceSize = height
+		double absoluteFaceSize = mHeight
 				* mFaceDetector.getMinRelativeFaceSize();
 		mThumbnailSize = (int) (absoluteFaceSize * 0.6);
 		Core.subtract(thumbnail, new Scalar(0, 0, 0, 100), transparentThumbnail);
