@@ -43,6 +43,8 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 	private Uri mOutputUri;
 	private ImageButton mSwitchButton;
 	private int mCurrentCameraIndex = ControlledJavaCameraView.CAMERA_ID_BACK;
+	
+	private ProgressDialog mProgressDialog;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +56,8 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 			setResult(Activity.RESULT_CANCELED);
 			finish();
 		}
+		
+		final String grabbingFaces = getString(R.string.progress_dialog_grabbing_face);
 
 		mOutputUri = extras.getParcelable(MediaStore.EXTRA_OUTPUT);
 
@@ -67,8 +71,8 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 			@Override
 			public void onClick(View v) {
 				mTakePhotoNow = true;
-				ProgressDialog.show(TakePhotoWithDetectionActivity.this, "",
-						"Grabbing faces...", true);
+				mProgressDialog = ProgressDialog.show(TakePhotoWithDetectionActivity.this, "",
+						grabbingFaces, true);
 			}
 		});
 
@@ -147,6 +151,7 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 				out = new FileOutputStream(mOutputUri.getPath());
 				bmp.compress(Bitmap.CompressFormat.PNG, 100, out);
 				out.close();
+				mProgressDialog.dismiss();
 				setResult(Activity.RESULT_OK);
 				finish();
 				return mRgba;

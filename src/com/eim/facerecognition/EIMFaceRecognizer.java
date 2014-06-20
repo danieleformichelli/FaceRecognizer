@@ -79,7 +79,8 @@ public class EIMFaceRecognizer {
 
 		System.loadLibrary("facerecognizer");
 
-		instance = new EIMFaceRecognizer(mContext.getApplicationContext(), mType);
+		instance = new EIMFaceRecognizer(mContext.getApplicationContext(),
+				mType);
 
 		return instance;
 	}
@@ -182,7 +183,7 @@ public class EIMFaceRecognizer {
 
 		mFaceRecognizer.train(faces, labelsMat);
 		mFaceRecognizer.save(mModelPath);
-		
+
 		isTrained = true;
 	}
 
@@ -209,6 +210,20 @@ public class EIMFaceRecognizer {
 	public void setType(Type mRecognizerType) {
 		if (mRecognizerType == null)
 			return;
+
+		switch (mRecognizerType) {
+		case EIGEN:
+			mFaceRecognizer = new EigenFaceRecognizer();
+			break;
+		case FISHER:
+			mFaceRecognizer = new FisherFaceRecognizer();
+			break;
+		case LBPH:
+			mFaceRecognizer = new LBPHFaceRecognizer();
+			break;
+		default:
+			throw new IllegalArgumentException("Invalid mType");
+		}
 
 		this.mRecognizerType = mRecognizerType;
 		resetModel();
