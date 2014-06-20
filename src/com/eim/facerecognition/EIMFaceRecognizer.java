@@ -41,6 +41,8 @@ public class EIMFaceRecognizer {
 	private String mModelPath;
 	private boolean isTrained;
 	SparseArray<Person> dataset;
+	private Size size;
+
 
 	private EIMFaceRecognizer(Context mContext, Type mType) {
 
@@ -157,20 +159,13 @@ public class EIMFaceRecognizer {
 		List<Integer> labels = new ArrayList<Integer>();
 		int counter = 0;
 		
-		// For EIGEN and FISHER
-		boolean needResize = !mRecognizerType.isIncrementable();
-		if (needResize)
-			Log.i(TAG, "Need Resize. Type = " + mRecognizerType.name());
-		else
-			Log.i(TAG, "No Resize. Type = " + mRecognizerType.name());
-		Size dsize = new Size(Double.MAX_VALUE,Double.MAX_VALUE);
+		size = new Size(Double.MAX_VALUE,Double.MAX_VALUE);
 		
 		for (int i = 0, l = sparseArray.size(); i < l; i++) {
 			
 			int label = sparseArray.keyAt(i);
 			Person person = sparseArray.valueAt(i);
 			SparseArray<Photo> photos = person.getPhotos();
-			
 			
 			for (int j = 0, k = photos.size(); j < k; j++) {
 				Photo mPhoto = photos.valueAt(j);
@@ -180,24 +175,21 @@ public class EIMFaceRecognizer {
 				if (face == null)
 					face = BitmapFactory.decodeFile(mPhoto.getUrl());
 				
-				Log.i(TAG, "Bitmap to Map");
 				Utils.bitmapToMat(face, mMat);
-				Log.i(TAG, "cvtColor");
 				Imgproc.cvtColor(mMat, mMat, Imgproc.COLOR_RGB2GRAY);
-				Log.i(TAG, "Add to list");
-				faces.add(mMat);
-				
+
 				// For EIGEN and FISHER
-				if (needResize) {
+				if (!mRecognizerType.isIncrementable()) {
 					Size s = mMat.size();
-					if (s.height < dsize.height)
-						dsize.height = s.height;
-					if (s.width < dsize.width)
-						dsize.width = s.width;
+					if (s.height < size.height)
+						size.height = s.height;
+					if (s.width < size.width)
+						size.width = s.width;
 				}
 				
 				labels.add((int) label);
-
+				faces.add(mMat);
+				
 				Log.d(TAG, "Inserting " + label + ":" + mPhoto.getUrl());
 
 				// labels.put(counter++, 0, new int[] { (int) label });
@@ -206,23 +198,25 @@ public class EIMFaceRecognizer {
 		
 		// for EIGEN and FISHER
 		
-		if (needResize) {
-			Log.i(TAG, "Set size of all faces to " + dsize.width + "x" + dsize.height);
+		if (!mRecognizerType.isIncrementable()) {
+			Log.i(TAG, "Set size of all faces to " + size.width + "x" + size.height);
 			ListIterator<Mat> itr = faces.listIterator();
 			while (itr.hasNext()) {
 				Mat src = itr.next();
 				Mat dst = new Mat();
-				Imgproc.resize(src, dst, dsize);
+				Imgproc.resize(src, dst, size);
 				itr.set(dst);
 			}
 		}
 
-		Log.i(TAG, "Resizing done!");
+		
 		Mat labelsMat = new Mat(labels.size(), 1, CvType.CV_32SC1);
 		for (counter = 0; counter < labelsMat.rows(); counter++)
 			labelsMat.put(counter, 0, new int[] { labels.get(counter) });
-
-		// Log.i(TAG, labelsMat.dump());
+		
+		Log.i(TAG, "Resizing done!");
+		
+		Log.i(TAG, labelsMat.dump());
 
 		mFaceRecognizer.train(faces, labelsMat);
 		mFaceRecognizer.save(mModelPath);
@@ -242,8 +236,18 @@ public class EIMFaceRecognizer {
 	}
 
 	public void predict(Mat src, int[] label, double[] confidence) {
-		if (isTrained)
-			mFaceRecognizer.predict(src, label, confidence);
+		Log.i(TAG, "Try prediction image. Type = " + mRecognizerType.name() );
+		if (isTrained) {
+			if (mRecognizerType.isIncrementable()) {
+				mFaceRecognizer.predict(src, label, confidence);
+			}
+			else {
+				Mat srcResized = new Mat();
+				Imgproc.resize(src, srcResized, size);
+				mFaceRecognizer.predict(srcResized, label, confidence);
+			}
+		}
+		Log.i(TAG, "Confidence: " + confidence[0]);
 	}
 
 	public Type getType() {
@@ -273,4 +277,6 @@ public class EIMFaceRecognizer {
 		
 		resetModel();
 	}
+	
+	
 }
