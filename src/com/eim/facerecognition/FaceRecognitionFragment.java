@@ -138,6 +138,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	@Override
 	public void swipeIn(boolean right) {
+		mFaceDetector.resetSizes();
 		if (mCameraView != null)
 			mCameraView.enableView();
 	}

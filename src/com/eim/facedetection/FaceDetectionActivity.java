@@ -387,8 +387,11 @@ public class FaceDetectionActivity extends Activity {
 
 		Mat gray = new Mat();
 		Imgproc.cvtColor(mScene, gray, Imgproc.COLOR_RGB2GRAY);
-
-		Rect[] faceRegions = FaceDetector.getInstance(this).detect(gray);
+		
+		FaceDetector fd = FaceDetector.getInstance(this);
+		
+		fd.resetSizes();
+		Rect[] faceRegions = fd.detect(gray);
 
 		Bitmap[] detectedFaces = new Bitmap[faceRegions.length];
 
