@@ -11,7 +11,7 @@
 
         <EditTextPreference
             android:defaultValue="@string/recognition_threshold_default"
-            android:inputType="numberDecimal"
+            android:inputType="number"
             android:key="@string/recognition_threshold"
             android:title="@string/recognition_threshold_title" />
     </PreferenceCategory>

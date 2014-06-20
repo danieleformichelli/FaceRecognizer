@@ -20,8 +20,8 @@
     <string name="recognition_recognizer_type_default">LBPH</string>
     <string name="recognition_threshold">recognition_threshold</string>
     <string name="recognition_threshold_title">Recognition threshold</string>
-    <string name="recognition_threshold_default">70.5</string>
-    <string name="recognition_invalid_threshold">The threshold must be in the range [0:1000]</string>
+    <string name="recognition_threshold_default">150</string>
+    <string name="recognition_invalid_threshold">The threshold must be in the range [0, 500]</string>
 
     <string-array name="recognition_recognizer_type_entries">
         <item>Eigen Faces</item>

@@ -117,8 +117,8 @@ public class EIMPreferences {
 	private String recognitionThresholdKey;
 	private String recognitionThresholdDefault;
 
-	public double recognitionThreshold() {
-		return Double.parseDouble(mSharedPreferences.getString(
+	public int recognitionThreshold() {
+		return Integer.parseInt(mSharedPreferences.getString(
 				recognitionThresholdKey, recognitionThresholdDefault));
 	}
 

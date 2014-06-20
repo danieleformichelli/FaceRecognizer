@@ -45,7 +45,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private static final Scalar FACE_UNKNOWN_RECT_COLOR = new Scalar(240, 44,
 			0, 255);
 
-	private static Double mDistanceThreshold = 0.0;
+	private static int mDistanceThreshold;
 
 	public enum Type {
 		EIGEN, FISHER, LBPH
@@ -117,7 +117,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				.findViewById(R.id.threshold_text);
 		mThresholdBar = (SeekBar) activity.findViewById(R.id.threshold_bar);
 		mThresholdBar.setOnSeekBarChangeListener(this);
-		mThresholdBar.setProgress(mDistanceThreshold.intValue());
+		mThresholdBar.setProgress(mDistanceThreshold);
 
 		thumbnails = new SparseArray<Mat>();
 	}
@@ -375,8 +375,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	@Override
 	public void onProgressChanged(SeekBar arg0, int arg1, boolean arg2) {
-		mDistanceThreshold = Double.valueOf(arg1);
-		mThresholdTextView.setText(mDistanceThreshold.toString());
+		mDistanceThreshold = arg1;
+		mThresholdTextView.setText(String.valueOf(mDistanceThreshold));
 	}
 
 	@Override
