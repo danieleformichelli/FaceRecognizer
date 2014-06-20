@@ -198,15 +198,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mGray = inputFrame.gray();
 
 		if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT) {
-			Mat flippedRgba = mRgba;
-			mRgba = new Mat();
-			Core.flip(flippedRgba, mRgba, 1);
-			flippedRgba.release();
-
-			Mat flippedGrey = mGray;
-			mGray = new Mat();
-			Core.flip(flippedGrey, mGray, 1);
-			flippedGrey.release();
+			Core.flip(mRgba, mRgba, 1);
+			Core.flip(mGray, mGray, 1);
 		}
 
 		mSceneForRecognizer = mGray;

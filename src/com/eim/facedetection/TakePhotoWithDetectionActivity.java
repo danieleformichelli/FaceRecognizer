@@ -81,7 +81,6 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 				mCameraView.disableView();
 				mCameraView.setCameraIndex(mCurrentCameraIndex);
 				mCameraView.enableView();
-				Log.d(TAG, "index: " + mCurrentCameraIndex);
 			}
 		});
 	}
@@ -132,11 +131,8 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
 		mRgba = inputFrame.rgba();
 
-		if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT) {
-			Mat flippedRgba = mRgba;
-			mRgba = new Mat();
-			Core.flip(flippedRgba, mRgba, 1);
-		}
+		if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT)
+			Core.flip(mRgba, mRgba, 1);
 
 		if (mTakePhotoNow) {
 			Bitmap bmp = Bitmap.createBitmap(mRgba.cols(), mRgba.rows(),
