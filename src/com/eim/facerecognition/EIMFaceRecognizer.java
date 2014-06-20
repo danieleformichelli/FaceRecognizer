@@ -2,12 +2,15 @@ package com.eim.facerecognition;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 import org.opencv.android.Utils;
 import org.opencv.contrib.FaceRecognizer;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import android.content.Context;
@@ -123,10 +126,12 @@ public class EIMFaceRecognizer {
 		newFaces.add(newFaceMat);
 		labels.put(0, 0, new int[] { label });
 
-		if (isTrained)
+		if (isTrained) {
 			mFaceRecognizer.update(newFaces, labels);
-		else
+		}
+		else {
 			mFaceRecognizer.train(newFaces, labels);
+		}
 
 		mFaceRecognizer.save(mModelPath);
 	}
@@ -140,6 +145,7 @@ public class EIMFaceRecognizer {
 	 *            the field Photos of the value
 	 */
 	public void train(SparseArray<Person> sparseArray) {
+		
 		if (!isDatasetValid(sparseArray)) {
 			resetModel();
 			return;
@@ -147,14 +153,19 @@ public class EIMFaceRecognizer {
 
 		List<Mat> faces = new ArrayList<Mat>();
 		List<Integer> labels = new ArrayList<Integer>();
-
 		int counter = 0;
-
+		
+		// For EIGEN and FISHER
+		boolean needResize = !mRecognizerType.isIncrementable();
+		Size dsize = new Size(Double.MAX_VALUE,Double.MAX_VALUE);
+		
 		for (int i = 0, l = sparseArray.size(); i < l; i++) {
+			
 			int label = sparseArray.keyAt(i);
 			Person person = sparseArray.valueAt(i);
 			SparseArray<Photo> photos = person.getPhotos();
-
+			
+			
 			for (int j = 0, k = photos.size(); j < k; j++) {
 				Photo mPhoto = photos.valueAt(j);
 				Mat mMat = new Mat();
@@ -162,10 +173,19 @@ public class EIMFaceRecognizer {
 				Bitmap face = mPhoto.getBitmap();
 				if (face == null)
 					face = BitmapFactory.decodeFile(mPhoto.getUrl());
-
-				Utils.bitmapToMat(face, mMat);
+				
 				Imgproc.cvtColor(mMat, mMat, Imgproc.COLOR_RGB2GRAY);
 				faces.add(mMat);
+				
+				// For EIGEN and FISHER
+				if (needResize) {
+					Size s = mMat.size();
+					if (s.height < dsize.height)
+						dsize.height = s.height;
+					if (s.width < dsize.width)
+						dsize.width = s.width;
+				}
+				
 				labels.add((int) label);
 
 				Log.d(TAG, "Inserting " + label + ":" + mPhoto.getUrl());
@@ -173,12 +193,23 @@ public class EIMFaceRecognizer {
 				// labels.put(counter++, 0, new int[] { (int) label });
 			}
 		}
+		
+		// for EIGEN and FISHER
+		if (needResize) {
+			ListIterator<Mat> itr = faces.listIterator();
+			while (itr.hasNext()) {
+				Mat src = itr.next();
+				Mat dst = new Mat();
+				Imgproc.resize(src, dst, dsize);
+				itr.set(dst);
+			}
+		}
 
 		Mat labelsMat = new Mat(labels.size(), 1, CvType.CV_32SC1);
 		for (counter = 0; counter < labelsMat.rows(); counter++)
 			labelsMat.put(counter, 0, new int[] { labels.get(counter) });
 
-		Log.i(TAG, labelsMat.dump());
+		// Log.i(TAG, labelsMat.dump());
 
 		mFaceRecognizer.train(faces, labelsMat);
 		mFaceRecognizer.save(mModelPath);
