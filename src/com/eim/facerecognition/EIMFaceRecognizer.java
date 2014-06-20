@@ -82,7 +82,8 @@ public class EIMFaceRecognizer {
 
 		System.loadLibrary("facerecognizer");
 
-		instance = new EIMFaceRecognizer(mContext.getApplicationContext(), mType);
+		instance = new EIMFaceRecognizer(mContext.getApplicationContext(),
+				mType);
 
 		return instance;
 	}
@@ -159,7 +160,9 @@ public class EIMFaceRecognizer {
 		// For EIGEN and FISHER
 		boolean needResize = !mRecognizerType.isIncrementable();
 		if (needResize)
-			Log.i(TAG, "Need Resize");
+			Log.i(TAG, "Need Resize. Type = " + mRecognizerType.name());
+		else
+			Log.i(TAG, "No Resize. Type = " + mRecognizerType.name());
 		Size dsize = new Size(Double.MAX_VALUE,Double.MAX_VALUE);
 		
 		for (int i = 0, l = sparseArray.size(); i < l; i++) {
@@ -177,7 +180,11 @@ public class EIMFaceRecognizer {
 				if (face == null)
 					face = BitmapFactory.decodeFile(mPhoto.getUrl());
 				
+				Log.i(TAG, "Bitmap to Map");
+				Utils.bitmapToMat(face, mMat);
+				Log.i(TAG, "cvtColor");
 				Imgproc.cvtColor(mMat, mMat, Imgproc.COLOR_RGB2GRAY);
+				Log.i(TAG, "Add to list");
 				faces.add(mMat);
 				
 				// For EIGEN and FISHER
@@ -198,7 +205,9 @@ public class EIMFaceRecognizer {
 		}
 		
 		// for EIGEN and FISHER
+		
 		if (needResize) {
+			Log.i(TAG, "Set size of all faces to " + dsize.width + "x" + dsize.height);
 			ListIterator<Mat> itr = faces.listIterator();
 			while (itr.hasNext()) {
 				Mat src = itr.next();
@@ -208,6 +217,7 @@ public class EIMFaceRecognizer {
 			}
 		}
 
+		Log.i(TAG, "Resizing done!");
 		Mat labelsMat = new Mat(labels.size(), 1, CvType.CV_32SC1);
 		for (counter = 0; counter < labelsMat.rows(); counter++)
 			labelsMat.put(counter, 0, new int[] { labels.get(counter) });
@@ -216,6 +226,8 @@ public class EIMFaceRecognizer {
 
 		mFaceRecognizer.train(faces, labelsMat);
 		mFaceRecognizer.save(mModelPath);
+
+		isTrained = true;
 	}
 
 	private boolean isDatasetValid(SparseArray<Person> dataset) {
@@ -239,12 +251,11 @@ public class EIMFaceRecognizer {
 	}
 
 	public void setType(Type mType) {
-		if (mRecognizerType == null)
+		if (mType == null)
 			return;
 
-		mRecognizerType = mType;
-		
 		switch (mType) {
+
 		case EIGEN:
 			mFaceRecognizer = new EigenFaceRecognizer();
 			break;
@@ -257,6 +268,8 @@ public class EIMFaceRecognizer {
 		default:
 			throw new IllegalArgumentException("Invalid mType");
 		}
+		
+		mRecognizerType = mType;
 		
 		resetModel();
 	}
