@@ -182,6 +182,8 @@ public class EIMFaceRecognizer {
 
 		mFaceRecognizer.train(faces, labelsMat);
 		mFaceRecognizer.save(mModelPath);
+		
+		isTrained = true;
 	}
 
 	private boolean isDatasetValid(SparseArray<Person> dataset) {
