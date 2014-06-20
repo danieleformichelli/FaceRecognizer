@@ -222,8 +222,6 @@ public class FaceDetector {
 			if (Math.round(height * mMaxRelativeFaceSize) > 0)
 				mMaxAbsoluteFaceSize = Math
 						.round(height * mMaxRelativeFaceSize);
-
-			mNativeDetector.setMinFaceSize((int) mMinAbsoluteFaceSize);
 		}
 
 		switch (mDetectorType) {
@@ -243,6 +241,11 @@ public class FaceDetector {
 
 		return faces.toArray();
 
+	}
+
+	public void resetSizes() {
+		mMinAbsoluteFaceSize = 0;
+		mMaxAbsoluteFaceSize = 0;
 	}
 
 }
