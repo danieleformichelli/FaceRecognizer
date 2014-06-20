@@ -75,6 +75,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private SeekBar mThresholdBar;
 	private TextView mThresholdTextView;
 	private ImageButton mSwitchButton;
+	private Mat mGrayGood;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -168,10 +169,11 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 		mGray = new Mat();
 		mRgba = new Mat();
-
+		mGrayGood = new Mat();
+		
+		mSceneForRecognizer = mGrayGood;
+		
 		mHeight = height;
-
-		mSceneForRecognizer = mGray;
 
 		mRecognitionThread = new Thread(mRecognitionWorker);
 		mRecognitionThread.start();
@@ -181,6 +183,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	public void onCameraViewStopped() {
 		mRecognitionThread.interrupt();
 		mRecognitionThread = null;
+		mGrayGood.release();
 		mGray.release();
 		mRgba.release();
 	}
@@ -206,17 +209,18 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 		if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT) {
 			Core.flip(mRgba, mRgba, 1);
-			Core.flip(mGray, mGray, 1);
+			Core.flip(mGray, mGrayGood, 1);
+			mSceneForRecognizer = mGrayGood;
+		} else {
+			mSceneForRecognizer = mGray;
 		}
 
 		if (multithread) {
-			mSceneForRecognizer.release();
-			mSceneForRecognizer = mGray;
 
 			for (LabelledRect faceAndLabel : mLabelsForDrawer)
 				drawLabel(mRgba, faceAndLabel);
 		} else {
-			Rect[] facesArray = mFaceDetector.detect(mGray);
+			Rect[] facesArray = mFaceDetector.detect(mSceneForRecognizer);
 			mLabelsForDrawer = recognizeFaces(facesArray);
 
 			for (LabelledRect faceAndLabel : mLabelsForDrawer)
