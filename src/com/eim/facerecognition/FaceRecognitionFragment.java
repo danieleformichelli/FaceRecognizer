@@ -4,6 +4,7 @@ import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
+import org.opencv.core.CvException;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
@@ -211,7 +212,9 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	}
 
 	private void drawLabel(Mat frame, LabelledRect info) {
-
+		if (info == null)
+			return;
+		
 		boolean unknownFace = (info.text == null);
 		Scalar boundingBoxColor;
 
@@ -283,29 +286,33 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				faceRect.height += faceRect.y;
 				faceRect.y = 0;
 			}
+			
+			try {
+				Mat face = mGray.submat(faceRect);
+				int[] predictedLabel = new int[1];
+				double[] distance = new double[1];
+				mFaceRecognizer.predict(face, predictedLabel, distance);
 
-			Mat face = mGray.submat(faceRect);
-			int[] predictedLabel = new int[1];
-			double[] distance = new double[1];
-			mFaceRecognizer.predict(face, predictedLabel, distance);
+				Log.e(TAG, "predict(): " + predictedLabel[0] + " (" + distance[0]
+						+ ")");
 
-			Log.e(TAG, "predict(): " + predictedLabel[0] + " (" + distance[0]
-					+ ")");
+				if (distance[0] < mDistanceThreshold) {
+					Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
+					if (guess == null) {
+						recognizedPeople[i] = new LabelledRect(faceRect, null, null);
+						continue;
+					}
 
-			if (distance[0] < mDistanceThreshold) {
-				Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
-				if (guess == null) {
+					recognizedPeople[i] = new LabelledRect(faceRect,
+							guess.getName(), getThumbnail(predictedLabel[0]));
+
+					Log.d(TAG, "Prediction: " + guess.getName() + " ("
+							+ distance[0] + ")");
+				} else
 					recognizedPeople[i] = new LabelledRect(faceRect, null, null);
-					continue;
-				}
-
-				recognizedPeople[i] = new LabelledRect(faceRect,
-						guess.getName(), getThumbnail(predictedLabel[0]));
-
-				Log.d(TAG, "Prediction: " + guess.getName() + " ("
-						+ distance[0] + ")");
-			} else
-				recognizedPeople[i] = new LabelledRect(faceRect, null, null);
+			} catch (CvException e) {
+				e.printStackTrace();
+			}
 		}
 
 		return recognizedPeople;
