@@ -61,11 +61,13 @@ public class FaceDetectionActivity extends Activity {
 	private int personId = -1;
 	private String mLabelName = "Unknown";
 
-	private boolean mAlreadyStarted = false;
+	private boolean opencvLoaded = false;
+	private boolean photoLoaded = false;
+	private boolean waitingForPhoto = false;
 	private boolean mChooserVisible = false;
 
 	private List<String> mFacesResults;
-	
+
 	private ProgressDialog mProgressDialog;
 	private String savingFace;
 
@@ -84,8 +86,11 @@ public class FaceDetectionActivity extends Activity {
 
 		personId = extras.getInt(PERSON_ID);
 		mLabelName = extras.getString(PERSON_NAME);
-		
+
 		savingFace = getString(R.string.progress_dialog_saving_face);
+
+		if (!waitingForPhoto)
+			showChooserDialog();
 	}
 
 	/**
@@ -95,10 +100,10 @@ public class FaceDetectionActivity extends Activity {
 	public void onResume() {
 		super.onResume();
 
-		if (mAlreadyStarted)
+		// don't load opencv the first time
+		if (!waitingForPhoto)
 			return;
 
-		mAlreadyStarted = true;
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, this,
 				new BaseLoaderCallback(this) {
 					@Override
@@ -106,7 +111,8 @@ public class FaceDetectionActivity extends Activity {
 						switch (status) {
 						case LoaderCallbackInterface.SUCCESS:
 							Log.i(TAG, "OpenCV loaded successfully");
-							showChooserDialog();
+							opencvLoaded = true;
+							detectAndProcessFaces();
 							break;
 						default:
 							Log.i(TAG, "OpenCV connection error: " + status);
@@ -165,6 +171,10 @@ public class FaceDetectionActivity extends Activity {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+				
+				opencvLoaded = false;
+				photoLoaded = false;
+				waitingForPhoto = true;
 
 				switch (item) {
 				case 0: // take photo from camera
@@ -237,20 +247,25 @@ public class FaceDetectionActivity extends Activity {
 			copyPickedPhoto(data);
 		case REQUEST_TAKE_PHOTO:
 		case REQUEST_TAKE_PHOTO_DETECTION:
-
-			Bitmap[] detectedFaces = detectFaces();
-			mSceneFile.delete();
-
-			if (detectedFaces.length == 0) {
-				showChooserDialog(true);
-				return;
-			}
-
-			displayFaceChooser(detectedFaces);
-
-			break;
+			photoLoaded = true;
+			detectAndProcessFaces();
 		}
 
+	}
+
+	private void detectAndProcessFaces() {
+		if (!photoLoaded || !opencvLoaded)
+			return;
+
+		Bitmap[] detectedFaces = detectFaces();
+		mSceneFile.delete();
+
+		if (detectedFaces.length == 0) {
+			showChooserDialog(true);
+			return;
+		}
+
+		displayFaceChooser(detectedFaces);
 	}
 
 	@Override
@@ -264,7 +279,8 @@ public class FaceDetectionActivity extends Activity {
 	private void processFace(Bitmap bitmap) {
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
 				.format(new Date());
-		String imageFileName = mLabelName + "_" + timeStamp + "_" + mFacesResults.size() + ".png";
+		String imageFileName = mLabelName + "_" + timeStamp + "_"
+				+ mFacesResults.size() + ".png";
 
 		String filename = getExternalFilesDir(null).getAbsolutePath() + "/"
 				+ imageFileName;
@@ -278,22 +294,23 @@ public class FaceDetectionActivity extends Activity {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		mFacesResults.add(filename);
 	}
-	
+
 	private void finishWithResults() {
 		Intent returnIntent = new Intent();
 		returnIntent.putExtra(PERSON_ID, personId);
-		returnIntent.putExtra(PHOTO_PATHS, mFacesResults.toArray(new String[0]));
+		returnIntent
+				.putExtra(PHOTO_PATHS, mFacesResults.toArray(new String[0]));
 
 		setResult(Activity.RESULT_OK, returnIntent);
-		mProgressDialog.dismiss(); 
+		mProgressDialog.dismiss();
 		finish();
 	}
 
 	private void displayFaceChooser(final Bitmap[] detectedFaces) {
-		
+
 		mFacesResults = new ArrayList<String>();
 		mChooserVisible = true;
 		setContentView(R.layout.activity_face_detection);
@@ -311,27 +328,27 @@ public class FaceDetectionActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View v,
 					int position, long id) {
 				mChooserVisible = false;
-				mProgressDialog = ProgressDialog.show(FaceDetectionActivity.this, "", 
-	                    savingFace, true);
+				mProgressDialog = ProgressDialog.show(
+						FaceDetectionActivity.this, "", savingFace, true);
 				processFace(detectedFaces[position]);
 				finishWithResults();
 			}
 		});
-		
+
 		Button all = (Button) findViewById(R.id.choose_all);
 		all.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				mProgressDialog = ProgressDialog.show(FaceDetectionActivity.this, "", 
-	                    savingFace, true);
-				
-				for (Bitmap face: detectedFaces)
+				mProgressDialog = ProgressDialog.show(
+						FaceDetectionActivity.this, "", savingFace, true);
+
+				for (Bitmap face : detectedFaces)
 					processFace(face);
-				
+
 				finishWithResults();
 			}
 		});
-		
+
 	}
 
 	private void copyPickedPhoto(Intent data) {
