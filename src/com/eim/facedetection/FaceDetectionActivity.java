@@ -65,6 +65,8 @@ public class FaceDetectionActivity extends Activity {
 	private boolean mChooserVisible = false;
 
 	private List<String> mFacesResults;
+	
+	private ProgressDialog mProgressDialog;
 
 	private interface GenericCancelListener extends OnCancelListener,
 			OnDismissListener {
@@ -283,6 +285,7 @@ public class FaceDetectionActivity extends Activity {
 		returnIntent.putExtra(PHOTO_PATHS, mFacesResults.toArray(new String[0]));
 
 		setResult(Activity.RESULT_OK, returnIntent);
+		mProgressDialog.dismiss(); 
 		finish();
 	}
 
@@ -305,7 +308,7 @@ public class FaceDetectionActivity extends Activity {
 			public void onItemClick(AdapterView<?> parent, View v,
 					int position, long id) {
 				mChooserVisible = false;
-				ProgressDialog.show(FaceDetectionActivity.this, "", 
+				mProgressDialog = ProgressDialog.show(FaceDetectionActivity.this, "", 
 	                    "Saving face...", true);
 				processFace(detectedFaces[position]);
 				finishWithResults();
@@ -316,7 +319,7 @@ public class FaceDetectionActivity extends Activity {
 		all.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View arg0) {
-				ProgressDialog.show(FaceDetectionActivity.this, "", 
+				mProgressDialog = ProgressDialog.show(FaceDetectionActivity.this, "", 
 	                    "Saving faces...", true);
 				
 				for (Bitmap face: detectedFaces)

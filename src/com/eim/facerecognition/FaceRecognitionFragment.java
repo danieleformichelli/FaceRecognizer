@@ -39,6 +39,7 @@ import com.eim.utilities.Swipeable;
 @TargetApi(Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
 public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		OnOpenCVLoaded, CvCameraViewListener2, SeekBar.OnSeekBarChangeListener {
+	private static final boolean multithread = false;
 	private static final String TAG = "FaceRecognitionFragment";
 	private static final Scalar FACE_RECT_COLOR = new Scalar(23, 150, 0, 255);
 	private static final Scalar FACE_UNKNOWN_RECT_COLOR = new Scalar(240, 44,
@@ -61,7 +62,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private Mat mRgba;
 
 	private Mat mSceneForRecognizer;
-	private LabelledRect[] mLabelsforDrawer;
+	private LabelledRect[] mLabelsForDrawer;
 
 	private SparseArray<Mat> thumbnails;
 	private int mThumbnailSize = 25;
@@ -126,10 +127,12 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		if (mCameraView != null)
 			mCameraView.disableView();
 
-		for (int i = 0, l = thumbnails.size(); i < l; i++)
-			thumbnails.valueAt(i).release();
+		if (thumbnails != null) {
+			for (int i = 0, l = thumbnails.size(); i < l; i++)
+				thumbnails.valueAt(i).release();
 
-		thumbnails.clear();
+			thumbnails.clear();
+		}
 	}
 
 	@Override
@@ -161,15 +164,15 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	@Override
 	public void onCameraViewStarted(int width, int height) {
-		setupFaceDetection();
+		setupFaceRecognition();
 
 		mGray = new Mat();
 		mRgba = new Mat();
-		
+
 		mHeight = height;
-		
+
 		mSceneForRecognizer = mGray;
-		
+
 		mRecognitionThread = new Thread(mRecognitionWorker);
 		mRecognitionThread.start();
 	}
@@ -181,14 +184,17 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mGray.release();
 		mRgba.release();
 	}
-	
+
 	private Thread mRecognitionThread = null;
 	private Runnable mRecognitionWorker = new Runnable() {
 		@Override
 		public void run() {
+			if (!multithread)
+				return;
+
 			while (!Thread.interrupted()) {
 				Rect[] facesArray = mFaceDetector.detect(mSceneForRecognizer);
-				mLabelsforDrawer = recognizeFaces(facesArray);
+				mLabelsForDrawer = recognizeFaces(facesArray);
 			}
 		}
 	};
@@ -203,18 +209,28 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 			Core.flip(mGray, mGray, 1);
 		}
 
-		mSceneForRecognizer = mGray;
+		if (multithread) {
+			mSceneForRecognizer.release();
+			mSceneForRecognizer = mGray;
 
-		for (LabelledRect faceAndLabel : mLabelsforDrawer)
-			drawLabel(mRgba, faceAndLabel);
+			for (LabelledRect faceAndLabel : mLabelsForDrawer)
+				drawLabel(mRgba, faceAndLabel);
+		} else {
+			Rect[] facesArray = mFaceDetector.detect(mGray);
+			mLabelsForDrawer = recognizeFaces(facesArray);
 
+			for (LabelledRect faceAndLabel : mLabelsForDrawer)
+				drawLabel(mRgba, faceAndLabel);
+
+			mGray.release();
+		}
 		return mRgba;
 	}
 
 	private void drawLabel(Mat frame, LabelledRect info) {
 		if (info == null)
 			return;
-		
+
 		boolean unknownFace = (info.text == null);
 		Scalar boundingBoxColor;
 
@@ -274,32 +290,34 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 		for (int i = 0; i < facesArray.length; i++) {
 			Rect faceRect = facesArray[i];
-			if (faceRect.x < 0) {
-				Log.e(TAG, "faceRect in " + faceRect.x + ", " + faceRect.y
-						+ " " + faceRect.width + "x" + faceRect.height);
-				faceRect.width += faceRect.x;
-				faceRect.x = 0;
-			}
-			if (faceRect.y < 0) {
-				Log.e(TAG, "faceRect in " + faceRect.x + ", " + faceRect.y
-						+ " " + faceRect.width + "x" + faceRect.height);
-				faceRect.height += faceRect.y;
-				faceRect.y = 0;
-			}
-			
+			// if (faceRect.x < 0) {
+			// Log.e(TAG, "faceRect in " + faceRect.x + ", " + faceRect.y
+			// + " " + faceRect.width + "x" + faceRect.height);
+			// faceRect.width += faceRect.x;
+			// faceRect.x = 0;
+			// }
+			// if (faceRect.y < 0) {
+			// Log.e(TAG, "faceRect in " + faceRect.x + ", " + faceRect.y
+			// + " " + faceRect.width + "x" + faceRect.height);
+			// faceRect.height += faceRect.y;
+			// faceRect.y = 0;
+			// }
+
 			try {
 				Mat face = mGray.submat(faceRect);
 				int[] predictedLabel = new int[1];
 				double[] distance = new double[1];
 				mFaceRecognizer.predict(face, predictedLabel, distance);
+				face.release();
 
-				Log.e(TAG, "predict(): " + predictedLabel[0] + " (" + distance[0]
-						+ ")");
+				// Log.e(TAG, "predict(): " + predictedLabel[0] + " ("
+				// + distance[0] + ")");
 
 				if (distance[0] < mDistanceThreshold) {
 					Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
 					if (guess == null) {
-						recognizedPeople[i] = new LabelledRect(faceRect, null, null);
+						recognizedPeople[i] = new LabelledRect(faceRect, null,
+								null);
 						continue;
 					}
 
@@ -311,6 +329,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				} else
 					recognizedPeople[i] = new LabelledRect(faceRect, null, null);
 			} catch (CvException e) {
+				Log.e(TAG, "faceRect in " + faceRect.x + ", " + faceRect.y
+						+ " " + faceRect.width + "x" + faceRect.height);
 				e.printStackTrace();
 			}
 		}
@@ -344,7 +364,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		return newThumbnail;
 	}
 
-	private void setupFaceDetection() {
+	private void setupFaceRecognition() {
 		mFaceDetector = FaceDetector.getInstance(activity);
 		mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
 				EIMPreferences.getInstance(activity).recognitionType());
