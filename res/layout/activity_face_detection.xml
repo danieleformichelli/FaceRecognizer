@@ -24,4 +24,10 @@
         android:padding="10dp"
         android:verticalSpacing="10dp" />
 
+    <Button
+        android:id="@+id/choose_all"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/face_detection_choose_all" />
+
 </LinearLayout>

@@ -34,8 +34,10 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.Button;
 import android.widget.GridView;
 
 import com.eim.R;
@@ -51,7 +53,7 @@ public class FaceDetectionActivity extends Activity {
 
 	public static final String PERSON_ID = "personId";
 	public static final String PERSON_NAME = "personName";
-	public static final String PHOTO_PATH = "photoPath";
+	public static final String PHOTO_PATHS = "photoPath";
 
 	private File mSceneFile;
 	private Mat mScene;
@@ -61,6 +63,8 @@ public class FaceDetectionActivity extends Activity {
 
 	private boolean mAlreadyStarted = false;
 	private boolean mChooserVisible = false;
+
+	private List<String> mFacesResults;
 
 	private interface GenericCancelListener extends OnCancelListener,
 			OnDismissListener {
@@ -255,7 +259,7 @@ public class FaceDetectionActivity extends Activity {
 	private void processFace(Bitmap bitmap) {
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US)
 				.format(new Date());
-		String imageFileName = mLabelName + "_" + timeStamp + ".png";
+		String imageFileName = mLabelName + "_" + timeStamp + "_" + mFacesResults.size() + ".png";
 
 		String filename = getExternalFilesDir(null).getAbsolutePath() + "/"
 				+ imageFileName;
@@ -269,17 +273,22 @@ public class FaceDetectionActivity extends Activity {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		
+		mFacesResults.add(filename);
+	}
+	
+	private void finishWithResults() {
 		Intent returnIntent = new Intent();
 		returnIntent.putExtra(PERSON_ID, personId);
-		returnIntent.putExtra(PHOTO_PATH, filename);
+		returnIntent.putExtra(PHOTO_PATHS, mFacesResults.toArray(new String[0]));
 
 		setResult(Activity.RESULT_OK, returnIntent);
 		finish();
 	}
 
 	private void displayFaceChooser(final Bitmap[] detectedFaces) {
-
+		
+		mFacesResults = new ArrayList<String>();
 		mChooserVisible = true;
 		setContentView(R.layout.activity_face_detection);
 
@@ -289,19 +298,34 @@ public class FaceDetectionActivity extends Activity {
 
 		PhotoAdapter adapter = new PhotoAdapter(this, faces, null);
 
-		GridView grid = (GridView) this.findViewById(R.id.face_chooser_grid);
+		GridView grid = (GridView) findViewById(R.id.face_chooser_grid);
 		grid.setAdapter(adapter);
 		grid.setOnItemClickListener(new OnItemClickListener() {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v,
 					int position, long id) {
-				// showConfirmDialog(detectedFaces[position]);
 				mChooserVisible = false;
 				ProgressDialog.show(FaceDetectionActivity.this, "", 
 	                    "Saving face...", true);
 				processFace(detectedFaces[position]);
+				finishWithResults();
 			}
 		});
+		
+		Button all = (Button) findViewById(R.id.choose_all);
+		all.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View arg0) {
+				ProgressDialog.show(FaceDetectionActivity.this, "", 
+	                    "Saving faces...", true);
+				
+				for (Bitmap face: detectedFaces)
+					processFace(face);
+				
+				finishWithResults();
+			}
+		});
+		
 	}
 
 	private void copyPickedPhoto(Intent data) {

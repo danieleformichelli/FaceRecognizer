@@ -5,6 +5,7 @@
     <string name="face_detection_add_photo_title">Add photo</string>
     <string name="face_detection_retry_add_photo_title">No face found. Try again!</string>
     <string name="face_detection_choose_face">Choose the face you want to recognize</string>
+    <string name="face_detection_choose_all">Recognize all!</string>
 
     <string-array name="face_detection_add_photo_options">
         <item>Take from camera</item>
