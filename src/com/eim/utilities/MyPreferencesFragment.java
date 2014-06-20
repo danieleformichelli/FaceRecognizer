@@ -13,6 +13,7 @@ import android.preference.PreferenceCategory;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceScreen;
 import android.preference.SwitchPreference;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.eim.R;
@@ -23,6 +24,8 @@ import com.eim.utilities.FaceRecognizerMainActivity.OnOpenCVLoaded;
 
 public class MyPreferencesFragment extends PreferenceFragment implements
 		OnOpenCVLoaded, Swipeable {
+	
+	private static final String TAG = "MyPreferenceFragment";
 	private Activity activity;
 	private PreferenceScreen mPreferenceScreen;
 	private String oldValue;
@@ -261,6 +264,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				final EIMFaceRecognizer.Type mRecognizerType = EIMFaceRecognizer.Type
 						.valueOf(((ListPreference) mPreference).getValue());
 				mFaceRecognizer.setType(mRecognizerType);
+				Log.i(TAG, "Change preferences: TYPE = " + mRecognizerType.name());
 				mFaceRecognizer.train(mPeopleDatabase.getPeople());
 			} else if (key.equals(detectorTypeKey)) {
 				final FaceDetector.Type mDetectorType = FaceDetector.Type

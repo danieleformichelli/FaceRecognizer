@@ -95,6 +95,7 @@ public class EIMFaceRecognizer {
 		if (mModelFile != null)
 			mModelFile.delete();
 		isTrained = false;
+		
 	}
 
 	/**
@@ -157,6 +158,8 @@ public class EIMFaceRecognizer {
 		
 		// For EIGEN and FISHER
 		boolean needResize = !mRecognizerType.isIncrementable();
+		if (needResize)
+			Log.i(TAG, "Need Resize");
 		Size dsize = new Size(Double.MAX_VALUE,Double.MAX_VALUE);
 		
 		for (int i = 0, l = sparseArray.size(); i < l; i++) {
@@ -235,11 +238,26 @@ public class EIMFaceRecognizer {
 		return mRecognizerType;
 	}
 
-	public void setType(Type mRecognizerType) {
+	public void setType(Type mType) {
 		if (mRecognizerType == null)
 			return;
 
-		this.mRecognizerType = mRecognizerType;
+		mRecognizerType = mType;
+		
+		switch (mType) {
+		case EIGEN:
+			mFaceRecognizer = new EigenFaceRecognizer();
+			break;
+		case FISHER:
+			mFaceRecognizer = new FisherFaceRecognizer();
+			break;
+		case LBPH:
+			mFaceRecognizer = new LBPHFaceRecognizer();
+			break;
+		default:
+			throw new IllegalArgumentException("Invalid mType");
+		}
+		
 		resetModel();
 	}
 }
