@@ -14,8 +14,10 @@ import org.opencv.imgproc.Imgproc;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.SparseArray;
 
@@ -24,6 +26,8 @@ import com.eim.facesmanagement.peopledb.Photo;
 
 public class EIMFaceRecognizer {
 	private static final String TAG = "EIMFaceRecognizer";
+	private static final String MIN_WIDTH = "min_width";
+	private static final String MIN_HEIGHT = "min_height";
 
 	public enum Type {
 		EIGEN, FISHER, LBPH;
@@ -43,11 +47,15 @@ public class EIMFaceRecognizer {
 	private String mModelPath;
 	private Type mRecognizerType;
 	private FaceRecognizer mFaceRecognizer;
+	private SharedPreferences mSharedPreferences;
 
 	private Size size;
 
 	private EIMFaceRecognizer(Context mContext, Type mType) {
 		System.loadLibrary("facerecognizer");
+
+		mSharedPreferences = PreferenceManager
+				.getDefaultSharedPreferences(mContext);
 
 		mRecognizerType = mType;
 
@@ -64,6 +72,15 @@ public class EIMFaceRecognizer {
 		default:
 			throw new IllegalArgumentException("Invalid mType");
 		}
+
+		size = new Size(mSharedPreferences.getInt(MIN_WIDTH, -1),
+				mSharedPreferences.getInt(MIN_HEIGHT, -1));
+		if (size.width == -1)
+			size.width = Double.MAX_VALUE;
+		if (size.height == -1)
+			size.height = Double.MAX_VALUE;
+
+		Log.e(TAG, size.width + "," + size.height);
 
 		mModelPath = mContext.getExternalFilesDir(null).getAbsolutePath() + "/"
 				+ MODEL_FILE_NAME;
@@ -181,8 +198,6 @@ public class EIMFaceRecognizer {
 		List<Mat> faces = new ArrayList<Mat>();
 		List<Integer> labels = new ArrayList<Integer>();
 
-		size = new Size(Double.MAX_VALUE, Double.MAX_VALUE);
-
 		for (int i = 0, l = people.size(); i < l; i++) {
 
 			int label = people.keyAt(i);
@@ -210,10 +225,13 @@ public class EIMFaceRecognizer {
 
 				labels.add(label);
 				faces.add(mMat);
-
-				Log.d(TAG, "Inserting " + label + ":" + mPhoto.getUrl());
 			}
 		}
+
+		mSharedPreferences.edit().putInt(MIN_WIDTH, (int) size.width)
+				.putInt(MIN_HEIGHT, (int) size.height).apply();
+
+		Log.e(TAG, size.width + "," + size.height);
 
 		// for EIGEN and FISHER
 

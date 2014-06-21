@@ -207,8 +207,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		private Validity isValid(SharedPreferences sharedPreferences) {
 			EIMPreferences mPreferences = EIMPreferences.getInstance(activity);
 
-			if (mPreferences.recognitionThreshold() > 500
-					|| mPreferences.recognitionThreshold() < 0)
+			if (mPreferences.recognitionThreshold() < 0)
 				return Validity.NOT_VALID_RECOGNITION_THRESHOLD;
 
 			if (mPreferences.detectionScaleFactor() <= 1)
