@@ -57,7 +57,7 @@ public class FaceDetector {
 
 	private FaceDetector(Context c) {
 		System.loadLibrary("nativedetector");
-		
+
 		mContext = c;
 		mDetectorType = EIMPreferences.getInstance(c).detectorType();
 		mClassifier = EIMPreferences.getInstance(c).detectorClassifier();
@@ -72,7 +72,6 @@ public class FaceDetector {
 	}
 
 	private void initDetector() {
-
 		loadCascadeFile();
 
 		mJavaDetector = new CascadeClassifier(mCascadeFile.getAbsolutePath());

@@ -171,7 +171,7 @@ public class FaceDetectionActivity extends Activity {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				
+
 				opencvLoaded = false;
 				photoLoaded = false;
 				waitingForPhoto = true;
@@ -377,7 +377,7 @@ public class FaceDetectionActivity extends Activity {
 
 	private void loadScene() {
 		Bitmap sceneBitmap = BitmapFactory.decodeFile(mSceneFile
-				.getAbsolutePath(), null);
+				.getAbsolutePath());
 		mScene = new Mat();
 		Utils.bitmapToMat(sceneBitmap, mScene);
 	}
@@ -389,7 +389,9 @@ public class FaceDetectionActivity extends Activity {
 
 		Imgproc.cvtColor(mScene, gray, Imgproc.COLOR_RGB2GRAY);
 
-		Rect[] faceRegions = FaceDetector.getInstance(this).detect(gray);
+		FaceDetector mFaceDetector = FaceDetector.getInstance(this);
+		mFaceDetector.resetSizes();
+		Rect[] faceRegions = mFaceDetector.detect(gray);
 
 		Bitmap[] detectedFaces = new Bitmap[faceRegions.length];
 

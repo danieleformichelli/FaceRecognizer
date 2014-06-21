@@ -23,6 +23,7 @@ import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;
 
 public class EIMFaceRecognizer {
+	private static final String TAG = "EIMFaceRecognizer";
 
 	public enum Type {
 		EIGEN, FISHER, LBPH;
@@ -36,19 +37,19 @@ public class EIMFaceRecognizer {
 		}
 	}
 
-	private static final String TAG = "EIMFaceRecognizer";
-	private static String MODEL_FILE_NAME = "trainedModel.xml";
-	private static boolean isTrained;
-	private static String mModelPath;
 	private static EIMFaceRecognizer instance;
-	private static Type mRecognizerType;
-	private static FaceRecognizer mFaceRecognizer;
-	
-	private SparseArray<Person> dataset;
+	private static String MODEL_FILE_NAME = "trainedModel.xml";
+	private boolean isTrained;
+	private String mModelPath;
+	private Type mRecognizerType;
+	private FaceRecognizer mFaceRecognizer;
+
 	private Size size;
 
 	private EIMFaceRecognizer(Context mContext, Type mType) {
 		System.loadLibrary("facerecognizer");
+		
+		mRecognizerType = mType;
 
 		switch (mType) {
 		case EIGEN:
@@ -64,46 +65,30 @@ public class EIMFaceRecognizer {
 			throw new IllegalArgumentException("Invalid mType");
 		}
 
-	}
+		mModelPath = mContext.getExternalFilesDir(null).getAbsolutePath() + "/"
+				+ MODEL_FILE_NAME;
 
+		if (new File(mModelPath).exists()) {
+			mFaceRecognizer.load(mModelPath);
+			isTrained = true;
+		}
+	}
 
 	public static EIMFaceRecognizer getInstance(Context mContext, Type mType) {
 		if (mContext == null)
 			throw new IllegalArgumentException("mContext cannot be null");
 		if (mType == null)
 			throw new IllegalArgumentException("mType cannot be null");
-		
-		mModelPath = mContext.getExternalFilesDir(null).getAbsolutePath() + "/"
-				+ MODEL_FILE_NAME;
-		
-		/*
-		 * The problem was:
-		 * --> Close application with type == EIGEN || Type == FISHER
-		 * --> Open application
-		 * 
-		 * The default type in preferences is LBPH, hence the constructor found
-		 * a trained Model performed by a different Face Recognizer
-		 * 
-		 * We have not to train the apps if the trainedModel already exists and
-		 * it created using a Recognizer of the same type.
-		 */
-		
-		if (mRecognizerType != mType) {
-			mRecognizerType = mType;
-			resetModel();
+
+		if (instance != null) {
+			if (instance.mRecognizerType == mType)
+				return instance;
+			else
+				instance.resetModel();
 		}
-		
-		if (new File(mModelPath).exists()) {
-			mFaceRecognizer.load(mModelPath);
-			isTrained = true;
-		} 
 
-		if (instance != null)
-			return instance;
-
-		System.loadLibrary("facerecognizer");
-
-		instance = new EIMFaceRecognizer(mContext.getApplicationContext(),mType);
+		instance = new EIMFaceRecognizer(mContext.getApplicationContext(),
+				mType);
 
 		return instance;
 	}
@@ -111,12 +96,11 @@ public class EIMFaceRecognizer {
 	/**
 	 * Resets the trained model
 	 */
-	public static void resetModel() {
+	public void resetModel() {
 		File mModelFile = new File(mModelPath);
 		if (mModelFile != null)
 			mModelFile.delete();
 		isTrained = false;
-
 	}
 
 	/**
@@ -166,11 +150,14 @@ public class EIMFaceRecognizer {
 				"", "Training...", true);
 		final Activity mActivity = activity;
 
-		(new Thread(){
+		(new Thread() {
 			public void run() {
 				EIMFaceRecognizer.this.incrementalTrain(mNewFacePath, mLabel);
 				mActivity.runOnUiThread(new Runnable() {
-					public void run() {mProgressDialog.dismiss();}});
+					public void run() {
+						mProgressDialog.dismiss();
+					}
+				});
 			}
 		}).start();
 	}
@@ -256,12 +243,15 @@ public class EIMFaceRecognizer {
 		final ProgressDialog mProgressDialog = ProgressDialog.show(activity,
 				"", "Training...", true);
 		final Activity mActivity = activity;
-		
-		(new Thread(){
+
+		(new Thread() {
 			public void run() {
 				EIMFaceRecognizer.this.train(mPeople);
 				mActivity.runOnUiThread(new Runnable() {
-					public void run() {mProgressDialog.dismiss();}});
+					public void run() {
+						mProgressDialog.dismiss();
+					}
+				});
 			}
 		}).start();
 	}

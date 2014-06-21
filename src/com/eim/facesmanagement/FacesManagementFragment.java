@@ -27,6 +27,7 @@ import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;
 import com.eim.utilities.FaceRecognizerMainActivity;
 import com.eim.utilities.FaceRecognizerMainActivity.OnOpenCVLoaded;
+import com.eim.utilities.EIMPreferences;
 import com.eim.utilities.PhotoAdapter;
 import com.eim.utilities.Swipeable;
 
@@ -41,7 +42,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 	private TextView addPerson, noPeopleMessage;
 	private View mainLayout;
 	private EIMFaceRecognizer mFaceRecognizer;
-	private EIMFaceRecognizer.Type mFaceRecognizerType = EIMFaceRecognizer.Type.LBPH;
+	private EIMFaceRecognizer.Type mFaceRecognizerType;
 
 	private PeopleDatabase mPeopleDatabase;
 	private boolean mOpenCVLoaded = false;
@@ -72,10 +73,9 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 
 		mPeopleList = (ExpandableListView) mainLayout
 				.findViewById(R.id.faces_management_people_list);
-		mPeopleAdapter = new PeopleAdapter(activity,
-				R.layout.person_list_item, R.layout.person_view,
-				mPeopleDatabase.getPeople(), mPeopleAdapterListener,
-				mPhotoGalleryListener);
+		mPeopleAdapter = new PeopleAdapter(activity, R.layout.person_list_item,
+				R.layout.person_view, mPeopleDatabase.getPeople(),
+				mPeopleAdapterListener, mPhotoGalleryListener);
 
 		mPeopleList.setAdapter(mPeopleAdapter);
 		if (mPeopleAdapter.getGroupCount() == 0)
@@ -83,7 +83,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 
 		if (mOpenCVLoaded)
 			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
-					mFaceRecognizerType);
+					EIMPreferences.getInstance(activity).recognitionType());
 	}
 
 	@Override
@@ -148,8 +148,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			if (name == null || name.length() == 0) {
 				Toast.makeText(
 						activity,
-						activity
-								.getString(R.string.error_person_name_not_valid),
+						activity.getString(R.string.error_person_name_not_valid),
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
@@ -159,8 +158,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			if (id == -1) {
 				Toast.makeText(
 						activity,
-						activity
-								.getString(R.string.error_person_already_present),
+						activity.getString(R.string.error_person_already_present),
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
@@ -176,8 +174,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			if (mPeopleAdapter.editPersonName(id, newName) == false) {
 				Toast.makeText(
 						activity,
-						activity
-								.getString(R.string.error_person_already_present),
+						activity.getString(R.string.error_person_already_present),
 						Toast.LENGTH_SHORT).show();
 				return;
 			}
@@ -194,7 +191,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			mPeopleDatabase.removePerson(id);
 
 			// A person has been removed: retrain the entire network
-			mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
+			mFaceRecognizer.trainWithLoading(activity,
+					mPeopleAdapter.getPeople());
 		}
 
 		@Override
@@ -205,10 +203,11 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 
 			// A person has been removed: incrementally train the network
 			if (mFaceRecognizer.getType().isIncrementable())
-				mFaceRecognizer.incrementalTrainWithLoading(activity, photo.getUrl(),
-						(int) personId);
+				mFaceRecognizer.incrementalTrainWithLoading(activity,
+						photo.getUrl(), (int) personId);
 			else
-				mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
+				mFaceRecognizer.trainWithLoading(activity,
+						mPeopleAdapter.getPeople());
 		}
 
 		@Override
@@ -217,7 +216,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			mPeopleDatabase.removePhoto(personId, photoId);
 
 			// A photo has been removed: retrain the entire network
-			mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
+			mFaceRecognizer.trainWithLoading(activity,
+					mPeopleAdapter.getPeople());
 		}
 	};
 
