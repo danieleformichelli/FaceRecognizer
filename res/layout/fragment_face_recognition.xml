@@ -40,7 +40,7 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:layout_alignTop="@+id/threshold_bar"
-        android:src="@android:drawable/ic_menu_rotate"
-        android:contentDescription="TODO"/>
+        android:contentDescription="TODO"
+        android:src="@android:drawable/ic_menu_rotate" />
 
 </RelativeLayout>

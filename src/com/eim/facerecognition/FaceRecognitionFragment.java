@@ -152,6 +152,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		if (mCameraView != null)
 			mCameraView.disableView();
 
+		mOpenCVLoaded = false;
 		super.onPause();
 	}
 
@@ -173,12 +174,18 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 		mHeight = height;
 
+		mSwitchButton.setEnabled(true);
+		mThresholdBar.setEnabled(true);
+		
 		mRecognitionThread = new Thread(mRecognitionWorker);
 		mRecognitionThread.start();
 	}
 
 	@Override
 	public void onCameraViewStopped() {
+		mSwitchButton.setEnabled(false);
+		mThresholdBar.setEnabled(false);
+
 		mRecognitionThread.interrupt();
 		mRecognitionThread = null;
 		mSceneForRecognizer.release();
