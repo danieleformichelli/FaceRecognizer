@@ -149,12 +149,11 @@ public class EIMFaceRecognizer {
 		newFaces.add(newFaceMat);
 		labels.put(0, 0, new int[] { label });
 
-		if (isTrained)
+		if (isTrained) {
 			mFaceRecognizer.update(newFaces, labels);
-		else
+			mFaceRecognizer.save(mModelPath);
+		} else
 			mFaceRecognizer.train(newFaces, labels);
-
-		mFaceRecognizer.save(mModelPath);
 	}
 
 	public void incrementalTrainWithLoading(Activity activity,
@@ -186,13 +185,11 @@ public class EIMFaceRecognizer {
 	 *            the field Photos of the value
 	 */
 	private void train(SparseArray<Person> people) {
-
 		if (!isDatasetValid(people)) {
 			resetModel();
 			return;
 		}
 
-		Log.i(TAG, "Training!");
 		List<Mat> faces = new ArrayList<Mat>();
 		List<Integer> labels = new ArrayList<Integer>();
 
@@ -206,11 +203,7 @@ public class EIMFaceRecognizer {
 				Photo mPhoto = photos.valueAt(j);
 				Mat mMat = new Mat();
 
-				Bitmap face = mPhoto.getBitmap();
-				if (face == null)
-					face = BitmapFactory.decodeFile(mPhoto.getUrl());
-
-				Utils.bitmapToMat(face, mMat);
+				Utils.bitmapToMat(mPhoto.getBitmap(), mMat);
 				Imgproc.cvtColor(mMat, mMat, Imgproc.COLOR_RGB2GRAY);
 
 				if (mRecognizerType.needResize()) {
@@ -229,8 +222,6 @@ public class EIMFaceRecognizer {
 		mSharedPreferences.edit().putInt(MIN_WIDTH, (int) size.width)
 				.putInt(MIN_HEIGHT, (int) size.height).apply();
 
-		Log.e(TAG, size.width + "," + size.height);
-
 		// for EIGEN and FISHER
 
 		if (mRecognizerType.needResize()) {
@@ -246,9 +237,8 @@ public class EIMFaceRecognizer {
 		for (Integer label : labels)
 			labelsMat.put(i++, 0, new int[] { label });
 
-		Log.i(TAG, labelsMat.dump());
-
 		mFaceRecognizer.train(faces, labelsMat);
+
 		mFaceRecognizer.save(mModelPath);
 
 		isTrained = true;
@@ -284,7 +274,6 @@ public class EIMFaceRecognizer {
 	}
 
 	public void predict(Mat src, int[] label, double[] confidence) {
-		Log.i(TAG, "Try prediction image. Type = " + mRecognizerType.name());
 		if (isTrained) {
 			if (mRecognizerType.needResize())
 				Imgproc.resize(src, src, size);
