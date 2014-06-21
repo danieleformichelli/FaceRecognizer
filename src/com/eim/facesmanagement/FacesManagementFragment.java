@@ -35,7 +35,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 	private static final String TAG = "FacesManagementFragment";
 	private static final int FACE_DETECTION_AND_EXTRACTION = 1;
 
-	private Activity mActivity;
+	private Activity activity;
 	private ExpandableListView mPeopleList;
 	private PeopleAdapter mPeopleAdapter;
 	private TextView addPerson, noPeopleMessage;
@@ -59,9 +59,9 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
-		mActivity = (FaceRecognizerMainActivity) getActivity();
+		activity = (FaceRecognizerMainActivity) getActivity();
 
-		mPeopleDatabase = PeopleDatabase.getInstance(mActivity);
+		mPeopleDatabase = PeopleDatabase.getInstance(activity);
 
 		addPerson = (TextView) mainLayout
 				.findViewById(R.id.faces_management_add_person);
@@ -72,7 +72,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 
 		mPeopleList = (ExpandableListView) mainLayout
 				.findViewById(R.id.faces_management_people_list);
-		mPeopleAdapter = new PeopleAdapter(mActivity,
+		mPeopleAdapter = new PeopleAdapter(activity,
 				R.layout.person_list_item, R.layout.person_view,
 				mPeopleDatabase.getPeople(), mPeopleAdapterListener,
 				mPhotoGalleryListener);
@@ -82,7 +82,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			noPeopleMessage.setVisibility(View.VISIBLE);
 
 		if (mOpenCVLoaded)
-			mFaceRecognizer = EIMFaceRecognizer.getInstance(mActivity,
+			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
 					mFaceRecognizerType);
 	}
 
@@ -93,8 +93,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		// but due to dependency of Context, cannot be created before
 		// OnActivityCreated()
 		mOpenCVLoaded = true;
-		if (mActivity != null)
-			mFaceRecognizer = EIMFaceRecognizer.getInstance(mActivity,
+		if (activity != null)
+			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
 					mFaceRecognizerType);
 	}
 
@@ -147,8 +147,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		public void addPerson(String name) {
 			if (name == null || name.length() == 0) {
 				Toast.makeText(
-						mActivity,
-						mActivity
+						activity,
+						activity
 								.getString(R.string.error_person_name_not_valid),
 						Toast.LENGTH_SHORT).show();
 				return;
@@ -158,8 +158,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 
 			if (id == -1) {
 				Toast.makeText(
-						mActivity,
-						mActivity
+						activity,
+						activity
 								.getString(R.string.error_person_already_present),
 						Toast.LENGTH_SHORT).show();
 				return;
@@ -175,8 +175,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		public void editPersonName(int id, String newName) {
 			if (mPeopleAdapter.editPersonName(id, newName) == false) {
 				Toast.makeText(
-						mActivity,
-						mActivity
+						activity,
+						activity
 								.getString(R.string.error_person_already_present),
 						Toast.LENGTH_SHORT).show();
 				return;
@@ -194,7 +194,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			mPeopleDatabase.removePerson(id);
 
 			// A person has been removed: retrain the entire network
-			mFaceRecognizer.train(mPeopleAdapter.getPeople());
+			mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
 		}
 
 		@Override
@@ -205,10 +205,10 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 
 			// A person has been removed: incrementally train the network
 			if (mFaceRecognizer.getType().isIncrementable())
-				mFaceRecognizer
-						.incrementalTrain(photo.getUrl(), (int) personId);
+				mFaceRecognizer.incrementalTrainWithLoading(activity, photo.getUrl(),
+						(int) personId);
 			else
-				mFaceRecognizer.train(mPeopleAdapter.getPeople());
+				mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
 		}
 
 		@Override
@@ -217,7 +217,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			mPeopleDatabase.removePhoto(personId, photoId);
 
 			// A photo has been removed: retrain the entire network
-			mFaceRecognizer.train(mPeopleAdapter.getPeople());
+			mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
 		}
 	};
 
@@ -228,7 +228,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			int id = (int) gallery.getTag();
 			String name = mPeopleAdapter.getPersonById(id).getName();
 
-			Intent mIntent = new Intent(mActivity, FaceDetectionActivity.class);
+			Intent mIntent = new Intent(activity, FaceDetectionActivity.class);
 			mIntent.putExtra(FaceDetectionActivity.PERSON_ID, id);
 			mIntent.putExtra(FaceDetectionActivity.PERSON_NAME, name);
 			startActivityForResult(mIntent, FACE_DETECTION_AND_EXTRACTION);
@@ -242,11 +242,11 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			int personId = (int) gallery.getTag();
 			Person mPerson = mPeopleAdapter.getPersonById(personId);
 			SparseArray<Photo> photos = mPerson.getPhotos();
-			
+
 			// i = 0 is add/delete
 			for (int i = 1, l = mPhotoAdapter.getCount(); i < l; i++)
 				if (mPhotoAdapter.isSelected(i))
-					toBeDeleted.add(photos.keyAt(i-1));
+					toBeDeleted.add(photos.keyAt(i - 1));
 
 			for (Integer i : toBeDeleted)
 				mPeopleAdapterListener.removePhoto(personId, i);
