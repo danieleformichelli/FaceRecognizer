@@ -48,7 +48,7 @@ public class EIMFaceRecognizer {
 
 	private EIMFaceRecognizer(Context mContext, Type mType) {
 		System.loadLibrary("facerecognizer");
-		
+
 		mRecognizerType = mType;
 
 		switch (mType) {
@@ -270,15 +270,11 @@ public class EIMFaceRecognizer {
 	public void predict(Mat src, int[] label, double[] confidence) {
 		Log.i(TAG, "Try prediction image. Type = " + mRecognizerType.name());
 		if (isTrained) {
-			if (mRecognizerType.isIncrementable()) {
-				mFaceRecognizer.predict(src, label, confidence);
-			} else {
-				Mat srcResized = new Mat();
-				Imgproc.resize(src, srcResized, size);
-				mFaceRecognizer.predict(srcResized, label, confidence);
-			}
+			if (mRecognizerType.needResize())
+				Imgproc.resize(src, src, size);
+
+			mFaceRecognizer.predict(src, label, confidence);
 		}
-		Log.i(TAG, "Confidence: " + confidence[0]);
 	}
 
 	public Type getType() {
