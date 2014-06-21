@@ -176,7 +176,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 		mSwitchButton.setEnabled(true);
 		mThresholdBar.setEnabled(true);
-		
+
 		mRecognitionThread = new Thread(mRecognitionWorker);
 		mRecognitionThread.start();
 	}
@@ -220,8 +220,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		} else {
 			mSceneForRecognizer = mGray;
 		}
-		
-		
 
 		if (multithread) {
 			for (LabelledRect faceAndLabel : mLabelsForDrawer)
@@ -281,55 +279,51 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		if (info == null)
 			return;
 
-		boolean unknownFace = (info.text == null);
-		Scalar boundingBoxColor;
-
-		boundingBoxColor = (unknownFace) ? FACE_UNKNOWN_RECT_COLOR
+		Scalar color = (info.thumbnail == null) ? FACE_UNKNOWN_RECT_COLOR
 				: FACE_RECT_COLOR;
 
 		// Bounding box
-		Core.rectangle(frame, info.rect.tl(), info.rect.br(), boundingBoxColor,
+		Core.rectangle(frame, info.rect.tl(), info.rect.br(), color,
 				3);
-		if (!unknownFace) {
-			// Text...
-			double fontScale = 6;
-			int fontFace = Core.FONT_HERSHEY_PLAIN;
-			int thickness = 3;
 
-			Size textSize = Core.getTextSize(info.text, fontFace, fontScale,
-					thickness, null);
+		// Text...
+		double fontScale = 4;
+		int fontFace = Core.FONT_HERSHEY_PLAIN;
+		int thickness = 3;
 
-			// ... under the box centered ...
-			Point textOrigin = new Point();
-			textOrigin.x = info.rect.tl().x
-					- (textSize.width - info.rect.width) / 2;
-			textOrigin.y = info.rect.br().y + textSize.height + 20;
+		Size textSize = Core.getTextSize(info.text, fontFace, fontScale,
+				thickness, null);
 
-			// ... with semi-transparent white background rectngle
-			double padding = 20;
-			Point rectangleTL = new Point(textOrigin.x, textOrigin.y
-					- textSize.height);
-			Point rectangleBR = new Point(textOrigin.x + textSize.width,
-					textOrigin.y);
+		// ... under the box centered ...
+		Point textOrigin = new Point();
+		textOrigin.x = info.rect.tl().x - (textSize.width - info.rect.width)
+				/ 2;
+		textOrigin.y = info.rect.br().y + textSize.height + 20;
 
-			rectangleTL.x -= padding;
-			rectangleTL.y -= padding;
+		// ... with semi-transparent white background rectngle
+		double padding = 20;
+		Point rectangleTL = new Point(textOrigin.x, textOrigin.y
+				- textSize.height);
+		Point rectangleBR = new Point(textOrigin.x + textSize.width,
+				textOrigin.y);
 
-			rectangleBR.x += padding;
-			rectangleBR.y += padding;
+		rectangleTL.x -= padding;
+		rectangleTL.y -= padding;
 
-			Core.rectangle(frame, rectangleTL, rectangleBR, new Scalar(255,
-					255, 255, 150), Core.FILLED);
+		rectangleBR.x += padding;
+		rectangleBR.y += padding;
 
-			Core.putText(frame, info.text, textOrigin, fontFace, fontScale,
-					FACE_RECT_COLOR, thickness);
+		Core.rectangle(frame, rectangleTL, rectangleBR, new Scalar(255, 255,
+				255, 150), Core.FILLED);
 
-			// Thumbnail
-			if (info.thumbnail != null) {
-				Rect thumbnailPosition = new Rect(info.rect.x, info.rect.y,
-						mThumbnailSize, mThumbnailSize);
-				info.thumbnail.copyTo(frame.submat(thumbnailPosition));
-			}
+		Core.putText(frame, info.text, textOrigin, fontFace, fontScale,
+				color, thickness);
+
+		// Thumbnail
+		if (info.thumbnail != null) {
+			Rect thumbnailPosition = new Rect(info.rect.x, info.rect.y,
+					mThumbnailSize, mThumbnailSize);
+			info.thumbnail.copyTo(frame.submat(thumbnailPosition));
 		}
 
 	}

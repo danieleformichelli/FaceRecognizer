@@ -126,7 +126,7 @@ public class EIMFaceRecognizer {
 	 * @param label
 	 *            the id of the person related to the new face
 	 */
-	private void incrementalTrain(String newFacePath, int label) {
+	public void incrementalTrain(String newFacePath, int label) {
 		if (!mRecognizerType.isIncrementable())
 			throw new IllegalStateException("Face detector of type "
 					+ mRecognizerType.toString()
@@ -154,6 +154,9 @@ public class EIMFaceRecognizer {
 			mFaceRecognizer.save(mModelPath);
 		} else
 			mFaceRecognizer.train(newFaces, labels);
+		
+		newFaceMat.release();
+		labels.release();
 	}
 
 	public void incrementalTrainWithLoading(Activity activity,
@@ -184,7 +187,7 @@ public class EIMFaceRecognizer {
 	 *            faces dataset, keys are the labels and faces are contained in
 	 *            the field Photos of the value
 	 */
-	private void train(SparseArray<Person> people) {
+	public void train(SparseArray<Person> people) {
 		if (!isDatasetValid(people)) {
 			resetModel();
 			return;
@@ -238,10 +241,12 @@ public class EIMFaceRecognizer {
 			labelsMat.put(i++, 0, new int[] { label });
 
 		mFaceRecognizer.train(faces, labelsMat);
-
 		mFaceRecognizer.save(mModelPath);
-
 		isTrained = true;
+
+		for (Mat face : faces)
+			face.release();
+		labelsMat.release();
 	}
 
 	public void trainWithLoading(Activity activity, SparseArray<Person> people) {
@@ -275,10 +280,12 @@ public class EIMFaceRecognizer {
 
 	public void predict(Mat src, int[] label, double[] confidence) {
 		if (isTrained) {
+			Mat resized = new Mat();
 			if (mRecognizerType.needResize())
-				Imgproc.resize(src, src, size);
+				Imgproc.resize(src, resized, size);
 
-			mFaceRecognizer.predict(src, label, confidence);
+			mFaceRecognizer.predict(resized, label, confidence);
+			resized.release();
 		}
 	}
 

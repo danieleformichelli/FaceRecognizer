@@ -206,10 +206,10 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 
 			mPeopleAdapter.addPhoto(personId, photoId, photo);
 
-			// A person has been removed: incrementally train the network
+			// A photo has been added: incrementally train the network
 			if (mFaceRecognizer.getType().isIncrementable())
 				mFaceRecognizer.incrementalTrainWithLoading(activity,
-						photo.getUrl(), (int) personId);
+						photo.getUrl(), personId);
 			else
 				mFaceRecognizer.trainWithLoading(activity,
 						mPeopleAdapter.getPeople());
