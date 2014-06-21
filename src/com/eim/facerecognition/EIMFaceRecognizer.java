@@ -2,7 +2,6 @@ package com.eim.facerecognition;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 
@@ -34,15 +33,14 @@ public class EIMFaceRecognizer {
 
 	private static final String TAG = "EIMFaceRecognizer";
 	private static String MODEL_FILE_NAME = "trainedModel.xml";
-
+	private static boolean isTrained;
+	private static String mModelPath;
 	private static EIMFaceRecognizer instance;
-	private FaceRecognizer mFaceRecognizer;
-	private Type mRecognizerType;
-	private String mModelPath;
-	private boolean isTrained;
-	SparseArray<Person> dataset;
+	private static Type mRecognizerType;
+	private static FaceRecognizer mFaceRecognizer;
+	
+	private SparseArray<Person> dataset;
 	private Size size;
-
 
 	private EIMFaceRecognizer(Context mContext, Type mType) {
 
@@ -60,17 +58,6 @@ public class EIMFaceRecognizer {
 			throw new IllegalArgumentException("Invalid mType");
 		}
 
-		mRecognizerType = mType;
-
-		mModelPath = mContext.getExternalFilesDir(null).getAbsolutePath() + "/"
-				+ MODEL_FILE_NAME;
-
-		if (new File(mModelPath).exists()) {
-			mFaceRecognizer.load(mModelPath);
-			isTrained = true;
-		} else
-			isTrained = false;
-
 	}
 
 	public static EIMFaceRecognizer getInstance(Context mContext, Type mType) {
@@ -78,14 +65,38 @@ public class EIMFaceRecognizer {
 			throw new IllegalArgumentException("mContext cannot be null");
 		if (mType == null)
 			throw new IllegalArgumentException("mType cannot be null");
+		
+		mModelPath = mContext.getExternalFilesDir(null).getAbsolutePath() + "/"
+				+ MODEL_FILE_NAME;
+		
+		/*
+		 * The problem was:
+		 * --> Close application with type == EIGEN || Type == FISHER
+		 * --> Open application
+		 * 
+		 * The default type in preferences is LBPH, hence the constructor found
+		 * a trained Model performed by a different Face Recognizer
+		 * 
+		 * We have not to train the apps if the trainedModel already exists and
+		 * it created using a Recognizer of the same type.
+		 */
+		
+		if (mRecognizerType != mType) {
+			mRecognizerType = mType;
+			resetModel();
+		}
+		
+		if (new File(mModelPath).exists()) {
+			mFaceRecognizer.load(mModelPath);
+			isTrained = true;
+		} 
 
 		if (instance != null)
 			return instance;
 
 		System.loadLibrary("facerecognizer");
 
-		instance = new EIMFaceRecognizer(mContext.getApplicationContext(),
-				mType);
+		instance = new EIMFaceRecognizer(mContext.getApplicationContext(),mType);
 
 		return instance;
 	}
@@ -93,7 +104,7 @@ public class EIMFaceRecognizer {
 	/**
 	 * Resets the trained model
 	 */
-	public void resetModel() {
+	public static void resetModel() {
 		File mModelFile = new File(mModelPath);
 		if (mModelFile != null)
 			mModelFile.delete();
@@ -155,6 +166,7 @@ public class EIMFaceRecognizer {
 			return;
 		}
 
+		Log.i(TAG, "Training!");
 		List<Mat> faces = new ArrayList<Mat>();
 		List<Integer> labels = new ArrayList<Integer>();
 		int counter = 0;
