@@ -171,9 +171,9 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mGray = new Mat();
 		mRgba = new Mat();
 		mGrayGood = new Mat();
-		
+
 		mSceneForRecognizer = mGrayGood;
-		
+
 		mHeight = height;
 
 		mRecognitionThread = new Thread(mRecognitionWorker);
@@ -217,7 +217,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		}
 
 		if (multithread) {
-
 			for (LabelledRect faceAndLabel : mLabelsForDrawer)
 				drawLabel(mRgba, faceAndLabel);
 		} else {
@@ -280,11 +279,11 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 					FACE_RECT_COLOR, thickness);
 
 			// Thumbnail
-
-			Rect thumbnailPosition = new Rect(info.rect.x, info.rect.y,
-					mThumbnailSize, mThumbnailSize);
-
-			info.thumbnail.copyTo(frame.submat(thumbnailPosition));
+			if (info.thumbnail != null) {
+				Rect thumbnailPosition = new Rect(info.rect.x, info.rect.y,
+						mThumbnailSize, mThumbnailSize);
+				info.thumbnail.copyTo(frame.submat(thumbnailPosition));
+			}
 		}
 
 	}
@@ -303,9 +302,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				mFaceRecognizer.predict(face, predictedLabel, distance);
 				face.release();
 
-				// Log.e(TAG, "predict(): " + predictedLabel[0] + " ("
-				// + distance[0] + ")");
-
 				if (distance[0] < mDistanceThreshold) {
 					Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
 					if (guess == null) {
@@ -320,7 +316,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 					Log.d(TAG, "Prediction: " + guess.getName() + " ("
 							+ distance[0] + ")");
 				} else
-					recognizedPeople[i] = new LabelledRect(faceRect, null, null);
+					recognizedPeople[i] = new LabelledRect(faceRect,
+							String.valueOf(((Double)distance[0]).intValue()), null);
 			} catch (CvException e) {
 				Log.e(TAG, "faceRect in " + faceRect.x + ", " + faceRect.y
 						+ " " + faceRect.width + "x" + faceRect.height);

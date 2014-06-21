@@ -26,9 +26,7 @@ public class FaceDetector {
 	}
 
 	public enum Classifier {
-		LBPCASCADE_FRONTALFACE, HAARCASCADE_FRONTALFACE_DEFAULT, 
-		HAARCASCADE_FRONTALFACE_ALT, HAARCASCADE_FRONTALFACE_ALT2, 
-		HAARCASCADE_FRONTALFACE_ALT_TREE
+		LBPCASCADE_FRONTALFACE, HAARCASCADE_FRONTALFACE_DEFAULT, HAARCASCADE_FRONTALFACE_ALT, HAARCASCADE_FRONTALFACE_ALT2, HAARCASCADE_FRONTALFACE_ALT_TREE
 	}
 
 	private Context mContext;
@@ -58,6 +56,8 @@ public class FaceDetector {
 	}
 
 	private FaceDetector(Context c) {
+		System.loadLibrary("nativedetector");
+		
 		mContext = c;
 		mDetectorType = EIMPreferences.getInstance(c).detectorType();
 		mClassifier = EIMPreferences.getInstance(c).detectorClassifier();
@@ -72,17 +72,17 @@ public class FaceDetector {
 	}
 
 	private void initDetector() {
-		
+
 		loadCascadeFile();
 
 		mJavaDetector = new CascadeClassifier(mCascadeFile.getAbsolutePath());
-		
+
 		if (mJavaDetector.empty()) {
 			Log.e(TAG, "Failed to load cascade classifier");
 			mJavaDetector = null;
-		} 
-		else {
-			Log.i(TAG, "Loaded cascade classifier from "
+		} else {
+			Log.i(TAG,
+					"Loaded cascade classifier from "
 							+ mCascadeFile.getAbsolutePath());
 		}
 
@@ -92,7 +92,7 @@ public class FaceDetector {
 	}
 
 	private void loadCascadeFile() {
-		
+
 		File cascadeDir = mContext.getDir("cascade", Context.MODE_PRIVATE);
 		mCascadeFile = new File(cascadeDir, mClassifier.toString().toLowerCase(
 				Locale.US)
@@ -165,7 +165,7 @@ public class FaceDetector {
 	}
 
 	public void setMinRelativeFaceSize(double d) {
-		if (d > 1 || d < 0)
+		if (d < 0 || d > 1)
 			throw new IllegalArgumentException(
 					"Argument must be between 0 and 1");
 
@@ -233,9 +233,8 @@ public class FaceDetector {
 								mMaxAbsoluteFaceSize, mMaxAbsoluteFaceSize));
 			break;
 		case NATIVE:
-			if (mNativeDetector != null) {
+			if (mNativeDetector != null)
 				mNativeDetector.detect(scene, faces);
-			}
 			break;
 		}
 

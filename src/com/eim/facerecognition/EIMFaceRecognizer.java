@@ -2,9 +2,7 @@ package com.eim.facerecognition;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.ListIterator;
 
 import org.opencv.android.Utils;
 import org.opencv.contrib.FaceRecognizer;
@@ -13,6 +11,8 @@ import org.opencv.core.Mat;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -30,6 +30,10 @@ public class EIMFaceRecognizer {
 		public boolean isIncrementable() {
 			return this == LBPH;
 		}
+
+		public boolean needResize() {
+			return this != LBPH;
+		}
 	}
 
 	private static final String TAG = "EIMFaceRecognizer";
@@ -43,8 +47,25 @@ public class EIMFaceRecognizer {
 	SparseArray<Person> dataset;
 	private Size size;
 
+	public static EIMFaceRecognizer getInstance(Context mContext, Type mType) {
+		if (mContext == null)
+			throw new IllegalArgumentException("mContext cannot be null");
+		if (mType == null)
+			throw new IllegalArgumentException("mType cannot be null");
+
+		if (instance != null)
+			return instance;
+
+		System.loadLibrary("facerecognizer");
+
+		instance = new EIMFaceRecognizer(mContext.getApplicationContext(),
+				mType);
+
+		return instance;
+	}
 
 	private EIMFaceRecognizer(Context mContext, Type mType) {
+		System.loadLibrary("facerecognizer");
 
 		switch (mType) {
 		case EIGEN:
@@ -73,23 +94,6 @@ public class EIMFaceRecognizer {
 
 	}
 
-	public static EIMFaceRecognizer getInstance(Context mContext, Type mType) {
-		if (mContext == null)
-			throw new IllegalArgumentException("mContext cannot be null");
-		if (mType == null)
-			throw new IllegalArgumentException("mType cannot be null");
-
-		if (instance != null)
-			return instance;
-
-		System.loadLibrary("facerecognizer");
-
-		instance = new EIMFaceRecognizer(mContext.getApplicationContext(),
-				mType);
-
-		return instance;
-	}
-
 	/**
 	 * Resets the trained model
 	 */
@@ -98,7 +102,7 @@ public class EIMFaceRecognizer {
 		if (mModelFile != null)
 			mModelFile.delete();
 		isTrained = false;
-		
+
 	}
 
 	/**
@@ -109,11 +113,13 @@ public class EIMFaceRecognizer {
 	 * @param label
 	 *            the id of the person related to the new face
 	 */
-	public void incrementalTrain(String newFacePath, int label) {
+	private void incrementalTrain(String newFacePath, int label) {
 		if (!mRecognizerType.isIncrementable())
 			throw new IllegalStateException("Face detector of type "
 					+ mRecognizerType.toString()
 					+ "cannot be trained incrementally");
+
+		// TODO in case isIncrementable != !needResize it doesn't work
 
 		List<Mat> newFaces = new ArrayList<Mat>();
 		Mat labels = new Mat(1, 1, CvType.CV_32SC1);
@@ -130,43 +136,57 @@ public class EIMFaceRecognizer {
 		newFaces.add(newFaceMat);
 		labels.put(0, 0, new int[] { label });
 
-		if (isTrained) {
+		if (isTrained)
 			mFaceRecognizer.update(newFaces, labels);
-		}
-		else {
+		else
 			mFaceRecognizer.train(newFaces, labels);
-		}
 
 		mFaceRecognizer.save(mModelPath);
+	}
+
+	public void incrementalTrainWithLoading(Activity activity,
+			String newFacePath, int label) {
+		final String mNewFacePath = newFacePath;
+		final int mLabel = label;
+		final ProgressDialog mProgressDialog = ProgressDialog.show(activity,
+				"", "Training...", true);
+		final Activity mActivity = activity;
+
+		(new Thread(){
+			public void run() {
+				EIMFaceRecognizer.this.incrementalTrain(mNewFacePath, mLabel);
+				mActivity.runOnUiThread(new Runnable() {
+					public void run() {mProgressDialog.dismiss();}});
+			}
+		}).start();
 	}
 
 	/**
 	 * Train with the specified dataset. If the dataset contains no faces the
 	 * model is reset
 	 * 
-	 * @param sparseArray
+	 * @param people
 	 *            faces dataset, keys are the labels and faces are contained in
 	 *            the field Photos of the value
 	 */
-	public void train(SparseArray<Person> sparseArray) {
-		
-		if (!isDatasetValid(sparseArray)) {
+	private void train(SparseArray<Person> people) {
+
+		if (!isDatasetValid(people)) {
 			resetModel();
 			return;
 		}
 
 		List<Mat> faces = new ArrayList<Mat>();
 		List<Integer> labels = new ArrayList<Integer>();
-		int counter = 0;
-		
-		size = new Size(Double.MAX_VALUE,Double.MAX_VALUE);
-		
-		for (int i = 0, l = sparseArray.size(); i < l; i++) {
-			
-			int label = sparseArray.keyAt(i);
-			Person person = sparseArray.valueAt(i);
+
+		size = new Size(Double.MAX_VALUE, Double.MAX_VALUE);
+
+		for (int i = 0, l = people.size(); i < l; i++) {
+
+			int label = people.keyAt(i);
+			Person person = people.valueAt(i);
 			SparseArray<Photo> photos = person.getPhotos();
-			
+
 			for (int j = 0, k = photos.size(); j < k; j++) {
 				Photo mPhoto = photos.valueAt(j);
 				Mat mMat = new Mat();
@@ -174,54 +194,61 @@ public class EIMFaceRecognizer {
 				Bitmap face = mPhoto.getBitmap();
 				if (face == null)
 					face = BitmapFactory.decodeFile(mPhoto.getUrl());
-				
+
 				Utils.bitmapToMat(face, mMat);
 				Imgproc.cvtColor(mMat, mMat, Imgproc.COLOR_RGB2GRAY);
 
-				// For EIGEN and FISHER
-				if (!mRecognizerType.isIncrementable()) {
+				if (mRecognizerType.needResize()) {
 					Size s = mMat.size();
 					if (s.height < size.height)
 						size.height = s.height;
 					if (s.width < size.width)
 						size.width = s.width;
 				}
-				
-				labels.add((int) label);
+
+				labels.add(label);
 				faces.add(mMat);
-				
+
 				Log.d(TAG, "Inserting " + label + ":" + mPhoto.getUrl());
-
-				// labels.put(counter++, 0, new int[] { (int) label });
 			}
 		}
-		
+
 		// for EIGEN and FISHER
-		
-		if (!mRecognizerType.isIncrementable()) {
-			Log.i(TAG, "Set size of all faces to " + size.width + "x" + size.height);
-			ListIterator<Mat> itr = faces.listIterator();
-			while (itr.hasNext()) {
-				Mat src = itr.next();
-				Mat dst = new Mat();
-				Imgproc.resize(src, dst, size);
-				itr.set(dst);
-			}
+
+		if (mRecognizerType.needResize()) {
+			Log.i(TAG, "Set size of all faces to " + size.width + "x"
+					+ size.height);
+
+			for (Mat face : faces)
+				Imgproc.resize(face, face, size);
 		}
 
-		
 		Mat labelsMat = new Mat(labels.size(), 1, CvType.CV_32SC1);
-		for (counter = 0; counter < labelsMat.rows(); counter++)
-			labelsMat.put(counter, 0, new int[] { labels.get(counter) });
-		
-		Log.i(TAG, "Resizing done!");
-		
+		int i = 0;
+		for (Integer label : labels)
+			labelsMat.put(i++, 0, new int[] { label });
+
 		Log.i(TAG, labelsMat.dump());
 
 		mFaceRecognizer.train(faces, labelsMat);
 		mFaceRecognizer.save(mModelPath);
 
 		isTrained = true;
+	}
+
+	public void trainWithLoading(Activity activity, SparseArray<Person> people) {
+		final SparseArray<Person> mPeople = people;
+		final ProgressDialog mProgressDialog = ProgressDialog.show(activity,
+				"", "Training...", true);
+		final Activity mActivity = activity;
+		
+		(new Thread(){
+			public void run() {
+				EIMFaceRecognizer.this.train(mPeople);
+				mActivity.runOnUiThread(new Runnable() {
+					public void run() {mProgressDialog.dismiss();}});
+			}
+		}).start();
 	}
 
 	private boolean isDatasetValid(SparseArray<Person> dataset) {
@@ -236,12 +263,11 @@ public class EIMFaceRecognizer {
 	}
 
 	public void predict(Mat src, int[] label, double[] confidence) {
-		Log.i(TAG, "Try prediction image. Type = " + mRecognizerType.name() );
+		Log.i(TAG, "Try prediction image. Type = " + mRecognizerType.name());
 		if (isTrained) {
 			if (mRecognizerType.isIncrementable()) {
 				mFaceRecognizer.predict(src, label, confidence);
-			}
-			else {
+			} else {
 				Mat srcResized = new Mat();
 				Imgproc.resize(src, srcResized, size);
 				mFaceRecognizer.predict(srcResized, label, confidence);
@@ -272,11 +298,10 @@ public class EIMFaceRecognizer {
 		default:
 			throw new IllegalArgumentException("Invalid mType");
 		}
-		
+
 		mRecognizerType = mType;
-		
+
 		resetModel();
 	}
-	
-	
+
 }
