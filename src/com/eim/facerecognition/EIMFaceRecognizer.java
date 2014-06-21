@@ -132,19 +132,21 @@ public class EIMFaceRecognizer {
 					+ mRecognizerType.toString()
 					+ "cannot be trained incrementally");
 
-		// TODO in case isIncrementable != !needResize it doesn't work
-
 		List<Mat> newFaces = new ArrayList<Mat>();
 		Mat labels = new Mat(1, 1, CvType.CV_32SC1);
 		Mat newFaceMat = new Mat();
 
 		Bitmap newFace = BitmapFactory.decodeFile(newFacePath);
 		if (newFace == null)
-			return;
+			throw new IllegalArgumentException("Cannot load the image at "
+					+ newFacePath);
 
 		Utils.bitmapToMat(newFace, newFaceMat);
 
 		Imgproc.cvtColor(newFaceMat, newFaceMat, Imgproc.COLOR_RGB2GRAY);
+
+		if (mRecognizerType.needResize())
+			Imgproc.resize(newFaceMat, newFaceMat, size);
 
 		newFaces.add(newFaceMat);
 		labels.put(0, 0, new int[] { label });
@@ -154,7 +156,7 @@ public class EIMFaceRecognizer {
 			mFaceRecognizer.save(mModelPath);
 		} else
 			mFaceRecognizer.train(newFaces, labels);
-		
+
 		newFaceMat.release();
 		labels.release();
 	}
