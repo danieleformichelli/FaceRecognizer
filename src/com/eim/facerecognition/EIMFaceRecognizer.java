@@ -80,8 +80,6 @@ public class EIMFaceRecognizer {
 		if (size.height == -1)
 			size.height = Double.MAX_VALUE;
 
-		Log.e(TAG, size.width + "," + size.height);
-
 		mModelPath = mContext.getExternalFilesDir(null).getAbsolutePath() + "/"
 				+ MODEL_FILE_NAME;
 

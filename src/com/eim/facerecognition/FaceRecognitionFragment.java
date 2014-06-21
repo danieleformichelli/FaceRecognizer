@@ -211,10 +211,13 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT) {
 			Core.flip(mRgba, mRgba, 1);
 			Core.flip(mGray, mGrayGood, 1);
+			mGray.release();
 			mSceneForRecognizer = mGrayGood;
 		} else {
 			mSceneForRecognizer = mGray;
 		}
+		
+		
 
 		if (multithread) {
 			for (LabelledRect faceAndLabel : mLabelsForDrawer)
@@ -225,10 +228,49 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 			for (LabelledRect faceAndLabel : mLabelsForDrawer)
 				drawLabel(mRgba, faceAndLabel);
-
-			mGray.release();
 		}
 		return mRgba;
+	}
+
+	private LabelledRect[] recognizeFaces(Rect[] facesArray) {
+
+		LabelledRect[] recognizedPeople = new LabelledRect[facesArray.length];
+
+		for (int i = 0; i < facesArray.length; i++) {
+			Rect faceRect = facesArray[i];
+
+			try {
+				Mat face = mSceneForRecognizer.submat(faceRect);
+				int[] predictedLabel = new int[1];
+				double[] distance = new double[1];
+				mFaceRecognizer.predict(face, predictedLabel, distance);
+				face.release();
+
+				if (distance[0] < mDistanceThreshold) {
+					Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
+					if (guess == null) {
+						recognizedPeople[i] = new LabelledRect(faceRect, null,
+								null);
+						continue;
+					}
+
+					recognizedPeople[i] = new LabelledRect(faceRect,
+							guess.getName(), getThumbnail(predictedLabel[0]));
+
+					Log.d(TAG, "Prediction: " + guess.getName() + " ("
+							+ distance[0] + ")");
+				} else
+					recognizedPeople[i] = new LabelledRect(faceRect,
+							String.valueOf(((Double) distance[0]).intValue()),
+							null);
+			} catch (CvException e) {
+				Log.e(TAG, "faceRect in " + faceRect.x + ", " + faceRect.y
+						+ " " + faceRect.width + "x" + faceRect.height);
+				e.printStackTrace();
+			}
+		}
+
+		return recognizedPeople;
 	}
 
 	private void drawLabel(Mat frame, LabelledRect info) {
@@ -286,46 +328,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 			}
 		}
 
-	}
-
-	private LabelledRect[] recognizeFaces(Rect[] facesArray) {
-
-		LabelledRect[] recognizedPeople = new LabelledRect[facesArray.length];
-
-		for (int i = 0; i < facesArray.length; i++) {
-			Rect faceRect = facesArray[i];
-
-			try {
-				Mat face = mGray.submat(faceRect);
-				int[] predictedLabel = new int[1];
-				double[] distance = new double[1];
-				mFaceRecognizer.predict(face, predictedLabel, distance);
-				face.release();
-
-				if (distance[0] < mDistanceThreshold) {
-					Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
-					if (guess == null) {
-						recognizedPeople[i] = new LabelledRect(faceRect, null,
-								null);
-						continue;
-					}
-
-					recognizedPeople[i] = new LabelledRect(faceRect,
-							guess.getName(), getThumbnail(predictedLabel[0]));
-
-					Log.d(TAG, "Prediction: " + guess.getName() + " ("
-							+ distance[0] + ")");
-				} else
-					recognizedPeople[i] = new LabelledRect(faceRect,
-							String.valueOf(((Double)distance[0]).intValue()), null);
-			} catch (CvException e) {
-				Log.e(TAG, "faceRect in " + faceRect.x + ", " + faceRect.y
-						+ " " + faceRect.width + "x" + faceRect.height);
-				e.printStackTrace();
-			}
-		}
-
-		return recognizedPeople;
 	}
 
 	private Mat getThumbnail(int id) {
