@@ -81,9 +81,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		if (mPeopleAdapter.getGroupCount() == 0)
 			noPeopleMessage.setVisibility(View.VISIBLE);
 
-		if (!mOpenCVLoaded)
-			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
-					EIMPreferences.getInstance(activity).recognitionType());
+		if (mOpenCVLoaded)
+			setupFaceRecognizer();
 	}
 
 	@Override
@@ -93,9 +92,15 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		// but due to dependency of Context, cannot be created before
 		// OnActivityCreated()
 		mOpenCVLoaded = true;
+		
 		if (activity != null)
-			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
-					mFaceRecognizerType);
+			setupFaceRecognizer();
+	}
+	
+	private void setupFaceRecognizer() {
+		mFaceRecognizerType = EIMPreferences.getInstance(activity).recognitionType();
+		mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
+				mFaceRecognizerType);
 	}
 
 	@Override
