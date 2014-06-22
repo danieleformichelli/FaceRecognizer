@@ -42,7 +42,6 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 	private TextView addPerson, noPeopleMessage;
 	private View mainLayout;
 	private EIMFaceRecognizer mFaceRecognizer;
-	private EIMFaceRecognizer.Type mFaceRecognizerType;
 
 	private PeopleDatabase mPeopleDatabase;
 	private boolean mOpenCVLoaded = false;
@@ -92,15 +91,34 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		// but due to dependency of Context, cannot be created before
 		// OnActivityCreated()
 		mOpenCVLoaded = true;
-		
+
 		if (activity != null)
 			setupFaceRecognizer();
 	}
-	
+
 	private void setupFaceRecognizer() {
-		mFaceRecognizerType = EIMPreferences.getInstance(activity).recognitionType();
-		mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
-				mFaceRecognizerType);
+		EIMPreferences mPreferences = EIMPreferences.getInstance(activity);
+		EIMFaceRecognizer.Type mRecognitionType = mPreferences
+				.recognitionType();
+
+		switch (mRecognitionType) {
+		case LBPH:
+			int radius = mPreferences.LBPHRadius();
+			int neighbours = mPreferences.LBPHNeighbours();
+			int gridX = mPreferences.LBPHGridX();
+			int gridY = mPreferences.LBPHGridY();
+			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
+					mRecognitionType, radius, neighbours, gridX, gridY);
+			break;
+		case EIGEN:
+		case FISHER:
+			int components = mPreferences.EigenComponents();
+			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
+					mRecognitionType, components);
+			break;
+		default:
+			throw new IllegalArgumentException("invalid recognition type");
+		}
 	}
 
 	@Override

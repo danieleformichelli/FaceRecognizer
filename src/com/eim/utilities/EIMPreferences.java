@@ -103,8 +103,9 @@ public class EIMPreferences {
 	public EIMFaceRecognizer.Type recognitionType() {
 		String mType = mSharedPreferences.getString(recognitionTypeKey,
 				recognitionTypeDefault);
-		EIMFaceRecognizer.Type[] recognitionTypes = EIMFaceRecognizer.Type.values();
-		
+		EIMFaceRecognizer.Type[] recognitionTypes = EIMFaceRecognizer.Type
+				.values();
+
 		for (int i = 0; i < recognitionTypes.length; i++)
 			if (recognitionTypes[i].toString().equals(mType))
 				return recognitionTypes[i];
@@ -118,6 +119,54 @@ public class EIMPreferences {
 	public int recognitionThreshold() {
 		return Integer.parseInt(mSharedPreferences.getString(
 				recognitionThresholdKey, recognitionThresholdDefault));
+	}
+
+	private String LBPHRadiusKey;
+	private String LBPHRadiusDefault;
+
+	public int LBPHRadius() {
+		return Integer.parseInt(mSharedPreferences.getString(LBPHRadiusKey,
+				LBPHRadiusDefault));
+	}
+
+	private String LBPHNeighboursKey;
+	private String LBPHNeighboursDefault;
+
+	public int LBPHNeighbours() {
+		return Integer.parseInt(mSharedPreferences.getString(LBPHNeighboursKey,
+				LBPHNeighboursDefault));
+	}
+
+	private String LBPHGridXKey;
+	private String LBPHGridXDefault;
+
+	public int LBPHGridX() {
+		return Integer.parseInt(mSharedPreferences.getString(LBPHGridXKey,
+				LBPHGridXDefault));
+	}
+
+	private String LBPHGridYKey;
+	private String LBPHGridYDefault;
+
+	public int LBPHGridY() {
+		return Integer.parseInt(mSharedPreferences.getString(LBPHGridYKey,
+				LBPHGridYDefault));
+	}
+
+	private String EigenComponentsKey;
+	private String EigenComponentsDefault;
+
+	public int EigenComponents() {
+		return Integer.parseInt(mSharedPreferences.getString(
+				EigenComponentsKey, EigenComponentsDefault));
+	}
+
+	private String FisherComponentsKey;
+	private String FisherComponentsDefault;
+
+	public int FisherComponents() {
+		return Integer.parseInt(mSharedPreferences.getString(
+				FisherComponentsKey, FisherComponentsDefault));
 	}
 
 	private void getKeysAndDefaultValues(Context mContext) {
@@ -169,5 +218,32 @@ public class EIMPreferences {
 				.getString(R.string.recognition_threshold);
 		recognitionThresholdDefault = mContext
 				.getString(R.string.recognition_threshold_default);
+
+		LBPHRadiusKey = mContext.getString(R.string.recognition_lbph_radius);
+		LBPHRadiusDefault = mContext
+				.getString(R.string.recognition_lbph_radius_default);
+
+		LBPHNeighboursKey = mContext
+				.getString(R.string.recognition_lbph_neighbours);
+		LBPHNeighboursDefault = mContext
+				.getString(R.string.recognition_lbph_neighbours_default);
+
+		LBPHGridXKey = mContext.getString(R.string.recognition_lbph_grid_y);
+		LBPHGridXDefault = mContext
+				.getString(R.string.recognition_lbph_grid_y_default);
+
+		LBPHGridYKey = mContext.getString(R.string.recognition_lbph_grid_y);
+		LBPHGridYDefault = mContext
+				.getString(R.string.recognition_lbph_grid_y_default);
+
+		EigenComponentsKey = mContext
+				.getString(R.string.recognition_eigen_components);
+		EigenComponentsDefault = mContext
+				.getString(R.string.recognition_eigen_components_default);
+
+		FisherComponentsKey = mContext
+				.getString(R.string.recognition_fisher_components);
+		FisherComponentsDefault = mContext
+				.getString(R.string.recognition_fisher_components_default);
 	}
 }

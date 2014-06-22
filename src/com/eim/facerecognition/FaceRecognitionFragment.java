@@ -354,10 +354,29 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	private void setupFaceRecognition() {
 		mFaceDetector = FaceDetector.getInstance(activity);
-		mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
-				EIMPreferences.getInstance(activity).recognitionType());
-
 		mPeopleDatabase = PeopleDatabase.getInstance(activity);
+		EIMPreferences mPreferences = EIMPreferences.getInstance(activity);
+		EIMFaceRecognizer.Type mRecognitionType = mPreferences
+				.recognitionType();
+
+		switch (mRecognitionType) {
+		case LBPH:
+			int radius = mPreferences.LBPHRadius();
+			int neighbours = mPreferences.LBPHNeighbours();
+			int gridX = mPreferences.LBPHGridX();
+			int gridY = mPreferences.LBPHGridY();
+			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
+					mRecognitionType, radius, neighbours, gridX, gridY);
+			break;
+		case EIGEN:
+		case FISHER:
+			int components = mPreferences.EigenComponents();
+			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
+					mRecognitionType, components);
+			break;
+		default:
+			throw new IllegalArgumentException("invalid recognition type");
+		}
 	}
 
 	public class LabelledRect {

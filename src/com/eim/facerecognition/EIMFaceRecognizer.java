@@ -69,11 +69,6 @@ public class EIMFaceRecognizer {
 
 	private Size size;
 
-	/*
-	 * private double tot_confidence; private int num_trials; private double
-	 * mean_confidence;
-	 */
-
 	private EIMFaceRecognizer(Context mContext, Type mType, Integer... params) {
 		System.loadLibrary("facerecognizer");
 
@@ -113,25 +108,38 @@ public class EIMFaceRecognizer {
 			if (paramsLength != 4)
 				throw new IllegalArgumentException("Invalid params length "
 						+ params.length + ", expected 4");
-			mFaceRecognizer = new LBPHFaceRecognizer(params[0], params[1],
-					params[2], params[3], Double.MAX_VALUE);
+
+			lbphRadius = params[0];
+			lbphNeighbours = params[1];
+			lbphGridX = params[2];
+			lbphGridY = params[3];
+
+			mFaceRecognizer = new LBPHFaceRecognizer(lbphRadius,
+					lbphNeighbours, lbphGridX, lbphGridY, Double.MAX_VALUE);
 			break;
 		case EIGEN:
-			// if (paramsLength != 1)
-			// throw new IllegalArgumentException("Invalid params length "
-			// + params.length + ", expected 1");
-			//
-			// mFaceRecognizer = new EigenFaceRecognizer(params[0]);
-			mFaceRecognizer = new EigenFaceRecognizer();
+			if (paramsLength != 1)
+				throw new IllegalArgumentException("Invalid params length "
+						+ params.length + ", expected 1");
+
+			eigenComponents = params[0];
+
+			if (eigenComponents == 0)
+				mFaceRecognizer = new EigenFaceRecognizer();
+			else
+				mFaceRecognizer = new EigenFaceRecognizer(eigenComponents);
 			break;
 		case FISHER:
-			// if (paramsLength != 1)
-			// throw new IllegalArgumentException("Invalid params length "
-			// + params.length + ", expected 1");
+			if (paramsLength != 1)
+				throw new IllegalArgumentException("Invalid params length "
+						+ params.length + ", expected 1");
 
-			// mFaceRecognizer = new FisherFaceRecognizer(mModelPath,
-			// params[0]);
-			mFaceRecognizer = new FisherFaceRecognizer();
+			fisherComponents = params[0];
+			if (fisherComponents == 0)
+				mFaceRecognizer = new FisherFaceRecognizer();
+			else
+				mFaceRecognizer = new FisherFaceRecognizer(mModelPath,
+						fisherComponents);
 			break;
 		default:
 			throw new IllegalArgumentException("Invalid mType");
@@ -148,26 +156,28 @@ public class EIMFaceRecognizer {
 		if (instance != null) {
 			if (instance.mRecognizerType == mType)
 				return instance;
-			// switch (mType) {
-			// case LBPH:
-			// if (instance.lbphRadius == params[0]
-			// && instance.lbphNeighbours == params[1]
-			// && instance.lbphGridX == params[2]
-			// && instance.lbphGridX == params[3])
-			// return instance;
-			// break;
-			// case EIGEN:
-			// if (instance.eigenComponents == params[0])
-			// return instance;
-			// break;
-			// case FISHER:
-			// if (instance.fisherComponents == params[0])
-			// return instance;
-			// break;
-			// default:
-			// break;
-			//
-			// }
+			switch (mType) {
+			case LBPH:
+				if (instance.lbphRadius == params[0]
+						&& instance.lbphNeighbours == params[1]
+						&& instance.lbphGridX == params[2]
+						&& instance.lbphGridX == params[3])
+					return instance;
+				break;
+			case EIGEN:
+				if (instance.eigenComponents == params[0])
+					return instance;
+				break;
+			case FISHER:
+				if (instance.fisherComponents == params[0])
+					return instance;
+				break;
+			default:
+				break;
+
+			}
+
+			Log.e(TAG, "reinstantiation.");
 
 			instance.resetModel();
 		}
@@ -186,10 +196,6 @@ public class EIMFaceRecognizer {
 		if (mModelFile != null)
 			mModelFile.delete();
 		isTrained = false;
-
-		/*
-		 * tot_confidence = 0.0; num_trials = 0;
-		 */
 	}
 
 	/**
@@ -375,13 +381,6 @@ public class EIMFaceRecognizer {
 				resized.release();
 			} else
 				mFaceRecognizer.predict(src, label, confidence);
-
-			/*
-			 * tot_confidence += confidence[0]; num_trials++; mean_confidence =
-			 * tot_confidence/num_trials; Log.i(TAG, "Try to predict. Type = " +
-			 * mRecognizerType.name()); Log.i(TAG, "Mean Confidence = " +
-			 * mean_confidence); Log.i(TAG, "Number of trials = " + num_trials);
-			 */
 		}
 	}
 

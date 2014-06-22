@@ -37,10 +37,12 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	private String recognizerTypeKey;
 	private String detectorClassifierKey, detectorTypeKey, classifierKey,
 			scaleFactorKey, minNeighborsKey, minRelativeFaceSizeKey,
-			maxRelativeFaceSizeKey;
+			maxRelativeFaceSizeKey, LBPHRadiusKey, LBPHNeighboursKey,
+			LBPHGridXKey, LBPHGridYKey, EigenComponentsKey,
+			FisherComponentsKey;
 
 	private enum Validity {
-		VALID, NOT_VALID_RECOGNITION_THRESHOLD, NOT_VALID_DETECTION_SCALE_FACTOR, NOT_VALID_DETECTION_MIN_NEIGHBORS, NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE
+		VALID, NOT_VALID_RECOGNITION_THRESHOLD, NOT_VALID_LBPH_RADIUS, NOT_VALID_LBPH_NEIGHBOURS, NOT_VALID_LBPH_GRID, NOT_VALID_EIGEN_COMPONENTS, NOT_VALID_FISHER_COMPONENTS, NOT_VALID_DETECTION_SCALE_FACTOR, NOT_VALID_DETECTION_MIN_NEIGHBORS, NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE
 	}
 
 	@Override
@@ -79,8 +81,28 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		mPeopleDatabase = PeopleDatabase.getInstance(activity);
 		mFaceDetector = FaceDetector.getInstance(activity);
 		mPreferences = EIMPreferences.getInstance(activity);
-		mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
-				mPreferences.recognitionType());
+
+		EIMFaceRecognizer.Type mRecognitionType = mPreferences
+				.recognitionType();
+
+		switch (mRecognitionType) {
+		case LBPH:
+			int radius = mPreferences.LBPHRadius();
+			int neighbours = mPreferences.LBPHNeighbours();
+			int gridX = mPreferences.LBPHGridX();
+			int gridY = mPreferences.LBPHGridY();
+			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
+					mRecognitionType, radius, neighbours, gridX, gridY);
+			break;
+		case EIGEN:
+		case FISHER:
+			int components = mPreferences.EigenComponents();
+			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
+					mRecognitionType, components);
+			break;
+		default:
+			throw new IllegalArgumentException("invalid recognition type");
+		}
 	}
 
 	private void getKeys() {
@@ -96,6 +118,15 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 		recognizerTypeKey = activity
 				.getString(R.string.recognition_recognizer_type);
+		LBPHRadiusKey = activity.getString(R.string.recognition_lbph_radius);
+		LBPHNeighboursKey = activity
+				.getString(R.string.recognition_lbph_neighbours);
+		LBPHGridXKey = activity.getString(R.string.recognition_lbph_grid_x);
+		LBPHGridYKey = activity.getString(R.string.recognition_lbph_grid_y);
+		EigenComponentsKey = activity
+				.getString(R.string.recognition_eigen_components);
+		FisherComponentsKey = activity
+				.getString(R.string.recognition_fisher_components);
 
 		clearDatabaseKey = activity.getString(R.string.general_clear_database);
 		restorePreferencesKey = activity
@@ -172,6 +203,21 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				case NOT_VALID_RECOGNITION_THRESHOLD:
 					msgId = R.string.recognition_invalid_threshold;
 					break;
+				case NOT_VALID_LBPH_RADIUS:
+					msgId = R.string.recognition_lbph_invalid_radius;
+					break;
+				case NOT_VALID_LBPH_NEIGHBOURS:
+					msgId = R.string.recognition_lbph_invalid_neighbours;
+					break;
+				case NOT_VALID_LBPH_GRID:
+					msgId = R.string.recognition_lbph_invalid_grid;
+					break;
+				case NOT_VALID_EIGEN_COMPONENTS:
+					msgId = R.string.recognition_eigen_invalid_components;
+					break;
+				case NOT_VALID_FISHER_COMPONENTS:
+					msgId = R.string.recognition_fisher_invalid_components;
+					break;
 				case NOT_VALID_DETECTION_SCALE_FACTOR:
 					msgId = R.string.detection_invalid_scale_factor;
 					break;
@@ -207,8 +253,24 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		private Validity isValid(SharedPreferences sharedPreferences) {
 			EIMPreferences mPreferences = EIMPreferences.getInstance(activity);
 
-			if (mPreferences.recognitionThreshold() < 0 || mPreferences.recognitionThreshold() > 5000)
+			if (mPreferences.recognitionThreshold() < 0
+					|| mPreferences.recognitionThreshold() > 5000)
 				return Validity.NOT_VALID_RECOGNITION_THRESHOLD;
+
+			if (mPreferences.LBPHRadius() < 1)
+				return Validity.NOT_VALID_LBPH_RADIUS;
+
+			if (mPreferences.LBPHNeighbours() < 1)
+				return Validity.NOT_VALID_LBPH_NEIGHBOURS;
+
+			if (mPreferences.LBPHGridX() < 1 || mPreferences.LBPHGridX() < 1)
+				return Validity.NOT_VALID_LBPH_GRID;
+
+			if (mPreferences.EigenComponents() < 0)
+				return Validity.NOT_VALID_EIGEN_COMPONENTS;
+
+			if (mPreferences.FisherComponents() < 0)
+				return Validity.NOT_VALID_FISHER_COMPONENTS;
 
 			if (mPreferences.detectionScaleFactor() <= 1)
 				return Validity.NOT_VALID_DETECTION_SCALE_FACTOR;
@@ -260,7 +322,50 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				final EIMFaceRecognizer.Type mRecognizerType = EIMFaceRecognizer.Type
 						.valueOf(((ListPreference) mPreference).getValue());
 				mFaceRecognizer.setType(mRecognizerType);
-				mFaceRecognizer.trainWithLoading(activity, mPeopleDatabase.getPeople());
+				mFaceRecognizer.trainWithLoading(activity,
+						mPeopleDatabase.getPeople());
+			} else if (key.equals(LBPHRadiusKey)) {
+				final int radius = Integer
+						.valueOf(((EditTextPreference) mPreference).getText());
+				mFaceRecognizer.setRadius(radius);
+				if (mFaceRecognizer.getType() == EIMFaceRecognizer.Type.LBPH)
+					mFaceRecognizer.trainWithLoading(activity,
+							mPeopleDatabase.getPeople());
+			} else if (key.equals(LBPHNeighboursKey)) {
+				final int neighbours = Integer
+						.valueOf(((EditTextPreference) mPreference).getText());
+				mFaceRecognizer.setNeighbours(neighbours);
+				if (mFaceRecognizer.getType() == EIMFaceRecognizer.Type.LBPH)
+					mFaceRecognizer.trainWithLoading(activity,
+							mPeopleDatabase.getPeople());
+			} else if (key.equals(LBPHGridXKey)) {
+				final int gridX = Integer
+						.valueOf(((EditTextPreference) mPreference).getText());
+				mFaceRecognizer.setGridX(gridX);
+				if (mFaceRecognizer.getType() == EIMFaceRecognizer.Type.LBPH)
+					mFaceRecognizer.trainWithLoading(activity,
+							mPeopleDatabase.getPeople());
+			} else if (key.equals(LBPHGridYKey)) {
+				final int gridY = Integer
+						.valueOf(((EditTextPreference) mPreference).getText());
+				mFaceRecognizer.setGridY(gridY);
+				if (mFaceRecognizer.getType() == EIMFaceRecognizer.Type.LBPH)
+					mFaceRecognizer.trainWithLoading(activity,
+							mPeopleDatabase.getPeople());
+			} else if (key.equals(EigenComponentsKey)) {
+				final int components = Integer
+						.valueOf(((EditTextPreference) mPreference).getText());
+				mFaceRecognizer.setEigenComponents(components);
+				if (mFaceRecognizer.getType() == EIMFaceRecognizer.Type.EIGEN)
+					mFaceRecognizer.trainWithLoading(activity,
+							mPeopleDatabase.getPeople());
+			} else if (key.equals(FisherComponentsKey)) {
+				final int components = Integer
+						.valueOf(((EditTextPreference) mPreference).getText());
+				mFaceRecognizer.setFisherComponents(components);
+				if (mFaceRecognizer.getType() == EIMFaceRecognizer.Type.FISHER)
+					mFaceRecognizer.trainWithLoading(activity,
+							mPeopleDatabase.getPeople());
 			} else if (key.equals(detectorTypeKey)) {
 				final FaceDetector.Type mDetectorType = FaceDetector.Type
 						.valueOf(((ListPreference) mPreference).getValue());
@@ -309,6 +414,8 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 			if (mPreference.getKey().compareTo(restorePreferencesKey) == 0) {
 				restorePreferences();
+				mFaceRecognizer.trainWithLoading(activity,
+						mPeopleDatabase.getPeople());
 				Toast.makeText(
 						activity,
 						activity.getString(R.string.general_restore_default_preferences_confirmation),
@@ -331,6 +438,18 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				R.string.recognition_recognizer_type_default);
 		setPreference(R.string.recognition_threshold,
 				R.string.recognition_threshold_default);
+		setPreference(R.string.recognition_lbph_radius,
+				R.string.recognition_lbph_radius_default);
+		setPreference(R.string.recognition_lbph_neighbours,
+				R.string.recognition_lbph_neighbours_default);
+		setPreference(R.string.recognition_lbph_grid_x,
+				R.string.recognition_lbph_grid_x_default);
+		setPreference(R.string.recognition_lbph_grid_y,
+				R.string.recognition_lbph_grid_y_default);
+		setPreference(R.string.recognition_eigen_components,
+				R.string.recognition_eigen_components_default);
+		setPreference(R.string.recognition_fisher_components,
+				R.string.recognition_fisher_components_default);
 		setPreference(R.string.detection_detector_type,
 				R.string.detection_detector_type_default);
 		setPreference(R.string.detection_scale_factor,
