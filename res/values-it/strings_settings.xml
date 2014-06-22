@@ -17,7 +17,7 @@
 
     <string name="preference_recognition">Riconoscimento</string>
     <string name="recognition_recognizer_type_title">Tipo di riconoscitore</string>
-    <string name="recognition_invalid_threshold">La soglia di riconoscimento non può essere negativa</string>
+    <string name="recognition_invalid_threshold">La soglia di riconoscimento deve essere nell\'intervallo [0, 5000]</string>
     
     <string-array name="recognition_recognizer_type_entries">
         <item>Eigen Faces</item>

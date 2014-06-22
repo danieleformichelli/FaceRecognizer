@@ -39,6 +39,19 @@ public class EIMFaceRecognizer {
 		public boolean needResize() {
 			return this != LBPH;
 		}
+
+		public int numberOfNeededClasses() {
+			switch (this) {
+			case EIGEN:
+				return 1;
+			case FISHER:
+				return 2;
+			case LBPH:
+				return 1;
+			}
+
+			return -1;
+		}
 	}
 
 	private static EIMFaceRecognizer instance;
@@ -292,12 +305,19 @@ public class EIMFaceRecognizer {
 	}
 
 	private boolean isDatasetValid(SparseArray<Person> dataset) {
-		if (dataset == null)
+		if (dataset == null
+				|| dataset.size() < mRecognizerType.numberOfNeededClasses())
 			return false;
 
+		int numberOfClasses = 0;
+
 		for (int i = 0, l = dataset.size(); i < l; i++)
-			if (dataset.valueAt(i).getPhotos().size() > 0)
-				return true;
+			if (dataset.valueAt(i).getPhotos().size() > 0) {
+				numberOfClasses++;
+				if (numberOfClasses >= mRecognizerType.numberOfNeededClasses())
+					return true;
+				continue;
+			}
 
 		return false;
 	}

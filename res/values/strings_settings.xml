@@ -21,7 +21,7 @@
     <string name="recognition_threshold">recognition_threshold</string>
     <string name="recognition_threshold_title">Recognition threshold</string>
     <string name="recognition_threshold_default">100</string>
-    <string name="recognition_invalid_threshold">The threshold cannot be negative</string>
+    <string name="recognition_invalid_threshold">The threshold must be in the range [0,5000]</string>
 
     <string-array name="recognition_recognizer_type_entries">
         <item>Eigen Faces</item>
@@ -73,7 +73,7 @@
     <string name="detection_scale_factor_default">1.1</string>
     <string name="detection_scale_factor_title">Scale Factor</string>
     <string name="detection_min_neighbors">detection_min_neighbors</string>
-    <string name="detection_min_neighbors_default">2</string>
+    <string name="detection_min_neighbors_default">5</string>
     <string name="detection_min_neighbors_title">Min Neighbors</string>
     <string name="detection_min_relative_face_size">detection_min_relative_face_size</string>
     <string name="detection_min_relative_face_size_default">0.2</string>
