@@ -73,7 +73,7 @@
     <string name="detection_scale_factor_default">1.1</string>
     <string name="detection_scale_factor_title">Scale Factor</string>
     <string name="detection_min_neighbors">detection_min_neighbors</string>
-    <string name="detection_min_neighbors_default">2</string>
+    <string name="detection_min_neighbors_default">5</string>
     <string name="detection_min_neighbors_title">Min Neighbors</string>
     <string name="detection_min_relative_face_size">detection_min_relative_face_size</string>
     <string name="detection_min_relative_face_size_default">0.2</string>

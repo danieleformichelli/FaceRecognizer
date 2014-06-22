@@ -248,13 +248,13 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				mFaceRecognizer.predict(face, predictedLabel, distance);
 				face.release();
 
+				Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
+				if (guess == null) {
+					recognizedPeople[i] = new LabelledRect(faceRect, null, null);
+					continue;
+				}
+
 				if (distance[0] < mDistanceThreshold) {
-					Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
-					if (guess == null) {
-						recognizedPeople[i] = new LabelledRect(faceRect, null,
-								null);
-						continue;
-					}
 
 					recognizedPeople[i] = new LabelledRect(faceRect,
 							guess.getName(), getThumbnail(predictedLabel[0]));
@@ -263,8 +263,10 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 							+ distance[0] + ")");
 				} else
 					recognizedPeople[i] = new LabelledRect(faceRect,
-							String.valueOf(((Double) distance[0]).intValue()),
-							null);
+							guess.getName()
+									+ " "
+									+ String.valueOf(((Double) distance[0])
+											.intValue()), null);
 			} catch (CvException e) {
 				Log.e(TAG, "faceRect in " + faceRect.x + ", " + faceRect.y
 						+ " " + faceRect.width + "x" + faceRect.height);
@@ -283,12 +285,14 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				: FACE_RECT_COLOR;
 
 		// Bounding box
-		Core.rectangle(frame, info.rect.tl(), info.rect.br(), color,
-				3);
+		Core.rectangle(frame, info.rect.tl(), info.rect.br(), color, 3);
+
+		if (info.text == null)
+			return;
 
 		// Text...
-		double fontScale = 4;
 		int fontFace = Core.FONT_HERSHEY_PLAIN;
+		double fontScale = 4;
 		int thickness = 3;
 
 		Size textSize = Core.getTextSize(info.text, fontFace, fontScale,
@@ -316,8 +320,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		Core.rectangle(frame, rectangleTL, rectangleBR, new Scalar(255, 255,
 				255, 150), Core.FILLED);
 
-		Core.putText(frame, info.text, textOrigin, fontFace, fontScale,
-				color, thickness);
+		Core.putText(frame, info.text, textOrigin, fontFace, fontScale, color,
+				thickness);
 
 		// Thumbnail
 		if (info.thumbnail != null) {
