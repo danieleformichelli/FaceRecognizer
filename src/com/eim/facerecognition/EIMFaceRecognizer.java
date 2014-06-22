@@ -25,6 +25,7 @@ import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;
 
 public class EIMFaceRecognizer {
+	
 	private static final String TAG = "EIMFaceRecognizer";
 	private static final String WIDTH = "min_width";
 	private static final String HEIGHT = "min_height";
@@ -242,13 +243,7 @@ public class EIMFaceRecognizer {
 				faces.add(mMat);
 				
 				if (mRecognizerType.needResize()) {
-					// Minimum for EIGEN
 					Size s = mMat.size();
-					if (s.height < size.height)
-						size.height = s.height;
-					if (s.width < size.width)
-						size.width = s.width;
-					// Mean for FISHER
 					height += s.height;
 					width += s.width;
 					images++;
@@ -256,7 +251,7 @@ public class EIMFaceRecognizer {
 			}
 		}
 		
-		if (mRecognizerType.equals(Type.FISHER)) {
+		if (mRecognizerType.needResize()) {
 			size.height = height/images;
 			size.width = width/images;
 		}

@@ -210,6 +210,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	@Override
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
+		
 		mRgba = inputFrame.rgba();
 		mGray = inputFrame.gray();
 
