@@ -15,7 +15,7 @@ class EigenFaceRecognizer extends FaceRecognizer {
 		super(createEigenFaceRecognizer_0());
 	}
 
-	private EigenFaceRecognizer(int num_components) {
+	EigenFaceRecognizer(int num_components) {
 		super(createEigenFaceRecognizer_1(num_components));
 	}
 

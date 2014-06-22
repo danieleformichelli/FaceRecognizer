@@ -1,7 +1,5 @@
 package com.eim.facesmanagement.peopledb;
 
-import com.eim.facerecognition.EIMFaceRecognizer;
-
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
@@ -38,7 +36,6 @@ public class PeopleDBOpenHelper extends SQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		EIMFaceRecognizer.getInstance(mContext, EIMFaceRecognizer.Type.LBPH).resetModel();
 		clear(db);
 	}
 

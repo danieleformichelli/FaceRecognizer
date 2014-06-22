@@ -15,11 +15,11 @@ class FisherFaceRecognizer extends FaceRecognizer {
 		super(createFisherFaceRecognizer_0());
 	}
 
-	private FisherFaceRecognizer(String modelPath, int num_components) {
+	FisherFaceRecognizer(String modelPath, int num_components) {
 		super(createFisherFaceRecognizer_1(num_components));
 	}
 
-	private FisherFaceRecognizer(String modelPath, int num_components, double threshold) {
+	FisherFaceRecognizer(String modelPath, int num_components, double threshold) {
 		super(createFisherFaceRecognizer_2(num_components, threshold));
 	}
 }

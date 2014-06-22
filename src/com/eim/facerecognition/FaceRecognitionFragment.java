@@ -180,8 +180,10 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mSwitchButton.setEnabled(false);
 		mThresholdBar.setEnabled(false);
 
-		mRecognitionThread.interrupt();
-		mRecognitionThread = null;
+		if (mRecognitionThread != null) {
+			mRecognitionThread.interrupt();
+			mRecognitionThread = null;
+		}
 
 		mSceneForRecognizer.release();
 		mRgba.release();
@@ -212,19 +214,18 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		flip = (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT);
 		if (flip)
 			Core.flip(mRgba, mRgba, 1);
-		
+
 		if (multithread) {
 			for (LabelledRect faceAndLabel : mLabelsForDrawer)
 				drawLabel(mRgba, faceAndLabel, flip);
 		} else {
 			Rect[] facesArray = mFaceDetector.detect(mSceneForRecognizer);
-						
+
 			mLabelsForDrawer = recognizeFaces(facesArray);
 
 			for (LabelledRect faceAndLabel : mLabelsForDrawer)
 				drawLabel(mRgba, faceAndLabel, flip);
 		}
-
 
 		return mRgba;
 	}

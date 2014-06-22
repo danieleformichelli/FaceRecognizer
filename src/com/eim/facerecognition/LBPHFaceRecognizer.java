@@ -18,15 +18,15 @@ class LBPHFaceRecognizer extends FaceRecognizer {
 		super(createLBPHFaceRecognizer_0());
 	}
 
-	private LBPHFaceRecognizer(int radius) {
+	LBPHFaceRecognizer(int radius) {
 		super(createLBPHFaceRecognizer_1(radius));
 	}
 
-	private LBPHFaceRecognizer(int radius, int neighbours) {
+	LBPHFaceRecognizer(int radius, int neighbours) {
 		super(createLBPHFaceRecognizer_2(radius, neighbours));
 	}
 
-	private LBPHFaceRecognizer(int radius, int neighbours, int gridX,
+	LBPHFaceRecognizer(int radius, int neighbours, int gridX,
 			int gridY, double threshold) {
 		super(createLBPHFaceRecognizer_3(radius, neighbours, gridX, gridY,
 				threshold));

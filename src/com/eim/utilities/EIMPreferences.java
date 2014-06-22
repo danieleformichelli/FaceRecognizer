@@ -99,19 +99,17 @@ public class EIMPreferences {
 
 	private String recognitionTypeKey;
 	private String recognitionTypeDefault;
-	private String[] recognitionTypes;
 
 	public EIMFaceRecognizer.Type recognitionType() {
 		String mType = mSharedPreferences.getString(recognitionTypeKey,
 				recognitionTypeDefault);
+		EIMFaceRecognizer.Type[] recognitionTypes = EIMFaceRecognizer.Type.values();
+		
+		for (int i = 0; i < recognitionTypes.length; i++)
+			if (recognitionTypes[i].toString().equals(mType))
+				return recognitionTypes[i];
 
-		if (recognitionTypes[0].equals(mType))
-			return EIMFaceRecognizer.Type.EIGEN;
-		else if (recognitionTypes[1].equals(mType))
-			return EIMFaceRecognizer.Type.FISHER;
-		else
-			return EIMFaceRecognizer.Type.LBPH;
-
+		return null;
 	}
 
 	private String recognitionThresholdKey;
@@ -151,7 +149,7 @@ public class EIMPreferences {
 				.getString(R.string.detection_face_classifier);
 		detectorClassifierDefault = mContext
 				.getString(R.string.detection_face_classifier_default);
-		
+
 		numberOfGalleryColumnsLandscapeKey = mContext
 				.getString(R.string.management_number_of_gallery_columns_landscape);
 		numberOfGalleryColumnsLandscapeDefault = mContext
@@ -166,8 +164,6 @@ public class EIMPreferences {
 				.getString(R.string.recognition_recognizer_type);
 		recognitionTypeDefault = mContext
 				.getString(R.string.recognition_recognizer_type_default);
-		recognitionTypes = mContext.getResources().getStringArray(
-				R.array.recognition_recognizer_type_values);
 
 		recognitionThresholdKey = mContext
 				.getString(R.string.recognition_threshold);

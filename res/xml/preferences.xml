@@ -14,6 +14,26 @@
             android:inputType="number"
             android:key="@string/recognition_threshold"
             android:title="@string/recognition_threshold_title" />
+        <EditTextPreference
+            android:defaultValue="@string/recognition_lbph_radius_default"
+            android:inputType="number"
+            android:key="@string/recognition_lbph_radius"
+            android:title="@string/recognition_lbph_radius_title" />
+        <EditTextPreference
+            android:defaultValue="@string/recognition_lbph_neighbours_default"
+            android:inputType="number"
+            android:key="@string/recognition_lbph_neighbours"
+            android:title="@string/recognition_lbph_neighbours_title" />
+        <EditTextPreference
+            android:defaultValue="@string/recognition_lbph_grid_x_default"
+            android:inputType="number"
+            android:key="@string/recognition_lbph_grid_x"
+            android:title="@string/recognition_lbph_grid_x_title" />
+        <EditTextPreference
+            android:defaultValue="@string/recognition_lbph_grid_y_default"
+            android:inputType="number"
+            android:key="@string/recognition_lbph_grid_y"
+            android:title="@string/recognition_lbph_grid_y_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_detection" >
         <ListPreference
@@ -23,11 +43,12 @@
             android:key="@string/detection_detector_type"
             android:title="@string/detection_detector_type_title" />
         <ListPreference
-            android:key="@string/detection_face_classifier"
-            android:title="@string/detection_face_classifier_title"
+            android:defaultValue="@string/detection_face_classifier_default"
             android:entries="@array/detection_face_classifier_entries"
-            android:entryValues="@array/detection_face_classifier_entry_values" 
-            android:defaultValue="@string/detection_face_classifier_default"/>
+            android:entryValues="@array/detection_face_classifier_entry_values"
+            android:key="@string/detection_face_classifier"
+            android:title="@string/detection_face_classifier_title" />
+
         <EditTextPreference
             android:defaultValue="@string/detection_scale_factor_default"
             android:inputType="numberDecimal"
