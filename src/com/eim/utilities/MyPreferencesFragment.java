@@ -406,6 +406,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 			if (mPreference.getKey().compareTo(clearDatabaseKey) == 0) {
 				((FaceRecognizerMainActivity) activity)
 						.getFacesManagementFragment().clearPeople();
+				mFaceRecognizer.resetModel();
 				Toast.makeText(
 						activity,
 						activity.getString(R.string.general_clear_database_confirmation),

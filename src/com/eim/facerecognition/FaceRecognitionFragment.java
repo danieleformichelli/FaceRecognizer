@@ -330,7 +330,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		if (thumbnails.get(id) != null)
 			return thumbnails.get(id);
 
-		// TEST THUMBNAIL LOADING
 		Bitmap mBitmap = PeopleDatabase.getInstance(activity).getPerson(id)
 				.getPhotos().valueAt(0).getBitmap();
 		Mat thumbnail = new Mat();

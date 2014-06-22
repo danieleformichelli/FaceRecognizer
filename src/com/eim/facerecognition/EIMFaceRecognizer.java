@@ -231,11 +231,13 @@ public class EIMFaceRecognizer {
 		newFaces.add(newFaceMat);
 		labels.put(0, 0, new int[] { label });
 
-		if (isTrained) {
+		if (isTrained)
 			mFaceRecognizer.update(newFaces, labels);
-			mFaceRecognizer.save(mModelPath);
-		} else
+		else
 			mFaceRecognizer.train(newFaces, labels);
+
+		mFaceRecognizer.save(mModelPath);
+		isTrained = true;
 
 		newFaceMat.release();
 		labels.release();
