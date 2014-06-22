@@ -26,8 +26,8 @@ import com.eim.facesmanagement.peopledb.Photo;
 
 public class EIMFaceRecognizer {
 	private static final String TAG = "EIMFaceRecognizer";
-	private static final String MIN_WIDTH = "min_width";
-	private static final String MIN_HEIGHT = "min_height";
+	private static final String WIDTH = "min_width";
+	private static final String HEIGHT = "min_height";
 
 	public enum Type {
 		EIGEN, FISHER, LBPH;
@@ -51,6 +51,12 @@ public class EIMFaceRecognizer {
 
 	private Size size;
 
+	/*
+	private double tot_confidence;
+	private int num_trials;
+	private double mean_confidence;
+	*/
+	
 	private EIMFaceRecognizer(Context mContext, Type mType) {
 		System.loadLibrary("facerecognizer");
 
@@ -73,8 +79,8 @@ public class EIMFaceRecognizer {
 			throw new IllegalArgumentException("Invalid mType");
 		}
 
-		size = new Size(mSharedPreferences.getInt(MIN_WIDTH, -1),
-				mSharedPreferences.getInt(MIN_HEIGHT, -1));
+		size = new Size(mSharedPreferences.getInt(WIDTH, -1),
+				mSharedPreferences.getInt(HEIGHT, -1));
 		if (size.width == -1)
 			size.width = Double.MAX_VALUE;
 		if (size.height == -1)
@@ -116,6 +122,11 @@ public class EIMFaceRecognizer {
 		if (mModelFile != null)
 			mModelFile.delete();
 		isTrained = false;
+		
+		/*
+		tot_confidence = 0.0;
+		num_trials = 0;
+		*/
 	}
 
 	/**
@@ -194,7 +205,10 @@ public class EIMFaceRecognizer {
 			resetModel();
 			return;
 		}
-
+		
+		int images = 0;
+		double height = 0.0;
+		double width = 0.0;
 		List<Mat> faces = new ArrayList<Mat>();
 		List<Integer> labels = new ArrayList<Integer>();
 
@@ -210,24 +224,32 @@ public class EIMFaceRecognizer {
 
 				Utils.bitmapToMat(mPhoto.getBitmap(), mMat);
 				Imgproc.cvtColor(mMat, mMat, Imgproc.COLOR_RGB2GRAY);
-
+				
+				labels.add(label);
+				faces.add(mMat);
+				
 				if (mRecognizerType.needResize()) {
+					// Minimum for EIGEN
 					Size s = mMat.size();
 					if (s.height < size.height)
 						size.height = s.height;
 					if (s.width < size.width)
 						size.width = s.width;
+					// Mean for FISHER
+					height += s.height;
+					width += s.width;
+					images++;
 				}
-
-				labels.add(label);
-				faces.add(mMat);
 			}
 		}
-
-		mSharedPreferences.edit().putInt(MIN_WIDTH, (int) size.width)
-				.putInt(MIN_HEIGHT, (int) size.height).apply();
-
-		// for EIGEN and FISHER
+		
+		if (mRecognizerType.equals(Type.FISHER)) {
+			size.height = height/images;
+			size.width = width/images;
+		}
+		
+		mSharedPreferences.edit().putInt(WIDTH, (int) size.width)
+				.putInt(HEIGHT, (int) size.height).apply();
 
 		if (mRecognizerType.needResize()) {
 			Log.i(TAG, "Set size of all faces to " + size.width + "x"
@@ -283,10 +305,24 @@ public class EIMFaceRecognizer {
 	public void predict(Mat src, int[] label, double[] confidence) {
 		if (isTrained) {
 			Mat resized = new Mat();
-			if (mRecognizerType.needResize())
+			if (mRecognizerType.needResize()) { 
 				Imgproc.resize(src, resized, size);
+				mFaceRecognizer.predict(resized, label, confidence);
+			}
+			else {
+				mFaceRecognizer.predict(src, label, confidence);
+			}
 
-			mFaceRecognizer.predict(resized, label, confidence);
+			
+			/*
+			tot_confidence += confidence[0];
+			num_trials++;
+			mean_confidence = tot_confidence/num_trials;
+			Log.i(TAG, "Try to predict. Type = " + mRecognizerType.name());
+			Log.i(TAG, "Mean Confidence = " + mean_confidence);
+			Log.i(TAG, "Number of trials = " + num_trials);
+			*/
+			
 			resized.release();
 		}
 	}
@@ -312,6 +348,7 @@ public class EIMFaceRecognizer {
 			break;
 		default:
 			throw new IllegalArgumentException("Invalid mType");
+			
 		}
 
 		mRecognizerType = mType;
