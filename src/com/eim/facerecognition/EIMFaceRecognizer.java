@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.opencv.android.Utils;
 import org.opencv.contrib.FaceRecognizer;
+import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
@@ -66,11 +67,10 @@ public class EIMFaceRecognizer {
 	private Size size;
 
 	/*
-	private double tot_confidence;
-	private int num_trials;
-	private double mean_confidence;
-	*/
-	
+	 * private double tot_confidence; private int num_trials; private double
+	 * mean_confidence;
+	 */
+
 	private EIMFaceRecognizer(Context mContext, Type mType) {
 		System.loadLibrary("facerecognizer");
 
@@ -104,7 +104,12 @@ public class EIMFaceRecognizer {
 				+ MODEL_FILE_NAME;
 
 		if (new File(mModelPath).exists()) {
-			mFaceRecognizer.load(mModelPath);
+			try {
+				mFaceRecognizer.load(mModelPath);
+			} catch (CvException e) {
+				new File(mModelPath).delete();
+				return;
+			}
 			isTrained = true;
 		}
 	}
@@ -136,11 +141,10 @@ public class EIMFaceRecognizer {
 		if (mModelFile != null)
 			mModelFile.delete();
 		isTrained = false;
-		
+
 		/*
-		tot_confidence = 0.0;
-		num_trials = 0;
-		*/
+		 * tot_confidence = 0.0; num_trials = 0;
+		 */
 	}
 
 	/**
@@ -219,7 +223,7 @@ public class EIMFaceRecognizer {
 			resetModel();
 			return;
 		}
-		
+
 		int images = 0;
 		double height = 0.0;
 		double width = 0.0;
@@ -238,10 +242,10 @@ public class EIMFaceRecognizer {
 
 				Utils.bitmapToMat(mPhoto.getBitmap(), mMat);
 				Imgproc.cvtColor(mMat, mMat, Imgproc.COLOR_RGB2GRAY);
-				
+
 				labels.add(label);
 				faces.add(mMat);
-				
+
 				if (mRecognizerType.needResize()) {
 					Size s = mMat.size();
 					height += s.height;
@@ -255,7 +259,7 @@ public class EIMFaceRecognizer {
 			size.height = height/images;
 			size.width = width/images;
 		}
-		
+
 		mSharedPreferences.edit().putInt(WIDTH, (int) size.width)
 				.putInt(HEIGHT, (int) size.height).apply();
 
@@ -319,26 +323,20 @@ public class EIMFaceRecognizer {
 
 	public void predict(Mat src, int[] label, double[] confidence) {
 		if (isTrained) {
-			Mat resized = new Mat();
-			if (mRecognizerType.needResize()) { 
+			if (mRecognizerType.needResize()) {
+				Mat resized = new Mat();
 				Imgproc.resize(src, resized, size);
 				mFaceRecognizer.predict(resized, label, confidence);
-			}
-			else {
+				resized.release();
+			} else
 				mFaceRecognizer.predict(src, label, confidence);
-			}
 
-			
 			/*
-			tot_confidence += confidence[0];
-			num_trials++;
-			mean_confidence = tot_confidence/num_trials;
-			Log.i(TAG, "Try to predict. Type = " + mRecognizerType.name());
-			Log.i(TAG, "Mean Confidence = " + mean_confidence);
-			Log.i(TAG, "Number of trials = " + num_trials);
-			*/
-			
-			resized.release();
+			 * tot_confidence += confidence[0]; num_trials++; mean_confidence =
+			 * tot_confidence/num_trials; Log.i(TAG, "Try to predict. Type = " +
+			 * mRecognizerType.name()); Log.i(TAG, "Mean Confidence = " +
+			 * mean_confidence); Log.i(TAG, "Number of trials = " + num_trials);
+			 */
 		}
 	}
 
@@ -363,7 +361,7 @@ public class EIMFaceRecognizer {
 			break;
 		default:
 			throw new IllegalArgumentException("Invalid mType");
-			
+
 		}
 
 		mRecognizerType = mType;
