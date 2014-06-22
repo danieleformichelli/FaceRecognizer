@@ -55,9 +55,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private boolean mOpenCVLoaded = false;
 	private int mCurrentCameraIndex = ControlledJavaCameraView.CAMERA_ID_BACK;
 
-	private Mat mGray;
 	private Mat mRgba;
-
 	private Mat mSceneForRecognizer;
 	private LabelledRect[] mLabelsForDrawer;
 
@@ -72,7 +70,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private SeekBar mThresholdBar;
 	private TextView mThresholdTextView;
 	private ImageButton mSwitchButton;
-	private Mat mGrayGood;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -166,11 +163,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	public void onCameraViewStarted(int width, int height) {
 		setupFaceRecognition();
 
-		mGray = new Mat();
 		mRgba = new Mat();
-		mGrayGood = new Mat();
-
-		mSceneForRecognizer = mGrayGood;
+		mSceneForRecognizer = new Mat();
 
 		mHeight = height;
 
@@ -188,9 +182,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 		mRecognitionThread.interrupt();
 		mRecognitionThread = null;
+
 		mSceneForRecognizer.release();
-		mGrayGood.release();
-		mGray.release();
 		mRgba.release();
 	}
 
@@ -210,27 +203,27 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	@Override
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
+		boolean flip;
 		mRgba = inputFrame.rgba();
-		mGray = inputFrame.gray();
+		mSceneForRecognizer = inputFrame.gray();
 
-		if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT) {
+		flip = (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT);
+		if (flip)
 			Core.flip(mRgba, mRgba, 1);
-			Core.flip(mGray, mGrayGood, 1);
-			mSceneForRecognizer = mGrayGood;
-		} else {
-			mSceneForRecognizer = mGray;
-		}
-
+		
 		if (multithread) {
 			for (LabelledRect faceAndLabel : mLabelsForDrawer)
-				drawLabel(mRgba, faceAndLabel);
+				drawLabel(mRgba, faceAndLabel, flip);
 		} else {
 			Rect[] facesArray = mFaceDetector.detect(mSceneForRecognizer);
+						
 			mLabelsForDrawer = recognizeFaces(facesArray);
 
 			for (LabelledRect faceAndLabel : mLabelsForDrawer)
-				drawLabel(mRgba, faceAndLabel);
+				drawLabel(mRgba, faceAndLabel, flip);
 		}
+
+
 		return mRgba;
 	}
 
@@ -254,14 +247,10 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 					continue;
 				}
 
-				if (distance[0] < mDistanceThreshold) {
-
+				if (distance[0] < mDistanceThreshold)
 					recognizedPeople[i] = new LabelledRect(faceRect,
 							guess.getName(), getThumbnail(predictedLabel[0]));
-
-					Log.d(TAG, "Prediction: " + guess.getName() + " ("
-							+ distance[0] + ")");
-				} else
+				else
 					recognizedPeople[i] = new LabelledRect(faceRect,
 							guess.getName()
 									+ " "
@@ -277,7 +266,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		return recognizedPeople;
 	}
 
-	private void drawLabel(Mat frame, LabelledRect info) {
+	private void drawLabel(Mat frame, LabelledRect info, boolean flip) {
 		if (info == null)
 			return;
 
@@ -285,6 +274,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				: FACE_RECT_COLOR;
 
 		// Bounding box
+		if (flip)
+			info.rect.x = frame.cols() - (info.rect.x + info.rect.width);
 		Core.rectangle(frame, info.rect.tl(), info.rect.br(), color, 3);
 
 		if (info.text == null)

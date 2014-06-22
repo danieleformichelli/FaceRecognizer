@@ -138,9 +138,6 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 	public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
 		mRgba = inputFrame.rgba();
 
-		if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT)
-			Core.flip(mRgba, mRgba, 1);
-
 		if (mTakePhotoNow) {
 			Bitmap bmp = Bitmap.createBitmap(mRgba.cols(), mRgba.rows(),
 					Bitmap.Config.ARGB_8888);
@@ -154,12 +151,17 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 				mProgressDialog.dismiss();
 				setResult(Activity.RESULT_OK);
 				finish();
+				if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT)
+					Core.flip(mRgba, mRgba, 1);
 				return mRgba;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 
+		if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT)
+			Core.flip(mRgba, mRgba, 1);
+		
 		mGray = inputFrame.gray();
 		if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT) {
 			Mat flippedGrey = mGray;
