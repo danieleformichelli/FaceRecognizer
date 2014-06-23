@@ -18,6 +18,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
+import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
@@ -28,7 +29,6 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnDismissListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -384,21 +384,12 @@ public class FaceDetectionActivity extends Activity {
 		}
 	}
 
-	private void loadScene() {
-		Bitmap sceneBitmap = BitmapFactory.decodeFile(mSceneFile
-				.getAbsolutePath());
-		mScene = new Mat();
-		Utils.bitmapToMat(sceneBitmap, mScene);
-	}
-
 	private Bitmap[] detectFaces() {
-		loadScene();
-
-		Mat gray = new Mat();
-
-		Imgproc.cvtColor(mScene, gray, Imgproc.COLOR_RGB2GRAY);
-
-		Rect[] faceRegions = mFaceDetector.detect(gray);
+		
+		mScene = Highgui.imread(mSceneFile.getAbsolutePath(),
+				Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+		
+		Rect[] faceRegions = mFaceDetector.detect(mScene);
 
 		Bitmap[] detectedFaces = new Bitmap[faceRegions.length];
 
