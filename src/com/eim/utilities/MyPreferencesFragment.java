@@ -22,9 +22,8 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	private PreferenceScreen mPreferenceScreen;
 	private String oldValue;
 
-	private String recognizerTypeKey, recognitionThresholdKey, lbphRadiusKey, lbphNeighborsKey, lbphGridXKey, lbphGridYKey,
-			eigenComponentsKey, fisherComponentsKey, clearDatabaseKey,
-			restorePreferencesKey;
+	private String recognitionCategoryKey, detectionCategoryKey,
+			clearDatabaseKey, restorePreferencesKey;
 
 	private enum Validity {
 		VALID, NOT_VALID_RECOGNITION_THRESHOLD, NOT_VALID_LBPH_RADIUS, NOT_VALID_LBPH_NEIGHBOURS, NOT_VALID_LBPH_GRID, NOT_VALID_EIGEN_COMPONENTS, NOT_VALID_FISHER_COMPONENTS, NOT_VALID_DETECTION_SCALE_FACTOR, NOT_VALID_DETECTION_MIN_NEIGHBORS, NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE
@@ -47,17 +46,10 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 		activity = (FaceRecognizerMainActivity) getActivity();
 
-		recognitionThresholdKey = activity.getString(R.string.recognition_threshold);
-		recognizerTypeKey = activity.getString(R.string.recognition_recognizer_type);
-		lbphRadiusKey = activity.getString(R.string.recognition_lbph_radius);
-		lbphNeighborsKey = activity
-				.getString(R.string.recognition_lbph_neighbors);
-		lbphGridXKey = activity.getString(R.string.recognition_lbph_grid_x);
-		lbphGridYKey = activity.getString(R.string.recognition_lbph_grid_y);
-		eigenComponentsKey = activity
-				.getString(R.string.recognition_eigen_components);
-		fisherComponentsKey = activity
-				.getString(R.string.recognition_fisher_components);
+		recognitionCategoryKey = activity
+				.getString(R.string.preference_recognition);
+		detectionCategoryKey = activity
+				.getString(R.string.preference_detection);
 		clearDatabaseKey = activity.getString(R.string.general_clear_database);
 		restorePreferencesKey = activity
 				.getString(R.string.general_restore_default_preferences);
@@ -184,13 +176,22 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		}
 
 		private void signalSettingsChange(String key) {
-			android.util.Log.e("TAG", "Preference changed: " + key);
-			if (key.equals(recognizerTypeKey) || key.equals(recognitionThresholdKey) || key.equals(lbphRadiusKey) || key.equals(lbphNeighborsKey)
-					|| key.equals(lbphGridXKey) || key.equals(lbphGridYKey)
-					|| key.equals(eigenComponentsKey)
-					|| key.equals(fisherComponentsKey))
+			if (hasCategory(key, recognitionCategoryKey))
 				activity.getFacesManagementFragment()
 						.recognitionSettingsChanged();
+
+			if (hasCategory(key, detectionCategoryKey))
+				activity.recreateFaceDetector();
+		}
+
+		private boolean hasCategory(String preferenceKey, String categoryKey) {
+			Preference category = mPreferenceScreen.findPreference(categoryKey);
+
+			if (category == null || !(category instanceof PreferenceCategory))
+				return false;
+
+			return ((PreferenceCategory) category)
+					.findPreference(preferenceKey) != null;
 		}
 
 		private Validity isValid(SharedPreferences sharedPreferences) {

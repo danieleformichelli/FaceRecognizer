@@ -3,7 +3,8 @@
 
     <!-- General -->
 
-    <string name="preference_general">General</string>
+    <string name="preference_general">preference_general</string>
+    <string name="preference_general_title">General</string>
     <string name="general_clear_database">general_clear_data</string>
     <string name="general_clear_database_title">Clear database</string>
     <string name="general_clear_database_confirmation">All people have been removed from database</string>
@@ -14,7 +15,8 @@
 
     <!-- Recognition -->
 
-    <string name="preference_recognition">Recognition</string>
+    <string name="preference_recognition">preference_recognition</string>
+    <string name="preference_recognition_title">Recognition</string>
     <string name="recognition_recognizer_type">recognition_type</string>
     <string name="recognition_recognizer_type_title">Recognition type</string>
     <string name="recognition_recognizer_type_default">LBPH</string>
@@ -31,23 +33,23 @@
     <string name="recognition_lbph_neighbors_title">LBPH neighbours</string>
     <string name="recognition_lbph_neighbors_default">8</string>
     <string name="recognition_lbph_grid_x">recognition_lbph_grid_x</string>
-    <string name="recognition_lbph_grid_x_title">Righe griglia LBPH</string>
+    <string name="recognition_lbph_grid_x_title">LBPH grid columns</string>
     <string name="recognition_lbph_grid_x_default">8</string>
     <string name="recognition_lbph_grid_y">recognition_lbph_grid_y</string>
-    <string name="recognition_lbph_grid_y_title">Colonne griglia LBPH</string>
+    <string name="recognition_lbph_grid_y_title">LBPH grid rows</string>
     <string name="recognition_lbph_grid_y_default">8</string>
     
     <!--  Eigen -->
     
     <string name="recognition_eigen_components">recognition_eigen_components</string>
-    <string name="recognition_eigen_components_title">Eigen components</string>
+    <string name="recognition_eigen_components_title">Eigen components (0 for all)</string>
     <string name="recognition_eigen_components_default">0</string>
 
     
     <!-- Fisher -->
     
     <string name="recognition_fisher_components">recognition_fisher_components</string>
-    <string name="recognition_fisher_components_title">Fisher components</string>
+    <string name="recognition_fisher_components_title">Fisher components (0 for all)</string>
     <string name="recognition_fisher_components_default">0</string>
 
     <!--  Invalid input handler -->
@@ -57,9 +59,7 @@
     <string name="recognition_lbph_invalid_neighbours">The neighbours number must be greater than zero</string>
     <string name="recognition_lbph_invalid_grid">The grid sizes must be positive</string>
     <string name="recognition_eigen_invalid_components">The components number cannot be negative</string>
-    <string name="recognition_eigen_invalid_threshold">The components number cannot be negative</string>
     <string name="recognition_fisher_invalid_components">The components number cannot be negative</string>
-    <string name="recognition_fisher_invalid_threshold">The components number cannot be negative</string>
     
     <string-array name="recognition_recognizer_type_entries">
         <item>Local Binary Pattern Histogram</item>
@@ -74,7 +74,8 @@
 
     <!-- Detection -->
 
-    <string name="preference_detection">Detection</string>
+    <string name="preference_detection">preference_detection</string>
+    <string name="preference_detection_title">Detection</string>
     <string name="detection_detector_type">detector_type</string>
     <string name="detection_detector_type_title">Detector type</string>
     <string name="detection_detector_type_default">NATIVE</string>
@@ -127,7 +128,6 @@
 
     <!-- Management -->
 
-    <string name="preference_management">Management</string>
     <string name="management_number_of_gallery_columns_landscape">management_number_of_gallery_columns_landscape</string>
     <string name="management_number_of_gallery_columns_landscape_default">5</string>
     <string name="management_number_of_gallery_columns_landscape_title">Number of gallery columns landscape</string>

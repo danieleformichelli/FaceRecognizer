@@ -354,44 +354,9 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	}
 
 	private void setupFaceRecognition() {
-		final EIMPreferences mPreferences = EIMPreferences
-				.getInstance(activity);
+		mFaceDetector = activity.getFaceDetector();
 
-		final FaceDetector.Type type = mPreferences.detectorType();
-		final FaceDetector.Classifier classifier = mPreferences
-				.detectorClassifier();
-		final double scaleFactor = mPreferences.detectionScaleFactor();
-		final int minNeighbors = mPreferences.detectionMinNeighbors();
-		final double minRelativeFaceSize = mPreferences
-				.detectionMinRelativeFaceSize();
-		final double maxRelativeFaceSize = mPreferences
-				.detectionMaxRelativeFaceSize();
-
-		mFaceDetector = new FaceDetector(activity, type, classifier,
-				scaleFactor, minNeighbors, minRelativeFaceSize,
-				maxRelativeFaceSize);
-
-		final EIMFaceRecognizer.Type mRecognitionType = mPreferences
-				.recognitionType();
-
-		switch (mRecognitionType) {
-		case LBPH:
-			final int radius = mPreferences.LBPHRadius();
-			final int neighbours = mPreferences.LBPHNeighbours();
-			final int gridX = mPreferences.LBPHGridX();
-			final int gridY = mPreferences.LBPHGridY();
-			mFaceRecognizer = new EIMFaceRecognizer(activity, mRecognitionType,
-					radius, neighbours, gridX, gridY);
-			break;
-		case EIGEN:
-		case FISHER:
-			final int components = mPreferences.EigenComponents();
-			mFaceRecognizer = new EIMFaceRecognizer(activity, mRecognitionType,
-					components);
-			break;
-		default:
-			throw new IllegalArgumentException("invalid recognition type");
-		}
+		mFaceRecognizer = activity.getFaceRecognizer();
 	}
 
 	public class LabelledRect {

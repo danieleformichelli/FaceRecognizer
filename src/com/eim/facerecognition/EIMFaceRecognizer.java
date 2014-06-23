@@ -118,9 +118,6 @@ public class EIMFaceRecognizer {
 			lbphGridX = params[2];
 			lbphGridY = params[3];
 
-			Log.e(TAG, lbphRadius + ", " + lbphNeighbours + ", " + lbphGridX
-					+ ", " + lbphGridY);
-
 			mFaceRecognizer = new LBPHFaceRecognizer(lbphRadius,
 					lbphNeighbours, lbphGridX, lbphGridY, Double.MAX_VALUE);
 			break;
@@ -180,7 +177,7 @@ public class EIMFaceRecognizer {
 	 * @param label
 	 *            the id of the person related to the new face
 	 */
-	private void _incrementalTrain(String newFacePath, int label) {
+	public void incrementalTrain(String newFacePath, int label) {
 		if (!mRecognizerType.isIncrementable())
 			throw new IllegalStateException("Face detector of type "
 					+ mRecognizerType.toString()
@@ -217,7 +214,7 @@ public class EIMFaceRecognizer {
 		labels.release();
 	}
 
-	public void incrementalTrain(Activity activity, String newFacePath,
+	public void incrementalTrainWithLoading(Activity activity, String newFacePath,
 			int label) {
 		final String mNewFacePath = newFacePath;
 		final int mLabel = label;
@@ -227,7 +224,7 @@ public class EIMFaceRecognizer {
 
 		(new Thread() {
 			public void run() {
-				_incrementalTrain(mNewFacePath, mLabel);
+				incrementalTrain(mNewFacePath, mLabel);
 				mActivity.runOnUiThread(new Runnable() {
 					public void run() {
 						mProgressDialog.dismiss();
@@ -245,7 +242,7 @@ public class EIMFaceRecognizer {
 	 *            faces dataset, keys are the labels and faces are contained in
 	 *            the field Photos of the value
 	 */
-	private void _train(SparseArray<Person> people) {
+	public void train(SparseArray<Person> people) {
 		if (!isDatasetValid(people)) {
 			resetModel();
 			return;
@@ -312,7 +309,7 @@ public class EIMFaceRecognizer {
 		labelsMat.release();
 	}
 
-	public void train(Activity activity, SparseArray<Person> people) {
+	public void trainWithLoading(Activity activity, SparseArray<Person> people) {
 		final SparseArray<Person> mPeople = people;
 		final ProgressDialog mProgressDialog = ProgressDialog.show(activity,
 				"", "Training...", true);
@@ -320,7 +317,7 @@ public class EIMFaceRecognizer {
 
 		(new Thread() {
 			public void run() {
-				_train(mPeople);
+				train(mPeople);
 				mActivity.runOnUiThread(new Runnable() {
 					public void run() {
 						mProgressDialog.dismiss();

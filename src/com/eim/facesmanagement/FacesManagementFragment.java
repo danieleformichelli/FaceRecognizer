@@ -27,7 +27,6 @@ import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;
 import com.eim.utilities.FaceRecognizerMainActivity;
 import com.eim.utilities.FaceRecognizerMainActivity.OnOpenCVLoaded;
-import com.eim.utilities.EIMPreferences;
 import com.eim.utilities.PhotoAdapter;
 import com.eim.utilities.Swipeable;
 
@@ -88,17 +87,15 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 	@Override
 	public void onOpenCVLoaded() {
 		if (activity != null && getUserVisibleHint()) {
+			setupFaceRecognizer();
 			if (retrainModel)
 				retrainRecognizer();
-			else
-				setupFaceRecognizer();
 		}
 	}
 
 	private void retrainRecognizer() {
-		EIMFaceRecognizer.deleteModelFromDisk(activity);
-		setupFaceRecognizer();
-		mFaceRecognizer.train(activity, mPeopleAdapter.getPeople());
+		mFaceRecognizer = activity.recreateFaceRecognizer();
+		mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
 		retrainModel = false;
 	}
 
@@ -114,31 +111,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 	}
 
 	private void setupFaceRecognizer() {
-		EIMPreferences mPreferences = EIMPreferences.getInstance(activity);
-		EIMFaceRecognizer.Type mRecognitionType = mPreferences
-				.recognitionType();
-
-		switch (mRecognitionType) {
-		case LBPH:
-			int radius = mPreferences.LBPHRadius();
-			int neighbours = mPreferences.LBPHNeighbours();
-			int gridX = mPreferences.LBPHGridX();
-			int gridY = mPreferences.LBPHGridY();
-			mFaceRecognizer = new EIMFaceRecognizer(activity, mRecognitionType,
-					radius, neighbours, gridX, gridY);
-			break;
-		case EIGEN:
-			int eigenComponents = mPreferences.EigenComponents();
-			mFaceRecognizer = new EIMFaceRecognizer(activity, mRecognitionType,
-					eigenComponents);
-		case FISHER:
-			int fisherComponents = mPreferences.EigenComponents();
-			mFaceRecognizer = new EIMFaceRecognizer(activity, mRecognitionType,
-					fisherComponents);
-			break;
-		default:
-			throw new IllegalArgumentException("invalid recognition type");
-		}
+		mFaceRecognizer = activity.getFaceRecognizer();
 	}
 
 	OnClickListener addPersonListener = new OnClickListener() {
@@ -236,7 +209,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			mPeopleDatabase.removePerson(id);
 
 			// A person has been removed: retrain the entire network
-			mFaceRecognizer.train(activity, mPeopleAdapter.getPeople());
+			mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
 		}
 
 		@Override
@@ -247,10 +220,10 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 
 			// A photo has been added: incrementally train the network
 			if (mFaceRecognizer.getType().isIncrementable())
-				mFaceRecognizer.incrementalTrain(activity, photo.getUrl(),
+				mFaceRecognizer.incrementalTrainWithLoading(activity, photo.getUrl(),
 						personId);
 			else
-				mFaceRecognizer.train(activity, mPeopleAdapter.getPeople());
+				mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
 		}
 
 		@Override
@@ -259,7 +232,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			mPeopleDatabase.removePhoto(personId, photoId);
 
 			// A photo has been removed: retrain the entire network
-			mFaceRecognizer.train(activity, mPeopleAdapter.getPeople());
+			mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
 		}
 	};
 

@@ -3,7 +3,7 @@
 
     <!-- General -->
 
-    <string name="preference_general">Generali</string>
+    <string name="preference_general_title">Generali</string>
     <string name="general_clear_database_title">Svuota database</string>
     <string name="general_clear_database_confirmation">Tutte le persone sono state rimosse dal database</string>
     <string name="general_restore_default_preferences_title">Ripristina impostazioni predefinite</string>
@@ -15,13 +15,28 @@
 
     <!-- Recognition -->
 
-    <string name="preference_recognition">Riconoscimento</string>
+    <string name="preference_recognition_title">Riconoscimento</string>
     <string name="recognition_recognizer_type_title">Tipo di riconoscitore</string>
-    <string name="recognition_invalid_threshold">La soglia di riconoscimento deve essere nell\'intervallo [0, 5000]</string>
     
+    <!--  LBPH -->
+    
+    <string name="recognition_lbph_radius_title">Raggio LBPH</string>
+    <string name="recognition_lbph_neighbors_title">Numero di vicini LBPH</string>
+    <string name="recognition_lbph_grid_x_title">Colonne della griglia LBPH</string>
+    <string name="recognition_lbph_grid_y">recognition_lbph_grid_y</string>
+    <string name="recognition_lbph_grid_y_title">Righe della griglia LBPH</string>
+    
+    <!--  Invalid input handler -->
+    
+    <string name="recognition_invalid_threshold">La soglia di riconoscimento deve essere nell\'intervallo [0, 5000]</string>
+    <string name="recognition_lbph_invalid_radius">Il raggio deve essere maggiore di zero</string>
+    <string name="recognition_lbph_invalid_neighbours">Il numero di vicini deve essere maggiore di zero</string>
+    <string name="recognition_lbph_invalid_grid">La dimensione della griglia deve essere maggiore di zero</string>
+    <string name="recognition_eigen_invalid_components">Il numero di componenti non può essere negativo</string>
+    <string name="recognition_fisher_invalid_components">Il numero di componenti non può essere negativo</string>
     <!-- Detection -->
 	
-    <string name="preference_detection">Detection</string>
+    <string name="preference_detection_title">Detection</string>
     <string name="detection_detector_type_title">Tipo di detector</string>
 	<string-array name="detection_detector_type_entries">
 	    <item>Java</item>
