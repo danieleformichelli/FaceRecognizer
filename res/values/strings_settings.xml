@@ -21,6 +21,9 @@
     <string name="recognition_threshold">recognition_threshold</string>
     <string name="recognition_threshold_title">Recognition threshold</string>
     <string name="recognition_threshold_default">100</string>
+    
+    <!--  LBPH -->
+    
     <string name="recognition_lbph_radius">recognition_lbph_radius</string>
     <string name="recognition_lbph_radius_title">LBPH radius</string>
     <string name="recognition_lbph_radius_default">1</string>
@@ -33,19 +36,31 @@
     <string name="recognition_lbph_grid_y">recognition_lbph_grid_y</string>
     <string name="recognition_lbph_grid_y_title">Colonne griglia LBPH</string>
     <string name="recognition_lbph_grid_y_default">8</string>
+    
+    <!--  Eigen -->
+    
     <string name="recognition_eigen_components">recognition_eigen_components</string>
     <string name="recognition_eigen_components_title">Eigen components</string>
     <string name="recognition_eigen_components_default">0</string>
+
+    
+    <!-- Fisher -->
+    
     <string name="recognition_fisher_components">recognition_fisher_components</string>
     <string name="recognition_fisher_components_title">Fisher components</string>
     <string name="recognition_fisher_components_default">0</string>
+
+    <!--  Invalid input handler -->
+    
     <string name="recognition_invalid_threshold">The threshold must be in the range [0,5000]</string>
     <string name="recognition_lbph_invalid_radius">The radius must be greater than zero</string>
     <string name="recognition_lbph_invalid_neighbours">The neighbours number must be greater than zero</string>
     <string name="recognition_lbph_invalid_grid">The grid sizes must be positive</string>
     <string name="recognition_eigen_invalid_components">The components number cannot be negative</string>
+    <string name="recognition_eigen_invalid_threshold">The components number cannot be negative</string>
     <string name="recognition_fisher_invalid_components">The components number cannot be negative</string>
-
+    <string name="recognition_fisher_invalid_threshold">The components number cannot be negative</string>
+    
     <string-array name="recognition_recognizer_type_entries">
         <item>Local Binary Pattern Histogram</item>
         <item>Eigen Faces</item>

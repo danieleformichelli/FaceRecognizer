@@ -34,6 +34,16 @@
             android:inputType="number"
             android:key="@string/recognition_lbph_grid_y"
             android:title="@string/recognition_lbph_grid_y_title" />
+        <EditTextPreference 
+            android:title="@string/recognition_eigen_components_title" 
+            android:key="@string/recognition_eigen_components" 
+            android:defaultValue="@string/recognition_eigen_components_default"
+            android:inputType="number"/>
+        <EditTextPreference 
+            android:title="@string/recognition_fisher_components_title" 
+            android:key="@string/recognition_fisher_components" 
+            android:defaultValue="@string/recognition_fisher_components_default"
+            android:inputType="number"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_detection" >
         <ListPreference

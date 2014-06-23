@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 public class EIMPreferences {
+	
 	private static EIMPreferences instance;
 
 	private SharedPreferences mSharedPreferences;
@@ -168,6 +169,7 @@ public class EIMPreferences {
 		return Integer.parseInt(mSharedPreferences.getString(
 				FisherComponentsKey, FisherComponentsDefault));
 	}
+	
 
 	private void getKeysAndDefaultValues(Context mContext) {
 		detectionScaleFactorKey = mContext

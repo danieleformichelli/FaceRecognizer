@@ -38,11 +38,24 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	private String detectorClassifierKey, detectorTypeKey, classifierKey,
 			scaleFactorKey, minNeighborsKey, minRelativeFaceSizeKey,
 			maxRelativeFaceSizeKey, LBPHRadiusKey, LBPHNeighboursKey,
-			LBPHGridXKey, LBPHGridYKey, EigenComponentsKey,
+			LBPHGridXKey, LBPHGridYKey, EigenComponentsKey, 
 			FisherComponentsKey;
 
 	private enum Validity {
-		VALID, NOT_VALID_RECOGNITION_THRESHOLD, NOT_VALID_LBPH_RADIUS, NOT_VALID_LBPH_NEIGHBOURS, NOT_VALID_LBPH_GRID, NOT_VALID_EIGEN_COMPONENTS, NOT_VALID_FISHER_COMPONENTS, NOT_VALID_DETECTION_SCALE_FACTOR, NOT_VALID_DETECTION_MIN_NEIGHBORS, NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE
+		VALID, 
+		NOT_VALID_RECOGNITION_THRESHOLD, 
+		NOT_VALID_LBPH_RADIUS, 
+		NOT_VALID_LBPH_NEIGHBOURS, 
+		NOT_VALID_LBPH_GRID, 
+		NOT_VALID_EIGEN_COMPONENTS, 
+		NOT_VALID_FISHER_COMPONENTS, 
+		NOT_VALID_DETECTION_SCALE_FACTOR, 
+		NOT_VALID_DETECTION_MIN_NEIGHBORS, 
+		NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, 
+		NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, 
+		NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, 
+		NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, 
+		NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE
 	}
 
 	@Override
@@ -78,6 +91,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	}
 
 	private void getInstances() {
+		
 		mPeopleDatabase = PeopleDatabase.getInstance(activity);
 		mFaceDetector = FaceDetector.getInstance(activity);
 		mPreferences = EIMPreferences.getInstance(activity);
@@ -85,6 +99,8 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		EIMFaceRecognizer.Type mRecognitionType = mPreferences
 				.recognitionType();
 
+		int components;
+		
 		switch (mRecognitionType) {
 		case LBPH:
 			int radius = mPreferences.LBPHRadius();
@@ -95,10 +111,15 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 					mRecognitionType, radius, neighbours, gridX, gridY);
 			break;
 		case EIGEN:
-		case FISHER:
-			int components = mPreferences.EigenComponents();
+			components = mPreferences.EigenComponents();
 			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
 					mRecognitionType, components);
+			break;
+		case FISHER:
+			components = mPreferences.FisherComponents();
+			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
+					mRecognitionType, components);
+			
 			break;
 		default:
 			throw new IllegalArgumentException("invalid recognition type");
@@ -271,7 +292,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 			if (mPreferences.FisherComponents() < 0)
 				return Validity.NOT_VALID_FISHER_COMPONENTS;
-
+			
 			if (mPreferences.detectionScaleFactor() <= 1)
 				return Validity.NOT_VALID_DETECTION_SCALE_FACTOR;
 
