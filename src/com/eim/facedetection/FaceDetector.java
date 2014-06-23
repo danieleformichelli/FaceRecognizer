@@ -48,6 +48,13 @@ public class FaceDetector {
 	public FaceDetector(Context context, Type detectorType,
 			Classifier classifier, double scaleFactor, int minNeighbors,
 			double minRelativeFaceSize, double maxRelativeFaceSize) {
+		if (context == null)
+			throw new IllegalArgumentException("context cannot be null");
+		if (detectorType == null)
+			throw new IllegalArgumentException("detectorType cannot be null");
+		if (classifier == null)
+			throw new IllegalArgumentException("classifier cannot be null");
+
 		mContext = context;
 		mDetectorType = detectorType;
 		mClassifier = classifier;
@@ -58,15 +65,21 @@ public class FaceDetector {
 
 		loadCascadeFile();
 
-		mJavaDetector = new CascadeClassifier(mCascadeFile.getAbsolutePath());
+		switch (mDetectorType) {
+		case JAVA:
+			mJavaDetector = new CascadeClassifier(
+					mCascadeFile.getAbsolutePath());
 
-		if (mJavaDetector.empty())
-			throw new IllegalArgumentException(
-					"Failed to load cascade classifier "
-							+ classifier.toString());
-
-		mNativeDetector = new DetectionBasedTracker(
-				mCascadeFile.getAbsolutePath(), 0);
+			if (mJavaDetector.empty())
+				throw new IllegalArgumentException(
+						"Failed to load cascade classifier "
+								+ classifier.toString());
+			break;
+		case NATIVE:
+			mNativeDetector = new DetectionBasedTracker(
+					mCascadeFile.getAbsolutePath(), 0);
+			break;
+		}
 	}
 
 	private void loadCascadeFile() {
@@ -126,18 +139,23 @@ public class FaceDetector {
 		if (mMinAbsoluteFaceSize == null) {
 			double minWidth = scene.cols() * mMinRelativeFaceSize;
 			double minHeight = scene.rows() * mMinRelativeFaceSize;
-			mMinAbsoluteFaceSize = new Size(minWidth, minHeight);
 
-			if (minWidth < minHeight)
-				mNativeDetector.setMinFaceSize((int) minWidth);
-			else
-				mNativeDetector.setMinFaceSize((int) minHeight);
+			switch (mDetectorType) {
+			case JAVA:
+				mMinAbsoluteFaceSize = new Size(minWidth, minHeight);
+
+				double maxWidth = scene.cols() * mMaxRelativeFaceSize;
+				double maxHeight = scene.rows() * mMaxRelativeFaceSize;
+				mMaxAbsoluteFaceSize = new Size(maxWidth, maxHeight);
+				break;
+			case NATIVE:
+				if (minWidth < minHeight)
+					mNativeDetector.setMinFaceSize((int) minWidth);
+				else
+					mNativeDetector.setMinFaceSize((int) minHeight);
+				break;
+			}
 		}
-
-		if (mMaxAbsoluteFaceSize == null)
-			mMinAbsoluteFaceSize = new Size(
-					scene.cols() * mMaxRelativeFaceSize, scene.rows()
-							* mMaxRelativeFaceSize);
 
 		switch (mDetectorType) {
 		case JAVA:
