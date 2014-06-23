@@ -226,9 +226,9 @@ public class EIMPreferences {
 				.getString(R.string.recognition_lbph_radius_default);
 
 		LBPHNeighboursKey = mContext
-				.getString(R.string.recognition_lbph_neighbours);
+				.getString(R.string.recognition_lbph_neighbors);
 		LBPHNeighboursDefault = mContext
-				.getString(R.string.recognition_lbph_neighbours_default);
+				.getString(R.string.recognition_lbph_neighbors_default);
 
 		LBPHGridXKey = mContext.getString(R.string.recognition_lbph_grid_y);
 		LBPHGridXDefault = mContext

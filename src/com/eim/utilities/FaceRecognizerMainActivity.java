@@ -33,6 +33,7 @@ public class FaceRecognizerMainActivity extends Activity {
 	private FaceRecognitionFragment mFaceRecognitionFragment;
 	private FacesManagementFragment mFacesManagementFragment;
 	private MyPreferencesFragment mPreferencesFragment;
+	private boolean isOpenCVLoaded;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,20 +62,26 @@ public class FaceRecognizerMainActivity extends Activity {
 		mViewPager.setOnPageChangeListener(mOnPageChangeListener);
 
 		currentPosition = 0;
+	}
 
+	@Override
+	public void onResume() {
+		super.onResume();
+		isOpenCVLoaded = false;
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, this,
 				new BaseLoaderCallback(this) {
 					@Override
 					public void onManagerConnected(int status) {
 						switch (status) {
 						case LoaderCallbackInterface.SUCCESS:
-							Log.i(TAG, "OpenCV loaded successfully");
+							System.loadLibrary("facerecognizer");
+							System.loadLibrary("nativedetector");
+							isOpenCVLoaded = true;
 							mFaceRecognitionFragment.onOpenCVLoaded();
 							mFacesManagementFragment.onOpenCVLoaded();
-							mPreferencesFragment.onOpenCVLoaded();
 							break;
 						default:
-							Log.i(TAG, "OpenCV connection error: " + status);
+							Log.e(TAG, "OpenCV connection error: " + status);
 							super.onManagerConnected(status);
 						}
 					}
@@ -137,5 +144,9 @@ public class FaceRecognizerMainActivity extends Activity {
 
 	public FacesManagementFragment getFacesManagementFragment() {
 		return mFacesManagementFragment;
+	}
+
+	public boolean isOpenCVLoaded() {
+		return isOpenCVLoaded;
 	}
 };

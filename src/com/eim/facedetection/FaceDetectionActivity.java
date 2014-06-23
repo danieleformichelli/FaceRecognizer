@@ -42,6 +42,7 @@ import android.widget.GridView;
 
 import com.eim.R;
 import com.eim.facesmanagement.peopledb.Photo;
+import com.eim.utilities.EIMPreferences;
 import com.eim.utilities.PhotoAdapter;
 
 public class FaceDetectionActivity extends Activity {
@@ -55,15 +56,15 @@ public class FaceDetectionActivity extends Activity {
 	public static final String PERSON_NAME = "personName";
 	public static final String PHOTO_PATHS = "photoPath";
 
+	private FaceDetector mFaceDetector;
+
 	private File mSceneFile;
 	private Mat mScene;
 
 	private int personId = -1;
 	private String mLabelName = "Unknown";
 
-	private boolean opencvLoaded = false;
-	private boolean photoLoaded = false;
-	private boolean waitingForPhoto = false;
+	private boolean isPhotoReady = false;
 	private boolean mChooserVisible = false;
 
 	private List<String> mFacesResults;
@@ -89,19 +90,14 @@ public class FaceDetectionActivity extends Activity {
 
 		savingFace = getString(R.string.progress_dialog_saving_face);
 
-		if (!waitingForPhoto)
-			showChooserDialog();
+		showChooserDialog();
 	}
 
-	/**
-	 * OpenCV initialization
-	 */
 	@Override
 	public void onResume() {
 		super.onResume();
 
-		// don't load opencv the first time
-		if (!waitingForPhoto)
+		if (!isPhotoReady)
 			return;
 
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, this,
@@ -110,12 +106,10 @@ public class FaceDetectionActivity extends Activity {
 					public void onManagerConnected(int status) {
 						switch (status) {
 						case LoaderCallbackInterface.SUCCESS:
-							Log.i(TAG, "OpenCV loaded successfully");
-							opencvLoaded = true;
 							detectAndProcessFaces();
 							break;
 						default:
-							Log.i(TAG, "OpenCV connection error: " + status);
+							Log.e(TAG, "OpenCV connection error: " + status);
 							super.onManagerConnected(status);
 						}
 					}
@@ -172,9 +166,7 @@ public class FaceDetectionActivity extends Activity {
 					e.printStackTrace();
 				}
 
-				opencvLoaded = false;
-				photoLoaded = false;
-				waitingForPhoto = true;
+				isPhotoReady = false;
 
 				switch (item) {
 				case 0: // take photo from camera
@@ -247,15 +239,14 @@ public class FaceDetectionActivity extends Activity {
 			copyPickedPhoto(data);
 		case REQUEST_TAKE_PHOTO:
 		case REQUEST_TAKE_PHOTO_DETECTION:
-			photoLoaded = true;
-			detectAndProcessFaces();
+			isPhotoReady = true;
+			// detection will be started by opencv async init
 		}
 
 	}
 
 	private void detectAndProcessFaces() {
-		if (!photoLoaded || !opencvLoaded)
-			return;
+		setupFaceDetection();
 
 		Bitmap[] detectedFaces = detectFaces();
 		mSceneFile.delete();
@@ -266,6 +257,24 @@ public class FaceDetectionActivity extends Activity {
 		}
 
 		displayFaceChooser(detectedFaces);
+	}
+
+	private void setupFaceDetection() {
+		final EIMPreferences mPreferences = EIMPreferences.getInstance(this);
+
+		// final FaceDetector.Type type = mPreferences.detectorType(); TODO
+		final FaceDetector.Type type = FaceDetector.Type.JAVA;
+		final FaceDetector.Classifier classifier = mPreferences
+				.detectorClassifier();
+		final double scaleFactor = mPreferences.detectionScaleFactor();
+		final int minNeighbors = mPreferences.detectionMinNeighbors();
+		final double minRelativeFaceSize = mPreferences
+				.detectionMinRelativeFaceSize();
+		final double maxRelativeFaceSize = mPreferences
+				.detectionMaxRelativeFaceSize();
+
+		mFaceDetector = new FaceDetector(this, type, classifier, scaleFactor,
+				minNeighbors, minRelativeFaceSize, maxRelativeFaceSize);
 	}
 
 	@Override
@@ -389,8 +398,6 @@ public class FaceDetectionActivity extends Activity {
 
 		Imgproc.cvtColor(mScene, gray, Imgproc.COLOR_RGB2GRAY);
 
-		FaceDetector mFaceDetector = FaceDetector.getInstance(this);
-		mFaceDetector.resetSizes();
 		Rect[] faceRegions = mFaceDetector.detect(gray);
 
 		Bitmap[] detectedFaces = new Bitmap[faceRegions.length];

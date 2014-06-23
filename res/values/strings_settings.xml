@@ -27,9 +27,9 @@
     <string name="recognition_lbph_radius">recognition_lbph_radius</string>
     <string name="recognition_lbph_radius_title">LBPH radius</string>
     <string name="recognition_lbph_radius_default">1</string>
-    <string name="recognition_lbph_neighbours">recognition_lbph_neighbours</string>
-    <string name="recognition_lbph_neighbours_title">LBPH neighbours</string>
-    <string name="recognition_lbph_neighbours_default">8</string>
+    <string name="recognition_lbph_neighbors">recognition_lbph_neighbours</string>
+    <string name="recognition_lbph_neighbors_title">LBPH neighbours</string>
+    <string name="recognition_lbph_neighbors_default">8</string>
     <string name="recognition_lbph_grid_x">recognition_lbph_grid_x</string>
     <string name="recognition_lbph_grid_x_title">Righe griglia LBPH</string>
     <string name="recognition_lbph_grid_x_default">8</string>

@@ -20,10 +20,10 @@
             android:key="@string/recognition_lbph_radius"
             android:title="@string/recognition_lbph_radius_title" />
         <EditTextPreference
-            android:defaultValue="@string/recognition_lbph_neighbours_default"
+            android:defaultValue="@string/recognition_lbph_neighbors_default"
             android:inputType="number"
-            android:key="@string/recognition_lbph_neighbours"
-            android:title="@string/recognition_lbph_neighbours_title" />
+            android:key="@string/recognition_lbph_neighbors"
+            android:title="@string/recognition_lbph_neighbors_title" />
         <EditTextPreference
             android:defaultValue="@string/recognition_lbph_grid_x_default"
             android:inputType="number"

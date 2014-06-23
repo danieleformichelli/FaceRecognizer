@@ -36,7 +36,9 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 	private static final String TAG = "FacesManagementFragment";
 	private static final int FACE_DETECTION_AND_EXTRACTION = 1;
 
-	private Activity activity;
+	private boolean retrainModel;
+
+	private FaceRecognizerMainActivity activity;
 	private ExpandableListView mPeopleList;
 	private PeopleAdapter mPeopleAdapter;
 	private TextView addPerson, noPeopleMessage;
@@ -44,7 +46,6 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 	private EIMFaceRecognizer mFaceRecognizer;
 
 	private PeopleDatabase mPeopleDatabase;
-	private boolean mOpenCVLoaded = false;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -80,19 +81,35 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		if (mPeopleAdapter.getGroupCount() == 0)
 			noPeopleMessage.setVisibility(View.VISIBLE);
 
-		if (mOpenCVLoaded)
+		if (activity.isOpenCVLoaded() && getUserVisibleHint())
 			setupFaceRecognizer();
 	}
 
 	@Override
 	public void onOpenCVLoaded() {
-		// Due to dynamic linking, LBPHFaceRecognizer cannot be created before
-		// OpenCV library has been loaded,
-		// but due to dependency of Context, cannot be created before
-		// OnActivityCreated()
-		mOpenCVLoaded = true;
+		if (activity != null && getUserVisibleHint()) {
+			if (retrainModel)
+				retrainRecognizer();
+			else
+				setupFaceRecognizer();
+		}
+	}
 
-		if (activity != null)
+	private void retrainRecognizer() {
+		EIMFaceRecognizer.deleteModelFromDisk(activity);
+		setupFaceRecognizer();
+		mFaceRecognizer.train(activity, mPeopleAdapter.getPeople());
+		retrainModel = false;
+	}
+
+	@Override
+	public void swipeOut(boolean toRight) {
+		mFaceRecognizer = null;
+	}
+
+	@Override
+	public void swipeIn(boolean fromRight) {
+		if (activity.isOpenCVLoaded())
 			setupFaceRecognizer();
 	}
 
@@ -107,26 +124,21 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			int neighbours = mPreferences.LBPHNeighbours();
 			int gridX = mPreferences.LBPHGridX();
 			int gridY = mPreferences.LBPHGridY();
-			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
-					mRecognitionType, radius, neighbours, gridX, gridY);
+			mFaceRecognizer = new EIMFaceRecognizer(activity, mRecognitionType,
+					radius, neighbours, gridX, gridY);
 			break;
 		case EIGEN:
+			int eigenComponents = mPreferences.EigenComponents();
+			mFaceRecognizer = new EIMFaceRecognizer(activity, mRecognitionType,
+					eigenComponents);
 		case FISHER:
-			int components = mPreferences.EigenComponents();
-			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
-					mRecognitionType, components);
+			int fisherComponents = mPreferences.EigenComponents();
+			mFaceRecognizer = new EIMFaceRecognizer(activity, mRecognitionType,
+					fisherComponents);
 			break;
 		default:
 			throw new IllegalArgumentException("invalid recognition type");
 		}
-	}
-
-	@Override
-	public void swipeOut(boolean toRight) {
-	}
-
-	@Override
-	public void swipeIn(boolean fromRight) {
 	}
 
 	OnClickListener addPersonListener = new OnClickListener() {
@@ -161,7 +173,17 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		SparseArray<Person> people = mPeopleAdapter.getPeople();
 		for (int i = 0, l = people.size(); i < l; i++)
 			mPeopleAdapterListener.removePerson(people.keyAt(i));
+	}
 
+	/**
+	 * Retrain the model if a parameter is changed
+	 */
+	public void recognitionSettingsChanged() {
+		if (activity.isOpenCVLoaded())
+			retrainRecognizer();
+		else
+			// the model will be trained on opencv load
+			retrainModel = true;
 	}
 
 	PeopleAdapterListener mPeopleAdapterListener = new PeopleAdapterListener() {
@@ -214,8 +236,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			mPeopleDatabase.removePerson(id);
 
 			// A person has been removed: retrain the entire network
-			mFaceRecognizer.trainWithLoading(activity,
-					mPeopleAdapter.getPeople());
+			mFaceRecognizer.train(activity, mPeopleAdapter.getPeople());
 		}
 
 		@Override
@@ -226,11 +247,10 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 
 			// A photo has been added: incrementally train the network
 			if (mFaceRecognizer.getType().isIncrementable())
-				mFaceRecognizer.incrementalTrainWithLoading(activity,
-						photo.getUrl(), personId);
+				mFaceRecognizer.incrementalTrain(activity, photo.getUrl(),
+						personId);
 			else
-				mFaceRecognizer.trainWithLoading(activity,
-						mPeopleAdapter.getPeople());
+				mFaceRecognizer.train(activity, mPeopleAdapter.getPeople());
 		}
 
 		@Override
@@ -239,8 +259,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			mPeopleDatabase.removePhoto(personId, photoId);
 
 			// A photo has been removed: retrain the entire network
-			mFaceRecognizer.trainWithLoading(activity,
-					mPeopleAdapter.getPeople());
+			mFaceRecognizer.train(activity, mPeopleAdapter.getPeople());
 		}
 	};
 

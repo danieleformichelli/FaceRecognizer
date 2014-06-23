@@ -12,7 +12,6 @@ import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import android.app.Activity;
 import android.app.Fragment;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -31,6 +30,7 @@ import com.eim.facedetection.FaceDetector;
 import com.eim.facesmanagement.peopledb.PeopleDatabase;
 import com.eim.facesmanagement.peopledb.Person;
 import com.eim.utilities.EIMPreferences;
+import com.eim.utilities.FaceRecognizerMainActivity;
 import com.eim.utilities.FaceRecognizerMainActivity.OnOpenCVLoaded;
 import com.eim.utilities.Swipeable;
 
@@ -48,11 +48,10 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		EIGEN, FISHER, LBPH
 	}
 
-	private Activity activity;
+	private FaceRecognizerMainActivity activity;
 
 	private ControlledJavaCameraView mCameraView;
 
-	private boolean mOpenCVLoaded = false;
 	private int mCurrentCameraIndex = ControlledJavaCameraView.CAMERA_ID_BACK;
 
 	private Mat mRgba;
@@ -83,7 +82,10 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
-		activity = getActivity();
+		activity = (FaceRecognizerMainActivity) getActivity();
+
+		mPeopleDatabase = PeopleDatabase.getInstance(activity);
+
 		mDistanceThreshold = EIMPreferences.getInstance(activity)
 				.recognitionThreshold();
 
@@ -95,7 +97,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mSwitchButton = (ImageButton) activity
 				.findViewById(R.id.switch_camera_button);
 		mSwitchButton.setOnClickListener(new OnClickListener() {
-
 			@Override
 			public void onClick(View v) {
 				if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_BACK)
@@ -118,9 +119,16 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	}
 
 	@Override
+	public void swipeIn(boolean right) {
+		if (activity.isOpenCVLoaded()) {
+			setupFaceRecognition();
+			mCameraView.enableView();
+		}
+	}
+
+	@Override
 	public void swipeOut(boolean right) {
-		if (mCameraView != null)
-			mCameraView.disableView();
+		mCameraView.disableView();
 
 		if (thumbnails != null) {
 			for (int i = 0, l = thumbnails.size(); i < l; i++)
@@ -128,34 +136,26 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 			thumbnails.clear();
 		}
-	}
 
-	@Override
-	public void swipeIn(boolean right) {
-		if (mFaceDetector != null) // NULL pointer exception at start
-			mFaceDetector.resetSizes();
-		if (mCameraView != null)
-			mCameraView.enableView();
+		mFaceRecognizer = null;
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		if (mOpenCVLoaded && getUserVisibleHint())
+		if (activity.isOpenCVLoaded() && getUserVisibleHint())
 			mCameraView.enableView();
 	}
 
 	@Override
 	public void onPause() {
-		if (mCameraView != null)
+		if (activity.isOpenCVLoaded())
 			mCameraView.disableView();
 
-		mOpenCVLoaded = false;
 		super.onPause();
 	}
 
 	public void onOpenCVLoaded() {
-		mOpenCVLoaded = true;
 		if (mCameraView != null && getUserVisibleHint())
 			mCameraView.enableView();
 	}
@@ -339,7 +339,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		Mat newThumbnail = new Mat();
 
 		double absoluteFaceSize = mHeight
-				* mFaceDetector.getMinRelativeFaceSize();
+				* EIMPreferences.getInstance(activity)
+						.detectionMinRelativeFaceSize();
 		mThumbnailSize = (int) (absoluteFaceSize * 0.6);
 		Core.subtract(thumbnail, new Scalar(0, 0, 0, 100), transparentThumbnail);
 
@@ -353,26 +354,40 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	}
 
 	private void setupFaceRecognition() {
-		mFaceDetector = FaceDetector.getInstance(activity);
-		mPeopleDatabase = PeopleDatabase.getInstance(activity);
-		EIMPreferences mPreferences = EIMPreferences.getInstance(activity);
-		EIMFaceRecognizer.Type mRecognitionType = mPreferences
+		final EIMPreferences mPreferences = EIMPreferences
+				.getInstance(activity);
+
+		final FaceDetector.Type type = mPreferences.detectorType();
+		final FaceDetector.Classifier classifier = mPreferences
+				.detectorClassifier();
+		final double scaleFactor = mPreferences.detectionScaleFactor();
+		final int minNeighbors = mPreferences.detectionMinNeighbors();
+		final double minRelativeFaceSize = mPreferences
+				.detectionMinRelativeFaceSize();
+		final double maxRelativeFaceSize = mPreferences
+				.detectionMaxRelativeFaceSize();
+
+		mFaceDetector = new FaceDetector(activity, type, classifier,
+				scaleFactor, minNeighbors, minRelativeFaceSize,
+				maxRelativeFaceSize);
+
+		final EIMFaceRecognizer.Type mRecognitionType = mPreferences
 				.recognitionType();
 
 		switch (mRecognitionType) {
 		case LBPH:
-			int radius = mPreferences.LBPHRadius();
-			int neighbours = mPreferences.LBPHNeighbours();
-			int gridX = mPreferences.LBPHGridX();
-			int gridY = mPreferences.LBPHGridY();
-			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
-					mRecognitionType, radius, neighbours, gridX, gridY);
+			final int radius = mPreferences.LBPHRadius();
+			final int neighbours = mPreferences.LBPHNeighbours();
+			final int gridX = mPreferences.LBPHGridX();
+			final int gridY = mPreferences.LBPHGridY();
+			mFaceRecognizer = new EIMFaceRecognizer(activity, mRecognitionType,
+					radius, neighbours, gridX, gridY);
 			break;
 		case EIGEN:
 		case FISHER:
-			int components = mPreferences.EigenComponents();
-			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
-					mRecognitionType, components);
+			final int components = mPreferences.EigenComponents();
+			mFaceRecognizer = new EIMFaceRecognizer(activity, mRecognitionType,
+					components);
 			break;
 		default:
 			throw new IllegalArgumentException("invalid recognition type");

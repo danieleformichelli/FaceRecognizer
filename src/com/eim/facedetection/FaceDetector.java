@@ -16,7 +16,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.eim.R;
-import com.eim.utilities.EIMPreferences;
 
 public class FaceDetector {
 	private static final String TAG = "FaceDetector";
@@ -46,32 +45,18 @@ public class FaceDetector {
 	private double mMaxAbsoluteFaceSize = 0;
 	private double mMaxRelativeFaceSize;
 
-	private static FaceDetector instance = null;
+	public FaceDetector(Context context, Type detectorType,
+			Classifier classifier, double scaleFactor, int minNeighbors,
+			double minRelativeFaceSize, double maxRelativeFaceSize) {
 
-	public static FaceDetector getInstance(Context mContext) {
-		if (instance == null)
-			instance = new FaceDetector(mContext.getApplicationContext());
+		mContext = context;
+		mDetectorType = detectorType;
+		mClassifier = classifier;
+		mScaleFactor = scaleFactor;
+		mMinNeighbors = minNeighbors;
+		mMinRelativeFaceSize = minRelativeFaceSize;
+		mMaxRelativeFaceSize = maxRelativeFaceSize;
 
-		return instance;
-	}
-
-	private FaceDetector(Context c) {
-		System.loadLibrary("nativedetector");
-
-		mContext = c;
-		mDetectorType = EIMPreferences.getInstance(c).detectorType();
-		mClassifier = EIMPreferences.getInstance(c).detectorClassifier();
-		mScaleFactor = EIMPreferences.getInstance(c).detectionScaleFactor();
-		mMinNeighbors = EIMPreferences.getInstance(c).detectionMinNeighbors();
-		mMinRelativeFaceSize = EIMPreferences.getInstance(c)
-				.detectionMinRelativeFaceSize();
-		mMaxRelativeFaceSize = EIMPreferences.getInstance(c)
-				.detectionMaxRelativeFaceSize();
-
-		initDetector();
-	}
-
-	private void initDetector() {
 		loadCascadeFile();
 
 		mJavaDetector = new CascadeClassifier(mCascadeFile.getAbsolutePath());
@@ -142,71 +127,11 @@ public class FaceDetector {
 		}
 	}
 
-	public Classifier Classifier() {
-		return mClassifier;
-	}
-
-	public void setClassifier(Classifier classifier) {
-		this.mClassifier = classifier;
-		initDetector();
-	}
-
-	public Type getDetectorType() {
-		return mDetectorType;
-	}
-
-	public void setDetectorType(Type detectorType) {
-		mDetectorType = detectorType;
-	}
-
-	public double getMinRelativeFaceSize() {
-		return mMinRelativeFaceSize;
-	}
-
-	public void setMinRelativeFaceSize(double d) {
-		if (d < 0 || d > 1)
-			throw new IllegalArgumentException(
-					"Argument must be between 0 and 1");
-
-		mMinRelativeFaceSize = d;
-		mMinAbsoluteFaceSize = 0;
-	}
-
-	public double getMaxRelativeFaceSize() {
-		return mMaxRelativeFaceSize;
-	}
-
-	public void setMaxRelativeFaceSize(double d) {
-		if (d > 1 || d < 0)
-			throw new IllegalArgumentException(
-					"Argument must be between 0 and 1");
-
-		mMaxRelativeFaceSize = d;
-		mMaxAbsoluteFaceSize = 0;
-	}
-
-	public double getScaleFactor() {
-		return mScaleFactor;
-	}
-
-	public void setScaleFactor(double mScaleFactor) {
-		this.mScaleFactor = mScaleFactor;
-	}
-
-	public int getMinNeighbors() {
-		return mMinNeighbors;
-	}
-
-	public void setMinNeighbors(int mMinNeighbors) {
-		this.mMinNeighbors = mMinNeighbors;
-	}
-
 	public Rect[] detect(Mat scene) {
 
 		MatOfRect faces = new MatOfRect();
 
 		if (mMinAbsoluteFaceSize == 0) {
-
 			int height = scene.rows();
 			if (Math.round(height * mMinRelativeFaceSize) > 0)
 				mMinAbsoluteFaceSize = Math
@@ -216,7 +141,6 @@ public class FaceDetector {
 		}
 
 		if (mMaxAbsoluteFaceSize == 0) {
-
 			int height = scene.rows();
 			if (Math.round(height * mMaxRelativeFaceSize) > 0)
 				mMaxAbsoluteFaceSize = Math
@@ -238,12 +162,5 @@ public class FaceDetector {
 		}
 
 		return faces.toArray();
-
 	}
-
-	public void resetSizes() {
-		mMinAbsoluteFaceSize = 0;
-		mMaxAbsoluteFaceSize = 0;
-	}
-
 }
