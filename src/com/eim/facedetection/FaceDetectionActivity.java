@@ -19,6 +19,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.highgui.Highgui;
+import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -385,10 +386,16 @@ public class FaceDetectionActivity extends Activity {
 
 	private Bitmap[] detectFaces() {
 		
-		mScene = Highgui.imread(mSceneFile.getAbsolutePath(),
-				Highgui.CV_LOAD_IMAGE_GRAYSCALE);
+		Mat tmp = Highgui.imread(mSceneFile.getAbsolutePath(), Highgui.CV_LOAD_IMAGE_UNCHANGED);
+		Mat mScene = new Mat();
+		Imgproc.cvtColor(tmp, mScene, Imgproc.COLOR_BGR2RGB);
+		tmp.release();
 		
-		Rect[] faceRegions = mFaceDetector.detect(mScene);
+		Mat gray = new Mat();
+
+		Imgproc.cvtColor(mScene, gray, Imgproc.COLOR_RGB2GRAY);
+
+		Rect[] faceRegions = mFaceDetector.detect(gray);
 
 		Bitmap[] detectedFaces = new Bitmap[faceRegions.length];
 
