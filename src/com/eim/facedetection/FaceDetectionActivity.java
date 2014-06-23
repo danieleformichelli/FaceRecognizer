@@ -59,7 +59,6 @@ public class FaceDetectionActivity extends Activity {
 	private FaceDetector mFaceDetector;
 
 	private File mSceneFile;
-	private Mat mScene;
 
 	private int personId = -1;
 	private String mLabelName = "Unknown";
@@ -387,13 +386,13 @@ public class FaceDetectionActivity extends Activity {
 	private Bitmap[] detectFaces() {
 		
 		Mat tmp = Highgui.imread(mSceneFile.getAbsolutePath(), Highgui.CV_LOAD_IMAGE_UNCHANGED);
-		Mat mScene = new Mat();
-		Imgproc.cvtColor(tmp, mScene, Imgproc.COLOR_BGR2RGB);
+		Mat scene = new Mat();
+		Imgproc.cvtColor(tmp, scene, Imgproc.COLOR_BGR2RGB);
 		tmp.release();
 		
 		Mat gray = new Mat();
 
-		Imgproc.cvtColor(mScene, gray, Imgproc.COLOR_RGB2GRAY);
+		Imgproc.cvtColor(scene, gray, Imgproc.COLOR_RGB2GRAY);
 
 		Rect[] faceRegions = mFaceDetector.detect(gray);
 
@@ -402,7 +401,7 @@ public class FaceDetectionActivity extends Activity {
 		Mat subRegion = new Mat();
 
 		for (int i = 0; i < faceRegions.length; i++) {
-			subRegion = mScene.submat(faceRegions[i]);
+			subRegion = scene.submat(faceRegions[i]);
 			detectedFaces[i] = Bitmap.createBitmap(subRegion.cols(),
 					subRegion.rows(), Bitmap.Config.ARGB_8888);
 			Utils.matToBitmap(subRegion, detectedFaces[i]);
