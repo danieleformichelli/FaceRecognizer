@@ -101,7 +101,6 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 
 	@Override
 	public void swipeOut(boolean toRight) {
-		mFaceRecognizer = null;
 	}
 
 	@Override
@@ -207,7 +206,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 				noPeopleMessage.setVisibility(View.VISIBLE);
 
 			mPeopleDatabase.removePerson(id);
-
+	
 			// A person has been removed: retrain the entire network
 			mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
 		}
@@ -230,7 +229,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		public void removePhoto(int personId, int photoId) {
 			mPeopleAdapter.removePhoto(personId, photoId);
 			mPeopleDatabase.removePhoto(personId, photoId);
-
+		
 			// A photo has been removed: retrain the entire network
 			mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
 		}

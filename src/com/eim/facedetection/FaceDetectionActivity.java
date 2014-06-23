@@ -384,11 +384,8 @@ public class FaceDetectionActivity extends Activity {
 	}
 
 	private Bitmap[] detectFaces() {
-		
-		Mat tmp = Highgui.imread(mSceneFile.getAbsolutePath(), Highgui.CV_LOAD_IMAGE_UNCHANGED);
-		Mat scene = new Mat();
-		Imgproc.cvtColor(tmp, scene, Imgproc.COLOR_BGR2RGB);
-		tmp.release();
+		Mat scene = Highgui.imread(mSceneFile.getAbsolutePath(), Highgui.CV_LOAD_IMAGE_UNCHANGED);
+		Imgproc.cvtColor(scene, scene, Imgproc.COLOR_BGR2RGB);
 		
 		Mat gray = new Mat();
 
@@ -407,6 +404,10 @@ public class FaceDetectionActivity extends Activity {
 			Utils.matToBitmap(subRegion, detectedFaces[i]);
 		}
 
+		scene.release();
+		gray.release();
+		subRegion.release();
+		
 		return detectedFaces;
 	}
 }

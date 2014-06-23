@@ -271,6 +271,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 						activity,
 						activity.getString(R.string.general_clear_database_confirmation),
 						Toast.LENGTH_SHORT).show();
+				return true;
 			}
 
 			if (mPreference.getKey().compareTo(restorePreferencesKey) == 0) {
@@ -280,6 +281,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 						activity,
 						activity.getString(R.string.general_restore_default_preferences_confirmation),
 						Toast.LENGTH_SHORT).show();
+				return true;
 			}
 
 			if (mPreference instanceof EditTextPreference) {
@@ -287,7 +289,6 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 				oldValue = mEditTextPreference.getText();
 				mEditTextPreference.getEditText().selectAll();
-				// TODO show the keyboard
 			}
 
 			return false;
