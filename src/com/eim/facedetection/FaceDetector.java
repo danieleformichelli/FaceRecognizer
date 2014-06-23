@@ -39,16 +39,15 @@ public class FaceDetector {
 	private double mScaleFactor;
 	private int mMinNeighbors;
 
-	private long mMinAbsoluteFaceSize = 0;
+	private Size mMinAbsoluteFaceSize;
 	private double mMinRelativeFaceSize;
 
-	private double mMaxAbsoluteFaceSize = 0;
+	private Size mMaxAbsoluteFaceSize;
 	private double mMaxRelativeFaceSize;
 
 	public FaceDetector(Context context, Type detectorType,
 			Classifier classifier, double scaleFactor, int minNeighbors,
 			double minRelativeFaceSize, double maxRelativeFaceSize) {
-
 		mContext = context;
 		mDetectorType = detectorType;
 		mClassifier = classifier;
@@ -61,22 +60,16 @@ public class FaceDetector {
 
 		mJavaDetector = new CascadeClassifier(mCascadeFile.getAbsolutePath());
 
-		if (mJavaDetector.empty()) {
-			Log.e(TAG, "Failed to load cascade classifier");
-			mJavaDetector = null;
-		} else {
-			Log.i(TAG,
-					"Loaded cascade classifier from "
-							+ mCascadeFile.getAbsolutePath());
-		}
+		if (mJavaDetector.empty())
+			throw new IllegalArgumentException(
+					"Failed to load cascade classifier "
+							+ classifier.toString());
 
-		System.loadLibrary("nativedetector");
 		mNativeDetector = new DetectionBasedTracker(
 				mCascadeFile.getAbsolutePath(), 0);
 	}
 
 	private void loadCascadeFile() {
-
 		File cascadeDir = mContext.getDir("cascade", Context.MODE_PRIVATE);
 		mCascadeFile = new File(cascadeDir, mClassifier.toString().toLowerCase(
 				Locale.US)
@@ -128,36 +121,32 @@ public class FaceDetector {
 	}
 
 	public Rect[] detect(Mat scene) {
-
 		MatOfRect faces = new MatOfRect();
 
-		if (mMinAbsoluteFaceSize == 0) {
-			int height = scene.rows();
-			if (Math.round(height * mMinRelativeFaceSize) > 0)
-				mMinAbsoluteFaceSize = Math
-						.round(height * mMinRelativeFaceSize);
+		if (mMinAbsoluteFaceSize == null) {
+			double minWidth = scene.cols() * mMinRelativeFaceSize;
+			double minHeight = scene.rows() * mMinRelativeFaceSize;
+			mMinAbsoluteFaceSize = new Size(minWidth, minHeight);
 
-			mNativeDetector.setMinFaceSize((int) mMinAbsoluteFaceSize);
+			if (minWidth < minHeight)
+				mNativeDetector.setMinFaceSize((int) minWidth);
+			else
+				mNativeDetector.setMinFaceSize((int) minHeight);
 		}
 
-		if (mMaxAbsoluteFaceSize == 0) {
-			int height = scene.rows();
-			if (Math.round(height * mMaxRelativeFaceSize) > 0)
-				mMaxAbsoluteFaceSize = Math
-						.round(height * mMaxRelativeFaceSize);
-		}
+		if (mMaxAbsoluteFaceSize == null)
+			mMinAbsoluteFaceSize = new Size(
+					scene.cols() * mMaxRelativeFaceSize, scene.rows()
+							* mMaxRelativeFaceSize);
 
 		switch (mDetectorType) {
 		case JAVA:
-			if (mJavaDetector != null)
-				mJavaDetector.detectMultiScale(scene, faces, mScaleFactor,
-						mMinNeighbors, 0, new Size(mMinAbsoluteFaceSize,
-								mMinAbsoluteFaceSize), new Size(
-								mMaxAbsoluteFaceSize, mMaxAbsoluteFaceSize));
+			mJavaDetector.detectMultiScale(scene, faces, mScaleFactor,
+					mMinNeighbors, 0, mMinAbsoluteFaceSize,
+					mMaxAbsoluteFaceSize);
 			break;
 		case NATIVE:
-			if (mNativeDetector != null)
-				mNativeDetector.detect(scene, faces);
+			mNativeDetector.detect(scene, faces);
 			break;
 		}
 
