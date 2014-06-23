@@ -118,7 +118,8 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 	private void setupFaceDetection() {
 		final EIMPreferences mPreferences = EIMPreferences.getInstance(this);
 
-		final FaceDetector.Type type = mPreferences.detectorType();
+		// final FaceDetector.Type type = mPreferences.detectorType();
+		final FaceDetector.Type type = FaceDetector.Type.JAVA;
 		final FaceDetector.Classifier classifier = mPreferences
 				.detectorClassifier();
 		final double scaleFactor = mPreferences.detectionScaleFactor();
