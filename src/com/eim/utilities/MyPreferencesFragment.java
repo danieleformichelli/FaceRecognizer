@@ -26,7 +26,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 			clearDatabaseKey, restorePreferencesKey;
 
 	private enum Validity {
-		VALID, NOT_VALID_RECOGNITION_THRESHOLD, NOT_VALID_LBPH_RADIUS, NOT_VALID_LBPH_NEIGHBOURS, NOT_VALID_LBPH_GRID, NOT_VALID_EIGEN_COMPONENTS, NOT_VALID_FISHER_COMPONENTS, NOT_VALID_DETECTION_SCALE_FACTOR, NOT_VALID_DETECTION_MIN_NEIGHBORS, NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE
+		VALID, NOT_VALID_RECOGNITION_THRESHOLD, NOT_VALID_CUTMODE_PERCENTAGE, NOT_VALID_LBPH_RADIUS, NOT_VALID_LBPH_NEIGHBOURS, NOT_VALID_LBPH_GRID, NOT_VALID_EIGEN_COMPONENTS, NOT_VALID_FISHER_COMPONENTS, NOT_VALID_DETECTION_SCALE_FACTOR, NOT_VALID_DETECTION_MIN_NEIGHBORS, NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE
 	}
 
 	@Override
@@ -131,6 +131,9 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				case NOT_VALID_RECOGNITION_THRESHOLD:
 					msgId = R.string.recognition_invalid_threshold;
 					break;
+				case NOT_VALID_CUTMODE_PERCENTAGE:
+					msgId = R.string.recognition_invalid_cutmode_percentage;
+					break;
 				case NOT_VALID_LBPH_RADIUS:
 					msgId = R.string.recognition_lbph_invalid_radius;
 					break;
@@ -201,6 +204,10 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 					|| mPreferences.recognitionThreshold() > 5000)
 				return Validity.NOT_VALID_RECOGNITION_THRESHOLD;
 
+			if (mPreferences.recognitionCutModePercentage() < 0
+					|| mPreferences.recognitionCutModePercentage() > 25)
+				return Validity.NOT_VALID_CUTMODE_PERCENTAGE;
+			
 			if (mPreferences.LBPHRadius() < 1)
 				return Validity.NOT_VALID_LBPH_RADIUS;
 

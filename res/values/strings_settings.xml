@@ -24,14 +24,14 @@
     <string name="recognition_threshold_title">Recognition threshold</string>
     <string name="recognition_threshold_default">100</string>
     <string name="recognition_cutmode">recognition_cutmode</string>
-    <string name="recognition_cutmode_title">Recognition cutmode</string>
-    <string name="recognition_cutmode_default">NO_CUT</string>
+    <string name="recognition_cutmode_title">Cut image</string>
+    <string name="recognition_cutmode_default">HORIZONTAL</string>
     <string name="recognition_cutmode_percentage">recognition_cutmode_percentage</string>
-    <string name="recognition_cutmode_percentage_title">Recognition cutmode percentage</string>
-    <string name="recognition_cutmode_percentage_default">5</string>
-    
-    <!--  LBPH -->
-    
+    <string name="recognition_cutmode_percentage_title">Cut percentage</string>
+    <string name="recognition_cutmode_percentage_default">10</string>
+
+    <!-- LBPH -->
+
     <string name="recognition_lbph_radius">recognition_lbph_radius</string>
     <string name="recognition_lbph_radius_title">LBPH radius</string>
     <string name="recognition_lbph_radius_default">1</string>
@@ -44,31 +44,31 @@
     <string name="recognition_lbph_grid_y">recognition_lbph_grid_y</string>
     <string name="recognition_lbph_grid_y_title">LBPH grid rows</string>
     <string name="recognition_lbph_grid_y_default">8</string>
-    
-    <!--  Eigen -->
-    
+
+    <!-- Eigen -->
+
     <string name="recognition_eigen_components">recognition_eigen_components</string>
     <string name="recognition_eigen_components_title">Eigen components (0 for all)</string>
     <string name="recognition_eigen_components_default">0</string>
 
-    
     <!-- Fisher -->
-    
+
     <string name="recognition_fisher_components">recognition_fisher_components</string>
     <string name="recognition_fisher_components_title">Fisher components (0 for all)</string>
     <string name="recognition_fisher_components_default">0</string>
 
-    <!--  Invalid input handler -->
-    
+    <!-- Invalid input handler -->
+
     <string name="recognition_invalid_threshold">The threshold must be in the range [0,5000]</string>
+    <string name="recognition_invalid_cutmode_percentage">The cut percentage must be in the range [0,25]</string>
     <string name="recognition_lbph_invalid_radius">The radius must be greater than zero</string>
     <string name="recognition_lbph_invalid_neighbours">The neighbours number must be greater than zero</string>
     <string name="recognition_lbph_invalid_grid">The grid sizes must be positive</string>
     <string name="recognition_eigen_invalid_components">The components number cannot be negative</string>
     <string name="recognition_fisher_invalid_components">The components number cannot be negative</string>
-    
+
     <!-- Recognizer Type -->
-    
+
     <string-array name="recognition_recognizer_type_entries">
         <item>Local Binary Pattern Histogram</item>
         <item>Eigen Faces</item>
@@ -79,16 +79,16 @@
         <item>EIGEN</item>
         <item>FISHER</item>
     </string-array>
-    
+
     <!-- Cut mode -->
-    
-    <string-array name="recognition_recognizer_cutmode_entries">
+
+    <string-array name="recognition_cutmode_entries">
         <item>No Cut</item>
         <item>Horizontal Cut</item>
         <item>Vertical Cut</item>
         <item>Total Cut</item>
     </string-array>
-    <string-array name="recognition_recognizer_cutmode_values">
+    <string-array name="recognition_cutmode_values">
         <item>NO_CUT</item>
         <item>HORIZONTAL</item>
         <item>VERTICAL</item>

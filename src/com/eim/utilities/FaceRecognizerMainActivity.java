@@ -160,9 +160,11 @@ public class FaceRecognizerMainActivity extends Activity {
 		final EIMPreferences mPreferences = EIMPreferences.getInstance(this);
 		final EIMFaceRecognizer.Type mRecognitionType = mPreferences
 				.recognitionType();
-		final EIMFaceRecognizer.CutMode mCutMode = mPreferences.
-				recognitionCutMode();
-		
+		final EIMFaceRecognizer.CutMode mCutMode = mPreferences
+				.recognitionCutMode();
+		final int mCutModePercentage = mPreferences
+				.recognitionCutModePercentage();
+
 		switch (mRecognitionType) {
 		case LBPH:
 			final int radius = mPreferences.LBPHRadius();
@@ -170,22 +172,21 @@ public class FaceRecognizerMainActivity extends Activity {
 			final int gridX = mPreferences.LBPHGridX();
 			final int gridY = mPreferences.LBPHGridY();
 			mFaceRecognizer = new EIMFaceRecognizer(this, mRecognitionType,
-					radius, neighbours, gridX, gridY);
+					mCutMode, mCutModePercentage, radius, neighbours, gridX,
+					gridY);
 			break;
 		case EIGEN:
 			final int eigenComponents = mPreferences.EigenComponents();
 			mFaceRecognizer = new EIMFaceRecognizer(this, mRecognitionType,
-					eigenComponents);
+					mCutMode, mCutModePercentage, eigenComponents);
 		case FISHER:
 			final int fisherComponents = mPreferences.FisherComponents();
 			mFaceRecognizer = new EIMFaceRecognizer(this, mRecognitionType,
-					fisherComponents);
+					mCutMode, mCutModePercentage, fisherComponents);
 			break;
 		default:
 			throw new IllegalArgumentException("invalid recognition type");
 		}
-		
-		mFaceRecognizer.setCutMode(mCutMode);
 	}
 
 	public EIMFaceRecognizer getFaceRecognizer() {

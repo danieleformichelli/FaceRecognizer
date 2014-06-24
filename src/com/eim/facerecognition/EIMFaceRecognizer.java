@@ -9,6 +9,7 @@ import org.opencv.contrib.FaceRecognizer;
 import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Rect;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -55,10 +56,9 @@ public class EIMFaceRecognizer {
 			return -1;
 		}
 	}
-	
+
 	public enum CutMode {
 		NO_CUT, HORIZONTAL, VERTICAL, TOTAL
-
 	}
 
 	private boolean isTrained;
@@ -68,14 +68,15 @@ public class EIMFaceRecognizer {
 	private FaceRecognizer mFaceRecognizer;
 	private SharedPreferences mSharedPreferences;
 	private CutMode mCutMode;
-	private double mPercentage;
+	private double mCutPercentage;
 	private int lbphRadius, lbphNeighbours, lbphGridX, lbphGridY;
 	private int eigenComponents;
 	private int fisherComponents;
 
 	private Size size;
 
-	public EIMFaceRecognizer(Context mContext, Type mType, Integer... params) {
+	public EIMFaceRecognizer(Context mContext, Type mType, CutMode mCutMode,
+			int mCutPercentage, Integer... params) {
 		if (mContext == null)
 			throw new IllegalArgumentException("mContext cannot be null");
 		if (mType == null)
@@ -83,6 +84,8 @@ public class EIMFaceRecognizer {
 
 		this.mContext = mContext;
 		mRecognizerType = mType;
+		this.mCutMode = mCutMode;
+		this.mCutPercentage = (100 - mCutPercentage) / 100.0;
 
 		mSharedPreferences = PreferenceManager
 				.getDefaultSharedPreferences(mContext);
@@ -206,6 +209,8 @@ public class EIMFaceRecognizer {
 		if (mRecognizerType.needResize())
 			Imgproc.resize(newFaceMat, newFaceMat, size);
 
+		cutImage(newFaceMat);
+
 		newFaces.add(newFaceMat);
 		labels.put(0, 0, new int[] { label });
 
@@ -221,8 +226,8 @@ public class EIMFaceRecognizer {
 		labels.release();
 	}
 
-	public void incrementalTrainWithLoading(Activity activity, String newFacePath,
-			int label) {
+	public void incrementalTrainWithLoading(Activity activity,
+			String newFacePath, int label) {
 		final String mNewFacePath = newFacePath;
 		final int mLabel = label;
 		final ProgressDialog mProgressDialog = ProgressDialog.show(activity,
@@ -302,6 +307,9 @@ public class EIMFaceRecognizer {
 				Imgproc.resize(face, face, size);
 		}
 
+		for (Mat face : faces)
+			cutImage(face);
+
 		Mat labelsMat = new Mat(labels.size(), 1, CvType.CV_32SC1);
 		int i = 0;
 		for (Integer label : labels)
@@ -354,75 +362,40 @@ public class EIMFaceRecognizer {
 
 	public void predict(Mat src, int[] label, double[] confidence) {
 		if (isTrained) {
+			if (mRecognizerType.needResize())
+				Imgproc.resize(src, src, size);
 			cutImage(src);
-			Mat resized = new Mat();
-			if (mRecognizerType.needResize()) {
-				Imgproc.resize(src, resized, size);
-				mFaceRecognizer.predict(resized, label, confidence);
-				
-			} else
-				mFaceRecognizer.predict(src, label, confidence);
-			resized.release();
+			mFaceRecognizer.predict(src, label, confidence);
 		}
 	}
 
 	private void cutImage(Mat image) {
-		
-		Size s = new Size();
-		
-		Log.i(TAG,"Cut Mode: " + mCutMode.name());
-		/*
-		switch(mCutMode) {
-			case NO_CUT:
-				return;
-			case HORIZONTAL: {
-				Mat tmp = new Mat();
-				s.width = image.size().width * mPercentage;
-				Imgproc.resize(image, tmp, s);
-				image = tmp;
-				tmp.release();
-				return;
-			}
-			case VERTICAL: {
-				Mat tmp = new Mat();
-				s.height = image.size().height * mPercentage;
-				Imgproc.resize(image, tmp, s);
-				image = tmp;
-				tmp.release();
-				return;
-			}
-				
-			case TOTAL: {
-				Mat tmp = new Mat();
-				s.width = image.size().width * mPercentage;
-				s.height = image.size().height * mPercentage;
-				Imgproc.resize(image, tmp, s);
-				image = tmp;
-				tmp.release();
-				return;
-			}
-		}*/
-		
+		Size imageSize = image.size();
+		Rect roi = new Rect();
+
+		switch (mCutMode) {
+		case NO_CUT:
+			return;
+		case HORIZONTAL:
+			roi.width = (int) (imageSize.width * mCutPercentage);
+			roi.height = (int) imageSize.height;
+			break;
+		case VERTICAL:
+			roi.width = (int) imageSize.width;
+			roi.height = (int) (imageSize.height * mCutPercentage);
+			break;
+		case TOTAL:
+			roi.width = (int) (imageSize.width * mCutPercentage);
+			roi.height = (int) (imageSize.height * mCutPercentage);
+			break;
+		}
+
+		roi.x = (image.cols() - roi.width) / 2;
+		roi.y = (image.rows() - roi.height) / 2;
+		image = image.submat(roi);
 	}
-	
+
 	public Type getType() {
 		return mRecognizerType;
 	}
-	
-	public void setCutMode(CutMode cutMode) {
-		mCutMode = cutMode;
-	}
-	
-	public CutMode getCutMode() {
-		return mCutMode;
-	}
-	
-	public void setPercentage(double p) {
-		mPercentage = p/100;
-	}
-	
-	public double getPercentage() {
-		return mPercentage;
-	}
-	
 }

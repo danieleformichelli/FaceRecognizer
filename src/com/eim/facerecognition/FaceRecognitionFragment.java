@@ -236,6 +236,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				int[] predictedLabel = new int[1];
 				double[] distance = new double[1];
 				
+				
 				mFaceRecognizer.predict(face, predictedLabel, distance);
 				face.release();
 				

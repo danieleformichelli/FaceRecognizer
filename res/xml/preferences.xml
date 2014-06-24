@@ -14,6 +14,18 @@
             android:inputType="number"
             android:key="@string/recognition_threshold"
             android:title="@string/recognition_threshold_title" />
+        <ListPreference
+            android:defaultValue="@string/recognition_cutmode_default"
+            android:entries="@array/recognition_cutmode_entries"
+            android:entryValues="@array/recognition_cutmode_values"
+            android:key="@string/recognition_cutmode"
+            android:title="@string/recognition_cutmode_title" />
+
+        <EditTextPreference
+            android:defaultValue="@string/recognition_cutmode_percentage_default"
+            android:inputType="number"
+            android:key="@string/recognition_cutmode_percentage"
+            android:title="@string/recognition_cutmode_percentage_title" />
         <EditTextPreference
             android:defaultValue="@string/recognition_lbph_radius_default"
             android:inputType="number"
