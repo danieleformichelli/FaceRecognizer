@@ -55,6 +55,11 @@ public class EIMFaceRecognizer {
 			return -1;
 		}
 	}
+	
+	public enum CutMode {
+		NO_CUT, HORIZONTAL, VERTICAL, TOTAL
+
+	}
 
 	private boolean isTrained;
 	private String mModelPath;
@@ -62,6 +67,8 @@ public class EIMFaceRecognizer {
 	private Type mRecognizerType;
 	private FaceRecognizer mFaceRecognizer;
 	private SharedPreferences mSharedPreferences;
+	private CutMode mCutMode;
+	private double mPercentage;
 	private int lbphRadius, lbphNeighbours, lbphGridX, lbphGridY;
 	private int eigenComponents;
 	private int fisherComponents;
@@ -347,17 +354,75 @@ public class EIMFaceRecognizer {
 
 	public void predict(Mat src, int[] label, double[] confidence) {
 		if (isTrained) {
+			cutImage(src);
+			Mat resized = new Mat();
 			if (mRecognizerType.needResize()) {
-				Mat resized = new Mat();
 				Imgproc.resize(src, resized, size);
 				mFaceRecognizer.predict(resized, label, confidence);
-				resized.release();
+				
 			} else
 				mFaceRecognizer.predict(src, label, confidence);
+			resized.release();
 		}
 	}
 
+	private void cutImage(Mat image) {
+		
+		Size s = new Size();
+		
+		Log.i(TAG,"Cut Mode: " + mCutMode.name());
+		/*
+		switch(mCutMode) {
+			case NO_CUT:
+				return;
+			case HORIZONTAL: {
+				Mat tmp = new Mat();
+				s.width = image.size().width * mPercentage;
+				Imgproc.resize(image, tmp, s);
+				image = tmp;
+				tmp.release();
+				return;
+			}
+			case VERTICAL: {
+				Mat tmp = new Mat();
+				s.height = image.size().height * mPercentage;
+				Imgproc.resize(image, tmp, s);
+				image = tmp;
+				tmp.release();
+				return;
+			}
+				
+			case TOTAL: {
+				Mat tmp = new Mat();
+				s.width = image.size().width * mPercentage;
+				s.height = image.size().height * mPercentage;
+				Imgproc.resize(image, tmp, s);
+				image = tmp;
+				tmp.release();
+				return;
+			}
+		}*/
+		
+	}
+	
 	public Type getType() {
 		return mRecognizerType;
 	}
+	
+	public void setCutMode(CutMode cutMode) {
+		mCutMode = cutMode;
+	}
+	
+	public CutMode getCutMode() {
+		return mCutMode;
+	}
+	
+	public void setPercentage(double p) {
+		mPercentage = p/100;
+	}
+	
+	public double getPercentage() {
+		return mPercentage;
+	}
+	
 }

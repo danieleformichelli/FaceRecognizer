@@ -160,7 +160,9 @@ public class FaceRecognizerMainActivity extends Activity {
 		final EIMPreferences mPreferences = EIMPreferences.getInstance(this);
 		final EIMFaceRecognizer.Type mRecognitionType = mPreferences
 				.recognitionType();
-
+		final EIMFaceRecognizer.CutMode mCutMode = mPreferences.
+				recognitionCutMode();
+		
 		switch (mRecognitionType) {
 		case LBPH:
 			final int radius = mPreferences.LBPHRadius();
@@ -182,6 +184,8 @@ public class FaceRecognizerMainActivity extends Activity {
 		default:
 			throw new IllegalArgumentException("invalid recognition type");
 		}
+		
+		mFaceRecognizer.setCutMode(mCutMode);
 	}
 
 	public EIMFaceRecognizer getFaceRecognizer() {

@@ -23,6 +23,12 @@
     <string name="recognition_threshold">recognition_threshold</string>
     <string name="recognition_threshold_title">Recognition threshold</string>
     <string name="recognition_threshold_default">100</string>
+    <string name="recognition_cutmode">recognition_cutmode</string>
+    <string name="recognition_cutmode_title">Recognition cutmode</string>
+    <string name="recognition_cutmode_default">NO_CUT</string>
+    <string name="recognition_cutmode_percentage">recognition_cutmode_percentage</string>
+    <string name="recognition_cutmode_percentage_title">Recognition cutmode percentage</string>
+    <string name="recognition_cutmode_percentage_default">5</string>
     
     <!--  LBPH -->
     
@@ -61,6 +67,8 @@
     <string name="recognition_eigen_invalid_components">The components number cannot be negative</string>
     <string name="recognition_fisher_invalid_components">The components number cannot be negative</string>
     
+    <!-- Recognizer Type -->
+    
     <string-array name="recognition_recognizer_type_entries">
         <item>Local Binary Pattern Histogram</item>
         <item>Eigen Faces</item>
@@ -70,6 +78,21 @@
         <item>LBPH</item>
         <item>EIGEN</item>
         <item>FISHER</item>
+    </string-array>
+    
+    <!-- Cut mode -->
+    
+    <string-array name="recognition_recognizer_cutmode_entries">
+        <item>No Cut</item>
+        <item>Horizontal Cut</item>
+        <item>Vertical Cut</item>
+        <item>Total Cut</item>
+    </string-array>
+    <string-array name="recognition_recognizer_cutmode_values">
+        <item>NO_CUT</item>
+        <item>HORIZONTAL</item>
+        <item>VERTICAL</item>
+        <item>TOTAL</item>
     </string-array>
 
     <!-- Detection -->

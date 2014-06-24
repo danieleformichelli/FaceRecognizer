@@ -45,7 +45,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private static int mDistanceThreshold;
 
 	public enum Type {
-		EIGEN, FISHER, LBPH
+		LBPH, FISHER, EIGEN
 	}
 
 	private FaceRecognizerMainActivity activity;
@@ -235,6 +235,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				Mat face = mSceneForRecognizer.submat(faceRect);
 				int[] predictedLabel = new int[1];
 				double[] distance = new double[1];
+				
 				mFaceRecognizer.predict(face, predictedLabel, distance);
 				face.release();
 				
@@ -349,7 +350,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	private void setupFaceRecognition() {
 		mFaceDetector = activity.getFaceDetector();
-
 		mFaceRecognizer = activity.getFaceRecognizer();
 	}
 
@@ -365,6 +365,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		public String text;
 		public Mat thumbnail;
 	}
+	
 
 	@Override
 	public void onProgressChanged(SeekBar arg0, int arg1, boolean arg2) {

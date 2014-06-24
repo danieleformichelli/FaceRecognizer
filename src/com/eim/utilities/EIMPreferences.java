@@ -113,7 +113,31 @@ public class EIMPreferences {
 
 		return null;
 	}
+	
+	private String recognitionCutModeKey;
+	private String recognitionCutModeDefault;
 
+	public EIMFaceRecognizer.CutMode recognitionCutMode() {
+		String mCutMode = mSharedPreferences.getString(recognitionCutModeKey,
+				recognitionCutModeDefault);
+		EIMFaceRecognizer.CutMode[] recognitionCutModes = EIMFaceRecognizer.CutMode
+				.values();
+
+		for (int i = 0; i < recognitionCutModes.length; i++)
+			if (recognitionCutModes[i].toString().equals(mCutMode))
+				return recognitionCutModes[i];
+
+		return null;
+	}
+
+	private String recognitionCutmodePercentageKey;
+	private String recognitionCutmodePercentageDefault;
+
+	public double recognitionCutmodePercentage() {
+		return Double.parseDouble(mSharedPreferences.getString(
+				recognitionCutmodePercentageKey, recognitionCutmodePercentageDefault));
+	}
+	
 	private String recognitionThresholdKey;
 	private String recognitionThresholdDefault;
 
@@ -220,7 +244,17 @@ public class EIMPreferences {
 				.getString(R.string.recognition_threshold);
 		recognitionThresholdDefault = mContext
 				.getString(R.string.recognition_threshold_default);
+		
+		recognitionCutModeKey = mContext
+				.getString(R.string.recognition_cutmode);
+		recognitionCutModeDefault = mContext
+				.getString(R.string.recognition_cutmode_default);
 
+		recognitionThresholdKey = mContext
+				.getString(R.string.recognition_cutmode_percentage);
+		recognitionThresholdDefault = mContext.
+				getString(R.string.recognition_cutmode_percentage_default);
+		
 		LBPHRadiusKey = mContext.getString(R.string.recognition_lbph_radius);
 		LBPHRadiusDefault = mContext
 				.getString(R.string.recognition_lbph_radius_default);
