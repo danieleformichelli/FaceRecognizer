@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
 
-    <PreferenceCategory android:title="@string/preference_recognition" >
+    <PreferenceCategory android:title="@string/preference_recognition_title" android:key="@string/preference_recognition" >
         <ListPreference
             android:defaultValue="@string/recognition_recognizer_type_default"
             android:entries="@array/recognition_recognizer_type_entries"
@@ -20,10 +20,10 @@
             android:key="@string/recognition_lbph_radius"
             android:title="@string/recognition_lbph_radius_title" />
         <EditTextPreference
-            android:defaultValue="@string/recognition_lbph_neighbours_default"
+            android:defaultValue="@string/recognition_lbph_neighbors_default"
             android:inputType="number"
-            android:key="@string/recognition_lbph_neighbours"
-            android:title="@string/recognition_lbph_neighbours_title" />
+            android:key="@string/recognition_lbph_neighbors"
+            android:title="@string/recognition_lbph_neighbors_title" />
         <EditTextPreference
             android:defaultValue="@string/recognition_lbph_grid_x_default"
             android:inputType="number"
@@ -34,18 +34,18 @@
             android:inputType="number"
             android:key="@string/recognition_lbph_grid_y"
             android:title="@string/recognition_lbph_grid_y_title" />
-        <EditTextPreference 
-            android:title="@string/recognition_eigen_components_title" 
-            android:key="@string/recognition_eigen_components" 
+        <EditTextPreference
             android:defaultValue="@string/recognition_eigen_components_default"
-            android:inputType="number"/>
-        <EditTextPreference 
-            android:title="@string/recognition_fisher_components_title" 
-            android:key="@string/recognition_fisher_components" 
+            android:inputType="number"
+            android:key="@string/recognition_eigen_components"
+            android:title="@string/recognition_eigen_components_title" />
+        <EditTextPreference
             android:defaultValue="@string/recognition_fisher_components_default"
-            android:inputType="number"/>
+            android:inputType="number"
+            android:key="@string/recognition_fisher_components"
+            android:title="@string/recognition_fisher_components_title" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/preference_detection" >
+    <PreferenceCategory android:title="@string/preference_detection_title" android:key="@string/preference_detection" >
         <ListPreference
             android:defaultValue="@string/detection_detector_type_default"
             android:entries="@array/detection_detector_type_entries"
@@ -80,7 +80,7 @@
             android:key="@string/detection_max_relative_face_size"
             android:title="@string/detection_max_relative_face_size_title" />
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/preference_general" >
+    <PreferenceCategory android:title="@string/preference_general_title" android:key="@string/preference_general" >
         <EditTextPreference
             android:defaultValue="@string/management_number_of_gallery_columns_landscape_default"
             android:inputType="number"

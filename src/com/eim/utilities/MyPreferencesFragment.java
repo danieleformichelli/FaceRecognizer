@@ -1,6 +1,5 @@
 package com.eim.utilities;
 
-import android.app.Activity;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -16,46 +15,18 @@ import android.preference.SwitchPreference;
 import android.widget.Toast;
 
 import com.eim.R;
-import com.eim.facedetection.FaceDetector;
-import com.eim.facerecognition.EIMFaceRecognizer;
-import com.eim.facesmanagement.peopledb.PeopleDatabase;
-import com.eim.utilities.FaceRecognizerMainActivity.OnOpenCVLoaded;
 
 public class MyPreferencesFragment extends PreferenceFragment implements
-		OnOpenCVLoaded, Swipeable {
-	private Activity activity;
+		Swipeable {
+	private FaceRecognizerMainActivity activity;
 	private PreferenceScreen mPreferenceScreen;
 	private String oldValue;
 
-	private PeopleDatabase mPeopleDatabase;
-	private EIMPreferences mPreferences;
-	private EIMFaceRecognizer mFaceRecognizer;
-	private FaceDetector mFaceDetector;
-	private boolean mOpenCVLoaded = false;
-
-	private String clearDatabaseKey, restorePreferencesKey;
-	private String recognizerTypeKey;
-	private String detectorClassifierKey, detectorTypeKey, classifierKey,
-			scaleFactorKey, minNeighborsKey, minRelativeFaceSizeKey,
-			maxRelativeFaceSizeKey, LBPHRadiusKey, LBPHNeighboursKey,
-			LBPHGridXKey, LBPHGridYKey, EigenComponentsKey, 
-			FisherComponentsKey;
+	private String recognitionCategoryKey, detectionCategoryKey,
+			clearDatabaseKey, restorePreferencesKey;
 
 	private enum Validity {
-		VALID, 
-		NOT_VALID_RECOGNITION_THRESHOLD, 
-		NOT_VALID_LBPH_RADIUS, 
-		NOT_VALID_LBPH_NEIGHBOURS, 
-		NOT_VALID_LBPH_GRID, 
-		NOT_VALID_EIGEN_COMPONENTS, 
-		NOT_VALID_FISHER_COMPONENTS, 
-		NOT_VALID_DETECTION_SCALE_FACTOR, 
-		NOT_VALID_DETECTION_MIN_NEIGHBORS, 
-		NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, 
-		NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, 
-		NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, 
-		NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, 
-		NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE
+		VALID, NOT_VALID_RECOGNITION_THRESHOLD, NOT_VALID_LBPH_RADIUS, NOT_VALID_LBPH_NEIGHBOURS, NOT_VALID_LBPH_GRID, NOT_VALID_EIGEN_COMPONENTS, NOT_VALID_FISHER_COMPONENTS, NOT_VALID_DETECTION_SCALE_FACTOR, NOT_VALID_DETECTION_MIN_NEIGHBORS, NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE
 	}
 
 	@Override
@@ -73,82 +44,12 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
 
-		activity = getActivity();
+		activity = (FaceRecognizerMainActivity) getActivity();
 
-		if (mOpenCVLoaded && mFaceRecognizer == null)
-			// opencv is loaded before the fragment
-			getInstances();
-
-		getKeys();
-	}
-
-	public void onOpenCVLoaded() {
-		mOpenCVLoaded = true;
-
-		if (activity != null)
-			// activity is already loaded
-			getInstances();
-	}
-
-	private void getInstances() {
-		
-		mPeopleDatabase = PeopleDatabase.getInstance(activity);
-		mFaceDetector = FaceDetector.getInstance(activity);
-		mPreferences = EIMPreferences.getInstance(activity);
-
-		EIMFaceRecognizer.Type mRecognitionType = mPreferences
-				.recognitionType();
-
-		int components;
-		
-		switch (mRecognitionType) {
-		case LBPH:
-			int radius = mPreferences.LBPHRadius();
-			int neighbours = mPreferences.LBPHNeighbours();
-			int gridX = mPreferences.LBPHGridX();
-			int gridY = mPreferences.LBPHGridY();
-			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
-					mRecognitionType, radius, neighbours, gridX, gridY);
-			break;
-		case EIGEN:
-			components = mPreferences.EigenComponents();
-			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
-					mRecognitionType, components);
-			break;
-		case FISHER:
-			components = mPreferences.FisherComponents();
-			mFaceRecognizer = EIMFaceRecognizer.getInstance(activity,
-					mRecognitionType, components);
-			
-			break;
-		default:
-			throw new IllegalArgumentException("invalid recognition type");
-		}
-	}
-
-	private void getKeys() {
-		detectorTypeKey = activity.getString(R.string.detection_detector_type);
-		detectorClassifierKey = activity
-				.getString(R.string.detection_face_classifier);
-		scaleFactorKey = activity.getString(R.string.detection_scale_factor);
-		minNeighborsKey = activity.getString(R.string.detection_min_neighbors);
-		minRelativeFaceSizeKey = activity
-				.getString(R.string.detection_min_relative_face_size);
-		maxRelativeFaceSizeKey = activity
-				.getString(R.string.detection_max_relative_face_size);
-
-		recognizerTypeKey = activity
-				.getString(R.string.recognition_recognizer_type);
-		LBPHRadiusKey = activity.getString(R.string.recognition_lbph_radius);
-		LBPHNeighboursKey = activity
-				.getString(R.string.recognition_lbph_neighbours);
-		LBPHGridXKey = activity.getString(R.string.recognition_lbph_grid_x);
-		LBPHGridYKey = activity.getString(R.string.recognition_lbph_grid_y);
-		EigenComponentsKey = activity
-				.getString(R.string.recognition_eigen_components);
-		FisherComponentsKey = activity
-				.getString(R.string.recognition_fisher_components);
-
+		recognitionCategoryKey = activity
+				.getString(R.string.preference_recognition);
+		detectionCategoryKey = activity
+				.getString(R.string.preference_detection);
 		clearDatabaseKey = activity.getString(R.string.general_clear_database);
 		restorePreferencesKey = activity
 				.getString(R.string.general_restore_default_preferences);
@@ -213,13 +114,19 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				SharedPreferences sharedPreferences, String key) {
 			Preference mPreference = findPreference(key);
 
+			if (mPreference instanceof ListPreference) {
+				setPreferenceSummary(mPreference);
+				signalSettingsChange(key);
+				return;
+			}
+
 			if (oldValue != null) {
 				int msgId;
 
 				switch (isValid(sharedPreferences)) {
 				case VALID:
 					setPreferenceSummary(mPreference);
-					updateInstances(mPreference);
+					signalSettingsChange(key);
 					return;
 				case NOT_VALID_RECOGNITION_THRESHOLD:
 					msgId = R.string.recognition_invalid_threshold;
@@ -265,10 +172,26 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				Toast.makeText(activity, getString(msgId), Toast.LENGTH_SHORT)
 						.show();
 				restoreValue(sharedPreferences, key);
-			} else if (mPreference instanceof ListPreference) {
-				setPreferenceSummary(mPreference);
-				updateInstances(mPreference);
 			}
+		}
+
+		private void signalSettingsChange(String key) {
+			if (hasCategory(key, recognitionCategoryKey))
+				activity.getFacesManagementFragment()
+						.recognitionSettingsChanged();
+
+			if (hasCategory(key, detectionCategoryKey))
+				activity.recreateFaceDetector();
+		}
+
+		private boolean hasCategory(String preferenceKey, String categoryKey) {
+			Preference category = mPreferenceScreen.findPreference(categoryKey);
+
+			if (category == null || !(category instanceof PreferenceCategory))
+				return false;
+
+			return ((PreferenceCategory) category)
+					.findPreference(preferenceKey) != null;
 		}
 
 		private Validity isValid(SharedPreferences sharedPreferences) {
@@ -292,7 +215,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 			if (mPreferences.FisherComponents() < 0)
 				return Validity.NOT_VALID_FISHER_COMPONENTS;
-			
+
 			if (mPreferences.detectionScaleFactor() <= 1)
 				return Validity.NOT_VALID_DETECTION_SCALE_FACTOR;
 
@@ -335,89 +258,6 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 			mEditor.commit();
 
 		}
-
-		private void updateInstances(Preference mPreference) {
-			String key = mPreference.getKey();
-
-			if (key.equals(recognizerTypeKey)) {
-				final EIMFaceRecognizer.Type mRecognizerType = EIMFaceRecognizer.Type
-						.valueOf(((ListPreference) mPreference).getValue());
-				mFaceRecognizer.setType(mRecognizerType);
-				mFaceRecognizer.trainWithLoading(activity,
-						mPeopleDatabase.getPeople());
-			} else if (key.equals(LBPHRadiusKey)) {
-				final int radius = Integer
-						.valueOf(((EditTextPreference) mPreference).getText());
-				mFaceRecognizer.setRadius(radius);
-				if (mFaceRecognizer.getType() == EIMFaceRecognizer.Type.LBPH)
-					mFaceRecognizer.trainWithLoading(activity,
-							mPeopleDatabase.getPeople());
-			} else if (key.equals(LBPHNeighboursKey)) {
-				final int neighbours = Integer
-						.valueOf(((EditTextPreference) mPreference).getText());
-				mFaceRecognizer.setNeighbours(neighbours);
-				if (mFaceRecognizer.getType() == EIMFaceRecognizer.Type.LBPH)
-					mFaceRecognizer.trainWithLoading(activity,
-							mPeopleDatabase.getPeople());
-			} else if (key.equals(LBPHGridXKey)) {
-				final int gridX = Integer
-						.valueOf(((EditTextPreference) mPreference).getText());
-				mFaceRecognizer.setGridX(gridX);
-				if (mFaceRecognizer.getType() == EIMFaceRecognizer.Type.LBPH)
-					mFaceRecognizer.trainWithLoading(activity,
-							mPeopleDatabase.getPeople());
-			} else if (key.equals(LBPHGridYKey)) {
-				final int gridY = Integer
-						.valueOf(((EditTextPreference) mPreference).getText());
-				mFaceRecognizer.setGridY(gridY);
-				if (mFaceRecognizer.getType() == EIMFaceRecognizer.Type.LBPH)
-					mFaceRecognizer.trainWithLoading(activity,
-							mPeopleDatabase.getPeople());
-			} else if (key.equals(EigenComponentsKey)) {
-				final int components = Integer
-						.valueOf(((EditTextPreference) mPreference).getText());
-				mFaceRecognizer.setEigenComponents(components);
-				if (mFaceRecognizer.getType() == EIMFaceRecognizer.Type.EIGEN)
-					mFaceRecognizer.trainWithLoading(activity,
-							mPeopleDatabase.getPeople());
-			} else if (key.equals(FisherComponentsKey)) {
-				final int components = Integer
-						.valueOf(((EditTextPreference) mPreference).getText());
-				mFaceRecognizer.setFisherComponents(components);
-				if (mFaceRecognizer.getType() == EIMFaceRecognizer.Type.FISHER)
-					mFaceRecognizer.trainWithLoading(activity,
-							mPeopleDatabase.getPeople());
-			} else if (key.equals(detectorTypeKey)) {
-				final FaceDetector.Type mDetectorType = FaceDetector.Type
-						.valueOf(((ListPreference) mPreference).getValue());
-				mFaceDetector.setDetectorType(mDetectorType);
-			} else if (key.equals(detectorClassifierKey)) {
-				final FaceDetector.Classifier mClassifier = FaceDetector.Classifier
-						.valueOf(((ListPreference) mPreference).getValue());
-				mFaceDetector.setClassifier(mClassifier);
-			} else if (key.equals(classifierKey)) {
-				final FaceDetector.Classifier mFaceDetectorClassifier = FaceDetector.Classifier
-						.valueOf(((ListPreference) mPreference).getValue());
-				mFaceDetector.setClassifier(mFaceDetectorClassifier);
-			} else if (key.equals(scaleFactorKey)) {
-				final double scaleFactor = Double
-						.valueOf(((EditTextPreference) mPreference).getText());
-				mFaceDetector.setScaleFactor(scaleFactor);
-			} else if (key.equals(minNeighborsKey)) {
-				final int minNeighbors = Integer
-						.valueOf(((EditTextPreference) mPreference).getText());
-				mFaceDetector.setMinNeighbors(minNeighbors);
-			} else if (key.equals(minRelativeFaceSizeKey)) {
-				final double minRelativeFaceSize = Double
-						.valueOf(((EditTextPreference) mPreference).getText());
-				mFaceDetector.setMinRelativeFaceSize(minRelativeFaceSize);
-			} else if (key.equals(maxRelativeFaceSizeKey)) {
-				final double maxRelativeFaceSize = Double
-						.valueOf(((EditTextPreference) mPreference).getText());
-				mFaceDetector.setMaxRelativeFaceSize(maxRelativeFaceSize);
-			}
-		}
-
 	};
 
 	OnPreferenceClickListener mOnPreferenceClickListener = new OnPreferenceClickListener() {
@@ -425,23 +265,23 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		@Override
 		public boolean onPreferenceClick(Preference mPreference) {
 			if (mPreference.getKey().compareTo(clearDatabaseKey) == 0) {
-				((FaceRecognizerMainActivity) activity)
-						.getFacesManagementFragment().clearPeople();
-				mFaceRecognizer.resetModel();
+				activity.getFacesManagementFragment().clearPeople();
+
 				Toast.makeText(
 						activity,
 						activity.getString(R.string.general_clear_database_confirmation),
 						Toast.LENGTH_SHORT).show();
+				return true;
 			}
 
 			if (mPreference.getKey().compareTo(restorePreferencesKey) == 0) {
 				restorePreferences();
-				mFaceRecognizer.trainWithLoading(activity,
-						mPeopleDatabase.getPeople());
+
 				Toast.makeText(
 						activity,
 						activity.getString(R.string.general_restore_default_preferences_confirmation),
 						Toast.LENGTH_SHORT).show();
+				return true;
 			}
 
 			if (mPreference instanceof EditTextPreference) {
@@ -462,8 +302,8 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				R.string.recognition_threshold_default);
 		setPreference(R.string.recognition_lbph_radius,
 				R.string.recognition_lbph_radius_default);
-		setPreference(R.string.recognition_lbph_neighbours,
-				R.string.recognition_lbph_neighbours_default);
+		setPreference(R.string.recognition_lbph_neighbors,
+				R.string.recognition_lbph_neighbors_default);
 		setPreference(R.string.recognition_lbph_grid_x,
 				R.string.recognition_lbph_grid_x_default);
 		setPreference(R.string.recognition_lbph_grid_y,

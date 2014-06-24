@@ -20,6 +20,8 @@ import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
 
 import com.eim.R;
+import com.eim.facedetection.FaceDetector;
+import com.eim.facerecognition.EIMFaceRecognizer;
 import com.eim.facerecognition.FaceRecognitionFragment;
 import com.eim.facesmanagement.FacesManagementFragment;
 
@@ -33,6 +35,9 @@ public class FaceRecognizerMainActivity extends Activity {
 	private FaceRecognitionFragment mFaceRecognitionFragment;
 	private FacesManagementFragment mFacesManagementFragment;
 	private MyPreferencesFragment mPreferencesFragment;
+	private FaceDetector mFaceDetector;
+	private EIMFaceRecognizer mFaceRecognizer;
+	private boolean isOpenCVLoaded;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -61,20 +66,28 @@ public class FaceRecognizerMainActivity extends Activity {
 		mViewPager.setOnPageChangeListener(mOnPageChangeListener);
 
 		currentPosition = 0;
+	}
 
+	@Override
+	public void onResume() {
+		super.onResume();
+		isOpenCVLoaded = false;
 		OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, this,
 				new BaseLoaderCallback(this) {
 					@Override
 					public void onManagerConnected(int status) {
 						switch (status) {
 						case LoaderCallbackInterface.SUCCESS:
-							Log.i(TAG, "OpenCV loaded successfully");
+							System.loadLibrary("facerecognizer");
+							setupFaceRecognizer();
+							System.loadLibrary("nativedetector");
+							setupFaceDetector();
+							isOpenCVLoaded = true;
 							mFaceRecognitionFragment.onOpenCVLoaded();
 							mFacesManagementFragment.onOpenCVLoaded();
-							mPreferencesFragment.onOpenCVLoaded();
 							break;
 						default:
-							Log.i(TAG, "OpenCV connection error: " + status);
+							Log.e(TAG, "OpenCV connection error: " + status);
 							super.onManagerConnected(status);
 						}
 					}
@@ -137,5 +150,73 @@ public class FaceRecognizerMainActivity extends Activity {
 
 	public FacesManagementFragment getFacesManagementFragment() {
 		return mFacesManagementFragment;
+	}
+
+	public boolean isOpenCVLoaded() {
+		return isOpenCVLoaded;
+	}
+
+	private void setupFaceRecognizer() {
+		final EIMPreferences mPreferences = EIMPreferences.getInstance(this);
+		final EIMFaceRecognizer.Type mRecognitionType = mPreferences
+				.recognitionType();
+
+		switch (mRecognitionType) {
+		case LBPH:
+			final int radius = mPreferences.LBPHRadius();
+			final int neighbours = mPreferences.LBPHNeighbours();
+			final int gridX = mPreferences.LBPHGridX();
+			final int gridY = mPreferences.LBPHGridY();
+			mFaceRecognizer = new EIMFaceRecognizer(this, mRecognitionType,
+					radius, neighbours, gridX, gridY);
+			break;
+		case EIGEN:
+			final int eigenComponents = mPreferences.EigenComponents();
+			mFaceRecognizer = new EIMFaceRecognizer(this, mRecognitionType,
+					eigenComponents);
+		case FISHER:
+			final int fisherComponents = mPreferences.FisherComponents();
+			mFaceRecognizer = new EIMFaceRecognizer(this, mRecognitionType,
+					fisherComponents);
+			break;
+		default:
+			throw new IllegalArgumentException("invalid recognition type");
+		}
+	}
+
+	public EIMFaceRecognizer getFaceRecognizer() {
+		return mFaceRecognizer;
+	}
+
+	public EIMFaceRecognizer recreateFaceRecognizer() {
+		EIMFaceRecognizer.deleteModelFromDisk(this);
+		setupFaceRecognizer();
+		return mFaceRecognizer;
+	}
+
+	public FaceDetector getFaceDetector() {
+		return mFaceDetector;
+	}
+
+	public FaceDetector recreateFaceDetector() {
+		setupFaceDetector();
+		return mFaceDetector;
+	}
+
+	private void setupFaceDetector() {
+		final EIMPreferences mPreferences = EIMPreferences.getInstance(this);
+
+		final FaceDetector.Type type = mPreferences.detectorType();
+		final FaceDetector.Classifier classifier = mPreferences
+				.detectorClassifier();
+		final double scaleFactor = mPreferences.detectionScaleFactor();
+		final int minNeighbors = mPreferences.detectionMinNeighbors();
+		final double minRelativeFaceSize = mPreferences
+				.detectionMinRelativeFaceSize();
+		final double maxRelativeFaceSize = mPreferences
+				.detectionMaxRelativeFaceSize();
+
+		mFaceDetector = new FaceDetector(this, type, classifier, scaleFactor,
+				minNeighbors, minRelativeFaceSize, maxRelativeFaceSize);
 	}
 };

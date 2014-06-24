@@ -26,10 +26,10 @@ import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;
 
 public class EIMFaceRecognizer {
-
 	private static final String TAG = "EIMFaceRecognizer";
-	private static final String WIDTH = "min_width";
-	private static final String HEIGHT = "min_height";
+	private static final String MODEL_FILE_NAME = "trainedModel.xml";
+	private static final String WIDTH = "width";
+	private static final String HEIGHT = "height";
 
 	public enum Type {
 		LBPH, EIGEN, FISHER;
@@ -56,10 +56,9 @@ public class EIMFaceRecognizer {
 		}
 	}
 
-	private static EIMFaceRecognizer instance;
-	private static String MODEL_FILE_NAME = "trainedModel.xml";
 	private boolean isTrained;
 	private String mModelPath;
+	private Context mContext;
 	private Type mRecognizerType;
 	private FaceRecognizer mFaceRecognizer;
 	private SharedPreferences mSharedPreferences;
@@ -69,16 +68,20 @@ public class EIMFaceRecognizer {
 
 	private Size size;
 
-	private EIMFaceRecognizer(Context mContext, Type mType, Integer... params) {
-		System.loadLibrary("facerecognizer");
+	public EIMFaceRecognizer(Context mContext, Type mType, Integer... params) {
+		if (mContext == null)
+			throw new IllegalArgumentException("mContext cannot be null");
+		if (mType == null)
+			throw new IllegalArgumentException("mType cannot be null");
+
+		this.mContext = mContext;
+		mRecognizerType = mType;
 
 		mSharedPreferences = PreferenceManager
 				.getDefaultSharedPreferences(mContext);
 
 		mModelPath = mContext.getExternalFilesDir(null).getAbsolutePath() + "/"
 				+ MODEL_FILE_NAME;
-
-		mRecognizerType = mType;
 
 		instantiateFaceRecognizer(params);
 
@@ -97,7 +100,8 @@ public class EIMFaceRecognizer {
 				return;
 			}
 			isTrained = true;
-		}
+		} else
+			isTrained = false;
 	}
 
 	private void instantiateFaceRecognizer(Integer... params) {
@@ -146,56 +150,23 @@ public class EIMFaceRecognizer {
 		}
 	}
 
-	public static EIMFaceRecognizer getInstance(Context mContext, Type mType,
-			Integer... params) {
-		if (mContext == null)
-			throw new IllegalArgumentException("mContext cannot be null");
-		if (mType == null)
-			throw new IllegalArgumentException("mType cannot be null");
-
-		if (instance != null) {
-			if (instance.mRecognizerType == mType)
-				return instance;
-			switch (mType) {
-			case LBPH:
-				if (instance.lbphRadius == params[0]
-						&& instance.lbphNeighbours == params[1]
-						&& instance.lbphGridX == params[2]
-						&& instance.lbphGridX == params[3])
-					return instance;
-				break;
-			case EIGEN:
-				if (instance.eigenComponents == params[0])
-					return instance;
-				break;
-			case FISHER:
-				if (instance.fisherComponents == params[0])
-					return instance;
-				break;
-			default:
-				break;
-
-			}
-
-			Log.e(TAG, "reinstantiation.");
-
-			instance.resetModel();
-		}
-
-		instance = new EIMFaceRecognizer(mContext.getApplicationContext(),
-				mType, params);
-
-		return instance;
-	}
-
 	/**
 	 * Resets the trained model
 	 */
 	public void resetModel() {
+		deleteModelFromDisk(mContext);
+		isTrained = false;
+	}
+
+	/**
+	 * Delete the model stored on the disk
+	 */
+	public static void deleteModelFromDisk(Context mContext) {
+		String mModelPath = mContext.getExternalFilesDir(null)
+				.getAbsolutePath() + "/" + MODEL_FILE_NAME;
 		File mModelFile = new File(mModelPath);
 		if (mModelFile != null)
 			mModelFile.delete();
-		isTrained = false;
 	}
 
 	/**
@@ -243,8 +214,8 @@ public class EIMFaceRecognizer {
 		labels.release();
 	}
 
-	public void incrementalTrainWithLoading(Activity activity,
-			String newFacePath, int label) {
+	public void incrementalTrainWithLoading(Activity activity, String newFacePath,
+			int label) {
 		final String mNewFacePath = newFacePath;
 		final int mLabel = label;
 		final ProgressDialog mProgressDialog = ProgressDialog.show(activity,
@@ -253,7 +224,7 @@ public class EIMFaceRecognizer {
 
 		(new Thread() {
 			public void run() {
-				EIMFaceRecognizer.this.incrementalTrain(mNewFacePath, mLabel);
+				incrementalTrain(mNewFacePath, mLabel);
 				mActivity.runOnUiThread(new Runnable() {
 					public void run() {
 						mProgressDialog.dismiss();
@@ -346,7 +317,7 @@ public class EIMFaceRecognizer {
 
 		(new Thread() {
 			public void run() {
-				EIMFaceRecognizer.this.train(mPeople);
+				train(mPeople);
 				mActivity.runOnUiThread(new Runnable() {
 					public void run() {
 						mProgressDialog.dismiss();
@@ -388,84 +359,5 @@ public class EIMFaceRecognizer {
 
 	public Type getType() {
 		return mRecognizerType;
-	}
-
-	public void setType(Type mType) {
-		if (mType == null)
-			return;
-
-		mRecognizerType = mType;
-
-		switch (mType) {
-		case LBPH:
-			instantiateFaceRecognizer(lbphRadius, lbphNeighbours, lbphGridX,
-					lbphGridY);
-			break;
-		case EIGEN:
-			instantiateFaceRecognizer(eigenComponents);
-			break;
-		case FISHER:
-			instantiateFaceRecognizer(fisherComponents);
-			break;
-		default:
-			throw new IllegalArgumentException("Invalid mType");
-
-		}
-
-		resetModel();
-	}
-
-	public void setRadius(int radius) {
-		this.lbphRadius = radius;
-		if (mRecognizerType == Type.LBPH) {
-			instantiateFaceRecognizer(lbphRadius, lbphNeighbours, lbphGridX,
-					lbphGridY);
-			resetModel();
-		}
-	}
-
-	public void setNeighbours(int neighbours) {
-		this.lbphNeighbours = neighbours;
-		if (mRecognizerType == Type.LBPH) {
-			instantiateFaceRecognizer(lbphRadius, lbphNeighbours, lbphGridX,
-					lbphGridY);
-			resetModel();
-		}
-	}
-
-	public void setGridX(int gridX) {
-		this.lbphGridX = gridX;
-
-		if (mRecognizerType == Type.LBPH) {
-			instantiateFaceRecognizer(lbphRadius, lbphNeighbours, lbphGridX,
-					lbphGridY);
-			resetModel();
-		}
-	}
-
-	public void setGridY(int gridY) {
-		this.lbphGridY = gridY;
-
-		if (mRecognizerType == Type.LBPH) {
-			instantiateFaceRecognizer(lbphRadius, lbphNeighbours, lbphGridX,
-					lbphGridY);
-			resetModel();
-		}
-	}
-
-	public void setEigenComponents(int components) {
-		this.eigenComponents = components;
-		if (mRecognizerType == Type.EIGEN) {
-			instantiateFaceRecognizer(eigenComponents);
-			resetModel();
-		}
-	}
-
-	public void setFisherComponents(int components) {
-		this.fisherComponents = components;
-		if (mRecognizerType == Type.EIGEN) {
-			instantiateFaceRecognizer(fisherComponents);
-			resetModel();
-		}
 	}
 }

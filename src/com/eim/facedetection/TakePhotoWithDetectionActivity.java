@@ -26,6 +26,7 @@ import android.widget.ImageButton;
 
 import com.eim.R;
 import com.eim.facerecognition.ControlledJavaCameraView;
+import com.eim.utilities.EIMPreferences;
 
 public class TakePhotoWithDetectionActivity extends Activity implements
 		CvCameraViewListener2 {
@@ -39,11 +40,11 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 	private Mat mRgba;
 
 	private FaceDetector mFaceDetector;
-	private boolean mTakePhotoNow = false;
+	private boolean mTakePhotoNow;
 	private Uri mOutputUri;
 	private ImageButton mSwitchButton;
 	private int mCurrentCameraIndex = ControlledJavaCameraView.CAMERA_ID_BACK;
-	
+
 	private ProgressDialog mProgressDialog;
 
 	@Override
@@ -56,7 +57,7 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 			setResult(Activity.RESULT_CANCELED);
 			finish();
 		}
-		
+
 		final String grabbingFaces = getString(R.string.progress_dialog_grabbing_face);
 
 		mOutputUri = extras.getParcelable(MediaStore.EXTRA_OUTPUT);
@@ -71,8 +72,9 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 			@Override
 			public void onClick(View v) {
 				mTakePhotoNow = true;
-				mProgressDialog = ProgressDialog.show(TakePhotoWithDetectionActivity.this, "",
-						grabbingFaces, true);
+				mProgressDialog = ProgressDialog.show(
+						TakePhotoWithDetectionActivity.this, "", grabbingFaces,
+						true);
 			}
 		});
 
@@ -102,6 +104,7 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 						switch (status) {
 						case LoaderCallbackInterface.SUCCESS:
 							Log.i(TAG, "OpenCV loaded successfully");
+							setupFaceDetection();
 							mCameraView.enableView();
 							break;
 						default:
@@ -112,18 +115,33 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 				});
 	}
 
+	private void setupFaceDetection() {
+		final EIMPreferences mPreferences = EIMPreferences.getInstance(this);
+
+		// final FaceDetector.Type type = mPreferences.detectorType();
+		final FaceDetector.Type type = FaceDetector.Type.JAVA;
+		final FaceDetector.Classifier classifier = mPreferences
+				.detectorClassifier();
+		final double scaleFactor = mPreferences.detectionScaleFactor();
+		final int minNeighbors = mPreferences.detectionMinNeighbors();
+		final double minRelativeFaceSize = mPreferences
+				.detectionMinRelativeFaceSize();
+		final double maxRelativeFaceSize = mPreferences
+				.detectionMaxRelativeFaceSize();
+
+		mFaceDetector = new FaceDetector(this, type, classifier, scaleFactor,
+				minNeighbors, minRelativeFaceSize, maxRelativeFaceSize);
+	}
+
 	@Override
 	public void onPause() {
-		if (mCameraView != null)
-			mCameraView.disableView();
+		mCameraView.disableView();
 
 		super.onPause();
 	}
 
 	@Override
 	public void onCameraViewStarted(int width, int height) {
-		mFaceDetector = FaceDetector.getInstance(this);
-		mFaceDetector.resetSizes();
 		mGray = new Mat();
 		mRgba = new Mat();
 	}
@@ -161,14 +179,14 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 
 		if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT)
 			Core.flip(mRgba, mRgba, 1);
-		
+
 		mGray = inputFrame.gray();
 		if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT) {
 			Mat flippedGrey = mGray;
 			mGray = new Mat();
 			Core.flip(flippedGrey, mGray, 1);
 		}
-		
+
 		Rect[] facesArray = mFaceDetector.detect(mGray);
 
 		for (Rect face : facesArray)
