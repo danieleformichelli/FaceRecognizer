@@ -197,10 +197,11 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		public void run() {
 			if (!mMultithread)
 				return;
-
+			Mat myMat = new Mat();
 			while (!Thread.interrupted()) {
+				mSceneForRecognizer.copyTo(myMat);
 				Rect[] facesArray = mFaceDetector.detect(mSceneForRecognizer);
-				mLabelsForDrawer = recognizeFaces(facesArray);
+				mLabelsForDrawer = recognizeFaces(myMat, facesArray);
 			}
 		}
 	};
@@ -216,7 +217,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 		if (!mMultithread) {
 			Rect[] facesArray = mFaceDetector.detect(mSceneForRecognizer);
-			mLabelsForDrawer = recognizeFaces(facesArray);
+			mLabelsForDrawer = recognizeFaces(mSceneForRecognizer, facesArray);
 		}
 		
 		for (LabelledRect faceAndLabel : mLabelsForDrawer)
@@ -225,7 +226,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		return mRgba;
 	}
 
-	private LabelledRect[] recognizeFaces(Rect[] facesArray) {
+	private LabelledRect[] recognizeFaces(Mat scene, Rect[] facesArray) {
 
 		LabelledRect[] recognizedPeople = new LabelledRect[facesArray.length];
 
@@ -233,7 +234,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 			Rect faceRect = facesArray[i];
 
 			try {
-				Mat face = mSceneForRecognizer.submat(faceRect);
+				Mat face = scene.submat(faceRect);
 				int[] predictedLabel = new int[1];
 				double[] distance = new double[1];
 				
@@ -242,7 +243,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				face.release();
 				
 				if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT)
-					faceRect.x = mSceneForRecognizer.cols() - (faceRect.x + faceRect.width);
+					faceRect.x = scene.cols() - (faceRect.x + faceRect.width);
 
 				Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
 				if (guess == null) {
