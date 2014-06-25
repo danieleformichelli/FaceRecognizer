@@ -20,14 +20,12 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.util.SparseArray;
 
 import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;
 
 public class EIMFaceRecognizer {
-	private static final String TAG = "EIMFaceRecognizer";
 	private static final String MODEL_FILE_NAME = "trainedModel.xml";
 	private static final String WIDTH = "width";
 	private static final String HEIGHT = "height";
@@ -211,9 +209,6 @@ public class EIMFaceRecognizer {
 
 		Imgproc.cvtColor(newFaceMat, newFaceMat, Imgproc.COLOR_RGB2GRAY);
 
-		if (mRecognizerType.needResize())
-			Imgproc.resize(newFaceMat, newFaceMat, size);
-
 		preprocessImage(newFaceMat);
 
 		newFaces.add(newFaceMat);
@@ -304,14 +299,6 @@ public class EIMFaceRecognizer {
 		mSharedPreferences.edit().putInt(WIDTH, (int) size.width)
 				.putInt(HEIGHT, (int) size.height).apply();
 
-		if (mRecognizerType.needResize()) {
-			Log.i(TAG, "Set size of all faces to " + size.width + "x"
-					+ size.height);
-
-			for (Mat face : faces)
-				Imgproc.resize(face, face, size);
-		}
-
 		for (Mat face : faces)
 			preprocessImage(face);
 
@@ -372,14 +359,16 @@ public class EIMFaceRecognizer {
 
 	public void predict(Mat src, int[] label, double[] confidence) {
 		if (isTrained) {
-			if (mRecognizerType.needResize())
-				Imgproc.resize(src, src, size);
 			preprocessImage(src);
 			mFaceRecognizer.predict(src, label, confidence);
 		}
 	}
 
 	private void preprocessImage(Mat image) {
+		// Resize
+		if (mRecognizerType.needResize())
+			Imgproc.resize(image, image, size);
+
 		// Illuminance normalization
 		if (normalize)
 			Imgproc.equalizeHist(image, image);

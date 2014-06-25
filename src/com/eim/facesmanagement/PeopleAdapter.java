@@ -1,5 +1,7 @@
 package com.eim.facesmanagement;
 
+import java.util.List;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -412,6 +414,10 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		 * @param photoId
 		 */
 		public void removePhoto(int personId, int photoId);
+
+		void removePhotos(int personId, List<Integer> toBeDeleted);
+
+		void removePeople();
 	}
 
 }

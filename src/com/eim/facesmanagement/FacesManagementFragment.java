@@ -142,9 +142,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 	 * Remove all the people
 	 */
 	public void clearPeople() {
-		SparseArray<Person> people = mPeopleAdapter.getPeople();
-		for (int i = 0, l = people.size(); i < l; i++)
-			mPeopleAdapterListener.removePerson(people.keyAt(i));
+		mPeopleAdapterListener.removePeople();
 	}
 
 	/**
@@ -206,9 +204,23 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 				noPeopleMessage.setVisibility(View.VISIBLE);
 
 			mPeopleDatabase.removePerson(id);
-	
+
 			// A person has been removed: retrain the entire network
-			mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
+			mFaceRecognizer.trainWithLoading(activity,
+					mPeopleAdapter.getPeople());
+		}
+
+		@Override
+		public void removePeople() {
+			SparseArray<Person> people = mPeopleAdapter.getPeople();
+			for (int i = 0, l = people.size(); i < l; i++)
+				mPeopleDatabase.removePerson(people.keyAt(i));
+
+			mPeopleAdapter.setPeople(null);
+			noPeopleMessage.setVisibility(View.VISIBLE);
+			
+			// All person have been removed: reset the network
+			mFaceRecognizer.resetModel();
 		}
 
 		@Override
@@ -219,20 +231,35 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 
 			// A photo has been added: incrementally train the network
 			if (mFaceRecognizer.getType().isIncrementable())
-				mFaceRecognizer.incrementalTrainWithLoading(activity, photo.getUrl(),
-						personId);
+				mFaceRecognizer.incrementalTrainWithLoading(activity,
+						photo.getUrl(), personId);
 			else
-				mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
+				mFaceRecognizer.trainWithLoading(activity,
+						mPeopleAdapter.getPeople());
 		}
 
 		@Override
 		public void removePhoto(int personId, int photoId) {
 			mPeopleAdapter.removePhoto(personId, photoId);
 			mPeopleDatabase.removePhoto(personId, photoId);
-		
+
 			// A photo has been removed: retrain the entire network
-			mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
+			mFaceRecognizer.trainWithLoading(activity,
+					mPeopleAdapter.getPeople());
 		}
+
+		@Override
+		public void removePhotos(int personId, List<Integer> toBeDeleted) {
+			for (Integer photoId : toBeDeleted) {
+				mPeopleAdapter.removePhoto(personId, photoId);
+				mPeopleDatabase.removePhoto(personId, photoId);
+			}
+
+			// A photo has been removed: retrain the entire network
+			mFaceRecognizer.trainWithLoading(activity,
+					mPeopleAdapter.getPeople());
+		}
+
 	};
 
 	PhotoGalleryListener mPhotoGalleryListener = new PhotoGalleryListener() {
@@ -262,8 +289,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 				if (mPhotoAdapter.isSelected(i))
 					toBeDeleted.add(photos.keyAt(i - 1));
 
-			for (Integer i : toBeDeleted)
-				mPeopleAdapterListener.removePhoto(personId, i);
+			mPeopleAdapterListener.removePhotos(personId, toBeDeleted);
 		}
 
 	};
