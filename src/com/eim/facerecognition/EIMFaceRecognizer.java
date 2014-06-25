@@ -76,8 +76,9 @@ public class EIMFaceRecognizer {
 
 	private Size size;
 
-	public EIMFaceRecognizer(Context mContext, Type mRecognizerType, boolean normalize, CutMode mCutMode,
-			int mCutPercentage, Integer... params) {
+	public EIMFaceRecognizer(Context mContext, Type mRecognizerType,
+			boolean normalize, CutMode mCutMode, int mCutPercentage,
+			Integer... params) {
 		if (mContext == null)
 			throw new IllegalArgumentException("mContext cannot be null");
 		if (mRecognizerType == null)
@@ -223,11 +224,10 @@ public class EIMFaceRecognizer {
 		else
 			mFaceRecognizer.train(newFaces, labels);
 
-		mFaceRecognizer.save(mModelPath);
-		isTrained = true;
-
 		newFaceMat.release();
 		labels.release();
+
+		isTrained = true;
 	}
 
 	public void incrementalTrainWithLoading(Activity activity,
@@ -243,6 +243,7 @@ public class EIMFaceRecognizer {
 				incrementalTrain(mNewFacePath, mLabel);
 				mActivity.runOnUiThread(new Runnable() {
 					public void run() {
+						mFaceRecognizer.save(mModelPath);
 						mProgressDialog.dismiss();
 					}
 				});
@@ -258,10 +259,10 @@ public class EIMFaceRecognizer {
 	 *            faces dataset, keys are the labels and faces are contained in
 	 *            the field Photos of the value
 	 */
-	public void train(SparseArray<Person> people) {
+	public boolean train(SparseArray<Person> people) {
 		if (!isDatasetValid(people)) {
 			resetModel();
-			return;
+			return false;
 		}
 
 		int images = 0;
@@ -326,6 +327,8 @@ public class EIMFaceRecognizer {
 		for (Mat face : faces)
 			face.release();
 		labelsMat.release();
+
+		return true;
 	}
 
 	public void trainWithLoading(Activity activity, SparseArray<Person> people) {
@@ -336,9 +339,12 @@ public class EIMFaceRecognizer {
 
 		(new Thread() {
 			public void run() {
-				train(mPeople);
+				final boolean trained = train(mPeople);
 				mActivity.runOnUiThread(new Runnable() {
 					public void run() {
+						if (trained)
+							mFaceRecognizer.save(mModelPath);
+
 						mProgressDialog.dismiss();
 					}
 				});
