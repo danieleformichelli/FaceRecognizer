@@ -8,6 +8,7 @@ import java.util.List;
 import org.opencv.android.Utils;
 import org.opencv.contrib.FaceRecognizer;
 import org.opencv.core.Core;
+import org.opencv.core.Core.MinMaxLocResult;
 import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
@@ -23,7 +24,6 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.util.SparseArray;
 
 import com.eim.facesmanagement.peopledb.Person;
@@ -428,9 +428,13 @@ public class EIMFaceRecognizer {
 		int sigma0 = 1;
 		int sigma1 = 2;
 		
-		float scale = src.rows() / 100;
+		float scale = src.rows() / 100.0f;
+		
+		sigma0 = (int) (sigma0 * scale);
+		sigma1 = (int) (sigma1 * scale);
 		
 		Mat I = new Mat();
+		Mat J = new Mat();
 		debugImg(src, "0.png", 1);
 
 		src.convertTo(I, CvType.CV_32FC1, 1.0/255);
@@ -445,22 +449,31 @@ public class EIMFaceRecognizer {
 			Mat gaussian1 = new Mat();
 			Mat gaussian0 = new Mat();
 			// Kernel Size:
-			int kernel_sz0 = 3 * (int) (sigma0 * scale);
-			int kernel_sz1 = 3 * (int) (sigma1 * scale);
+			int kernel_sz0 = (3 * sigma0);
+			int kernel_sz1 = (3 * sigma1);
 			// Make them odd for OpenCV:
-			kernel_sz0 += ((kernel_sz0 % 2) == 0) ? 1 : 0;
-			kernel_sz1 += ((kernel_sz1 % 2) == 0) ? 1 : 0;
-
+			kernel_sz0 |= 1;
+			kernel_sz1 |= 1;
+		
 			Imgproc.GaussianBlur(I, gaussian0,
 					new Size(kernel_sz0, kernel_sz0), sigma0, sigma0,
-					Imgproc.BORDER_CONSTANT);
+					Imgproc.BORDER_REPLICATE);
 			Imgproc.GaussianBlur(I, gaussian1,
 					new Size(kernel_sz1, kernel_sz1), sigma1, sigma1,
-					Imgproc.BORDER_CONSTANT);
+					Imgproc.BORDER_REPLICATE);
 			Core.subtract(gaussian0, gaussian1, I);
 			
 			gaussian0.release();
 			gaussian1.release();
+			
+			// Normalize
+			MinMaxLocResult m = Core.minMaxLoc(I);
+			
+			Core.subtract(I, new Scalar(m.minVal), I);
+			Core.multiply(I, new Scalar(1/(m.maxVal-m.minVal)), I);
+			
+			// Core.subtract(Mat.ones(I.size(), CvType.CV_32FC1), I, I);
+			// Core.add(I, new Scalar(0.5), I);
 		}
 		
 		debugImg(I, "2.png");
@@ -476,9 +489,9 @@ public class EIMFaceRecognizer {
 				meanI = Core.mean(tmp).val[0];
 				tmp.release();
 			}
-			Mat ones = Mat.ones(I.size(), CvType.CV_32FC1);
-			I = I.mul(ones, 1 / Math.pow(meanI, 1.0 / alpha));
-			ones.release();
+
+			Core.multiply(I, new Scalar(1 / Math.pow(meanI, 1.0 / alpha)), I);
+
 		}
 		
 		debugImg(I, "3.png");
@@ -495,9 +508,7 @@ public class EIMFaceRecognizer {
 				meanI = Core.mean(tmp).val[0];
 				tmp.release();
 			}
-			Mat ones = Mat.ones(I.size(), CvType.CV_32FC1);
-			I = I.mul(ones, 1 / Math.pow(meanI, 1.0 / alpha));
-			ones.release();
+			Core.multiply(I, new Scalar(1 / Math.pow(meanI, 1.0 / alpha)), I);
 		}
 		
 		debugImg(I, "4.png");
@@ -509,9 +520,7 @@ public class EIMFaceRecognizer {
 					I.put(r, c, I.get(r, c)[0] / tau);
 				}
 			}
-			Mat ones = Mat.ones(I.size(), CvType.CV_32FC1);
-			I = I.mul(ones, tau);
-			ones.release();
+			Core.multiply(I, new Scalar(tau), I);
 		}
 		
 		debugImg(I, "5.png");
