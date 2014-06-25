@@ -26,6 +26,9 @@
     <string name="recognition_threshold">recognition_threshold</string>
     <string name="recognition_threshold_title">Recognition threshold</string>
     <string name="recognition_threshold_default">100</string>
+    <string name="recognition_face_size">recognition_face_size</string>
+    <string name="recognition_face_size_title">Face size</string>
+    <string name="recognition_face_size_default">150</string>
     <string name="recognition_normalization">recognition_normalization</string>
     <string name="recognition_normalization_title">Perform normalization</string>
     <string name="recognition_normalization_default">true</string>
@@ -69,9 +72,7 @@
     <string name="recognition_invalid_cutmode_percentage">The cut percentage must be in the range [0,25]</string>
     <string name="recognition_lbph_invalid_radius">The radius must be greater than zero</string>
     <string name="recognition_lbph_invalid_neighbours">The neighbours number must be greater than zero</string>
-    <string name="recognition_lbph_invalid_grid">The grid sizes must be positive</string>
-    <string name="recognition_eigen_invalid_components">The components number cannot be negative</string>
-    <string name="recognition_fisher_invalid_components">The components number cannot be negative</string>
+    <string name="recognition_lbph_invalid_grid">The grid sizes must be greater than zero</string>
 
     <!-- Recognizer Type -->
 

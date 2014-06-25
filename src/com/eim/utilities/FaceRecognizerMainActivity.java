@@ -67,8 +67,9 @@ public class FaceRecognizerMainActivity extends Activity {
 		mViewPager.setOnPageChangeListener(mOnPageChangeListener);
 
 		currentPosition = 0;
-		
-		isMultithreadingEnabled = EIMPreferences.getInstance(this).multithreading();
+
+		isMultithreadingEnabled = EIMPreferences.getInstance(this)
+				.multithreading();
 		mFaceRecognitionFragment.mMultithread = isMultithreadingEnabled;
 	}
 
@@ -164,6 +165,7 @@ public class FaceRecognizerMainActivity extends Activity {
 		final EIMPreferences mPreferences = EIMPreferences.getInstance(this);
 		final EIMFaceRecognizer.Type mRecognitionType = mPreferences
 				.recognitionType();
+		final int faceSize = mPreferences.recognitionFaceSize();
 		final boolean normalize = mPreferences.recognitionNormalization();
 		final EIMFaceRecognizer.CutMode mCutMode = mPreferences
 				.recognitionCutMode();
@@ -177,17 +179,19 @@ public class FaceRecognizerMainActivity extends Activity {
 			final int gridX = mPreferences.LBPHGridX();
 			final int gridY = mPreferences.LBPHGridY();
 			mFaceRecognizer = new EIMFaceRecognizer(this, mRecognitionType,
-					normalize, mCutMode, mCutModePercentage, radius, neighbours, gridX,
-					gridY);
+					faceSize, normalize, mCutMode, mCutModePercentage, radius,
+					neighbours, gridX, gridY);
 			break;
 		case EIGEN:
 			final int eigenComponents = mPreferences.EigenComponents();
 			mFaceRecognizer = new EIMFaceRecognizer(this, mRecognitionType,
-					normalize, mCutMode, mCutModePercentage, eigenComponents);
+					faceSize, normalize, mCutMode, mCutModePercentage,
+					eigenComponents);
 		case FISHER:
 			final int fisherComponents = mPreferences.FisherComponents();
 			mFaceRecognizer = new EIMFaceRecognizer(this, mRecognitionType,
-					normalize, mCutMode, mCutModePercentage, fisherComponents);
+					faceSize, normalize, mCutMode, mCutModePercentage,
+					fisherComponents);
 			break;
 		default:
 			throw new IllegalArgumentException("invalid recognition type");
@@ -233,6 +237,5 @@ public class FaceRecognizerMainActivity extends Activity {
 	public void setMultithreading(boolean enable) {
 		isMultithreadingEnabled = enable;
 		mFaceRecognitionFragment.mMultithread = isMultithreadingEnabled;
-		Log.e(TAG, (enable ? "Enable" : "Disable") + " multithreading");
 	}
 };

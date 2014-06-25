@@ -22,7 +22,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	private PreferenceScreen mPreferenceScreen;
 	private String oldValue;
 
-	private String recognitionCategoryKey, detectionCategoryKey,
+	private String recognitionThresholdKey, recognitionCategoryKey, detectionCategoryKey,
 			clearDatabaseKey, restorePreferencesKey, multithreadingKey;
 
 	private enum Validity {
@@ -46,6 +46,8 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 		activity = (FaceRecognizerMainActivity) getActivity();
 
+		recognitionThresholdKey = activity
+				.getString(R.string.recognition_threshold);
 		recognitionCategoryKey = activity
 				.getString(R.string.preference_recognition);
 		detectionCategoryKey = activity
@@ -144,12 +146,6 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				case NOT_VALID_LBPH_GRID:
 					msgId = R.string.recognition_lbph_invalid_grid;
 					break;
-				case NOT_VALID_EIGEN_COMPONENTS:
-					msgId = R.string.recognition_eigen_invalid_components;
-					break;
-				case NOT_VALID_FISHER_COMPONENTS:
-					msgId = R.string.recognition_fisher_invalid_components;
-					break;
 				case NOT_VALID_DETECTION_SCALE_FACTOR:
 					msgId = R.string.detection_invalid_scale_factor;
 					break;
@@ -181,16 +177,17 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 
 		private void signalSettingsChange(String key) {
 			if (hasCategory(key, recognitionCategoryKey))
-				activity.getFacesManagementFragment()
-						.recognitionSettingsChanged();
-			else if (hasCategory(key, detectionCategoryKey))
-				activity.recreateFaceDetector();
-			else if (key.equals(multithreadingKey)) {
-				final boolean isMultithreadingEnabled = mPreferenceScreen
-						.getSharedPreferences().getBoolean(multithreadingKey,
-								false);
-				activity.setMultithreading(isMultithreadingEnabled);
-			}
+				if (!key.equals(recognitionThresholdKey))
+					activity.getFacesManagementFragment()
+							.recognitionSettingsChanged();
+				else if (hasCategory(key, detectionCategoryKey))
+					activity.recreateFaceDetector();
+				else if (key.equals(multithreadingKey)) {
+					final boolean isMultithreadingEnabled = mPreferenceScreen
+							.getSharedPreferences().getBoolean(
+									multithreadingKey, false);
+					activity.setMultithreading(isMultithreadingEnabled);
+				}
 		}
 
 		private boolean hasCategory(String preferenceKey, String categoryKey) {
@@ -206,51 +203,41 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		private Validity isValid(SharedPreferences sharedPreferences) {
 			EIMPreferences mPreferences = EIMPreferences.getInstance(activity);
 
-			if (mPreferences.recognitionThreshold() < 0
-					|| mPreferences.recognitionThreshold() > 5000)
+			if (mPreferences.recognitionThreshold() > 5000)
 				return Validity.NOT_VALID_RECOGNITION_THRESHOLD;
 
-			if (mPreferences.recognitionCutModePercentage() < 0
-					|| mPreferences.recognitionCutModePercentage() > 25)
+			if (mPreferences.recognitionCutModePercentage() > 25)
 				return Validity.NOT_VALID_CUTMODE_PERCENTAGE;
 
-			if (mPreferences.LBPHRadius() < 1)
+			if (mPreferences.LBPHRadius() == 0)
 				return Validity.NOT_VALID_LBPH_RADIUS;
 
-			if (mPreferences.LBPHNeighbours() < 1)
+			if (mPreferences.LBPHNeighbours() == 0)
 				return Validity.NOT_VALID_LBPH_NEIGHBOURS;
 
-			if (mPreferences.LBPHGridX() < 1 || mPreferences.LBPHGridX() < 1)
+			if (mPreferences.LBPHGridX() == 0 || mPreferences.LBPHGridX() == 0)
 				return Validity.NOT_VALID_LBPH_GRID;
 
-			if (mPreferences.EigenComponents() < 0)
-				return Validity.NOT_VALID_EIGEN_COMPONENTS;
-
-			if (mPreferences.FisherComponents() < 0)
-				return Validity.NOT_VALID_FISHER_COMPONENTS;
-
-			if (mPreferences.detectionScaleFactor() <= 1)
+			if (mPreferences.detectionScaleFactor() == 0)
 				return Validity.NOT_VALID_DETECTION_SCALE_FACTOR;
 
-			if (mPreferences.detectionMinNeighbors() < 1)
+			if (mPreferences.detectionMinNeighbors() == 0)
 				return Validity.NOT_VALID_DETECTION_MIN_NEIGHBORS;
 
-			if (mPreferences.detectionMinRelativeFaceSize() < 0
-					|| mPreferences.detectionMinRelativeFaceSize() > 1)
+			if (mPreferences.detectionMinRelativeFaceSize() > 1)
 				return Validity.NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE;
 
-			if (mPreferences.detectionMaxRelativeFaceSize() < 0
-					|| mPreferences.detectionMaxRelativeFaceSize() > 1)
+			if (mPreferences.detectionMaxRelativeFaceSize() > 1)
 				return Validity.NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE;
 
 			if (mPreferences.detectionMinRelativeFaceSize() >= mPreferences
 					.detectionMaxRelativeFaceSize())
 				return Validity.NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO;
 
-			if (mPreferences.numberOfGalleryColumnsPortrait() < 1)
+			if (mPreferences.numberOfGalleryColumnsPortrait() == 0)
 				return Validity.NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT;
 
-			if (mPreferences.numberOfGalleryColumnsLandscape() < 1)
+			if (mPreferences.numberOfGalleryColumnsLandscape() == 0)
 				return Validity.NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE;
 
 			return Validity.VALID;

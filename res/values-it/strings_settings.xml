@@ -38,12 +38,11 @@
     <!-- Invalid input handler -->
 
     <string name="recognition_invalid_threshold">La soglia di riconoscimento deve essere nell\'intervallo [0, 5000]</string>
+    <string name="recognition_face_size_title">Dimensione delle facce</string>
     <string name="recognition_invalid_cutmode_percentage">La percentuale di taglio deve essere nell\'intervallo [0,25]</string>
     <string name="recognition_lbph_invalid_radius">Il raggio deve essere maggiore di zero</string>
     <string name="recognition_lbph_invalid_neighbours">Il numero di vicini deve essere maggiore di zero</string>
     <string name="recognition_lbph_invalid_grid">La dimensione della griglia deve essere maggiore di zero</string>
-    <string name="recognition_eigen_invalid_components">Il numero di componenti non può essere negativo</string>
-    <string name="recognition_fisher_invalid_components">Il numero di componenti non può essere negativo</string>
 
     <!-- Detection -->
 

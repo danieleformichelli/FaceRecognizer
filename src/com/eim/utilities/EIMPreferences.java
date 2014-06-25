@@ -155,6 +155,14 @@ public class EIMPreferences {
 				recognitionThresholdKey, recognitionThresholdDefault));
 	}
 
+	private String recognitionFaceSizeKey;
+	private String recognitionFaceSizeDefault;
+
+	public int recognitionFaceSize() {
+		return Integer.parseInt(mSharedPreferences.getString(
+				recognitionFaceSizeKey, recognitionFaceSizeDefault));
+	}
+
 	private String LBPHRadiusKey;
 	private String LBPHRadiusDefault;
 
@@ -256,6 +264,11 @@ public class EIMPreferences {
 		recognitionTypeDefault = mContext
 				.getString(R.string.recognition_recognizer_type_default);
 
+		recognitionFaceSizeKey = mContext
+				.getString(R.string.recognition_face_size);
+		recognitionFaceSizeDefault = mContext
+				.getString(R.string.recognition_face_size_default);
+		
 		recognitionThresholdKey = mContext
 				.getString(R.string.recognition_threshold);
 		recognitionThresholdDefault = mContext

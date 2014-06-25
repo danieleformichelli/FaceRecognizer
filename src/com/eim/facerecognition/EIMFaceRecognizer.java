@@ -19,10 +19,8 @@ import org.opencv.imgproc.Imgproc;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.preference.PreferenceManager;
 import android.util.SparseArray;
 
 import com.eim.facesmanagement.peopledb.Person;
@@ -30,18 +28,12 @@ import com.eim.facesmanagement.peopledb.Photo;
 
 public class EIMFaceRecognizer {
 	private static final String MODEL_FILE_NAME = "trainedModel.xml";
-	private static final String WIDTH = "width";
-	private static final String HEIGHT = "height";
 
 	public enum Type {
 		LBPH, EIGEN, FISHER;
 
 		public boolean isIncrementable() {
 			return this == LBPH;
-		}
-
-		public boolean needResize() {
-			return this != LBPH;
 		}
 
 		public int numberOfNeededClasses() {
@@ -67,19 +59,18 @@ public class EIMFaceRecognizer {
 	private Context mContext;
 	private Type mRecognizerType;
 	private FaceRecognizer mFaceRecognizer;
-	private SharedPreferences mSharedPreferences;
+	private Size faceSize;
 	private boolean normalize;
 	private CutMode mCutMode;
 	private double mCutPercentage;
+	private Rect cutRect;
 	private int lbphRadius, lbphNeighbours, lbphGridX, lbphGridY;
 	private int eigenComponents;
 	private int fisherComponents;
 
-	private Size size;
-
 	public EIMFaceRecognizer(Context mContext, Type mRecognizerType,
-			boolean normalize, CutMode mCutMode, int mCutPercentage,
-			Integer... params) {
+			int faceSize, boolean normalize, CutMode mCutMode,
+			int mCutPercentage, Integer... params) {
 		if (mContext == null)
 			throw new IllegalArgumentException("mContext cannot be null");
 		if (mRecognizerType == null)
@@ -89,24 +80,16 @@ public class EIMFaceRecognizer {
 
 		this.mContext = mContext;
 		this.mRecognizerType = mRecognizerType;
+		this.faceSize = new Size(faceSize, faceSize);
 		this.normalize = normalize;
 		this.mCutMode = mCutMode;
 		this.mCutPercentage = (100 - mCutPercentage) / 100.0;
-
-		mSharedPreferences = PreferenceManager
-				.getDefaultSharedPreferences(mContext);
+		computeCutRect();
 
 		mModelPath = mContext.getExternalFilesDir(null).getAbsolutePath() + "/"
 				+ MODEL_FILE_NAME;
 
 		instantiateFaceRecognizer(params);
-
-		size = new Size(mSharedPreferences.getInt(WIDTH, -1),
-				mSharedPreferences.getInt(HEIGHT, -1));
-		if (size.width == -1)
-			size.width = Double.MAX_VALUE;
-		if (size.height == -1)
-			size.height = Double.MAX_VALUE;
 
 		if (new File(mModelPath).exists()) {
 			try {
@@ -118,6 +101,30 @@ public class EIMFaceRecognizer {
 			isTrained = true;
 		} else
 			isTrained = false;
+	}
+
+	private void computeCutRect() {
+		cutRect = new Rect();
+
+		switch (mCutMode) {
+		case NO_CUT:
+			return;
+		case HORIZONTAL:
+			cutRect.width = (int) (faceSize.width * mCutPercentage);
+			cutRect.height = (int) faceSize.height;
+			break;
+		case VERTICAL:
+			cutRect.width = (int) faceSize.width;
+			cutRect.height = (int) (faceSize.height * mCutPercentage);
+			break;
+		case TOTAL:
+			cutRect.width = (int) (faceSize.width * mCutPercentage);
+			cutRect.height = (int) (faceSize.height * mCutPercentage);
+			break;
+		}
+
+		cutRect.x = (int) (faceSize.width - cutRect.width) / 2;
+		cutRect.y = (int) (faceSize.height - cutRect.height) / 2;
 	}
 
 	private void instantiateFaceRecognizer(Integer... params) {
@@ -278,10 +285,6 @@ public class EIMFaceRecognizer {
 			resetModel();
 			return false;
 		}
-
-		int images = 0;
-		double height = 0.0;
-		double width = 0.0;
 		List<Mat> faces = new ArrayList<Mat>();
 		List<Integer> labels = new ArrayList<Integer>();
 
@@ -301,22 +304,8 @@ public class EIMFaceRecognizer {
 				labels.add(label);
 				faces.add(mMat);
 
-				if (mRecognizerType.needResize()) {
-					Size s = mMat.size();
-					height += s.height;
-					width += s.width;
-					images++;
-				}
 			}
 		}
-
-		if (mRecognizerType.needResize()) {
-			size.height = height / images;
-			size.width = width / images;
-		}
-
-		mSharedPreferences.edit().putInt(WIDTH, (int) size.width)
-				.putInt(HEIGHT, (int) size.height).apply();
 
 		for (Mat face : faces)
 			preprocessImage(face);
@@ -385,62 +374,39 @@ public class EIMFaceRecognizer {
 
 	private void preprocessImage(Mat image) {
 		// Illuminance normalization
-		if (normalize) {
+		if (normalize)
 			Imgproc.equalizeHist(image, image);
-			// illuminanceNormalization(image, image);
-		}
-		
+		// illuminanceNormalization(image, image);
+
 		// Resize
-		if (mRecognizerType.needResize())
-			Imgproc.resize(image, image, size);
+		Imgproc.resize(image, image, faceSize);
 
 		// Cut
-		Size imageSize = image.size();
-		Rect roi = new Rect();
-
-		switch (mCutMode) {
-		case NO_CUT:
-			return;
-		case HORIZONTAL:
-			roi.width = (int) (imageSize.width * mCutPercentage);
-			roi.height = (int) imageSize.height;
-			break;
-		case VERTICAL:
-			roi.width = (int) imageSize.width;
-			roi.height = (int) (imageSize.height * mCutPercentage);
-			break;
-		case TOTAL:
-			roi.width = (int) (imageSize.width * mCutPercentage);
-			roi.height = (int) (imageSize.height * mCutPercentage);
-			break;
-		}
-
-		roi.x = (image.cols() - roi.width) / 2;
-		roi.y = (image.rows() - roi.height) / 2;
-		image = image.submat(roi);
+		image = image.submat(cutRect);
 	}
 
+	@SuppressWarnings("unused")
 	private void illuminanceNormalization(Mat src, Mat dst) {
 		float alpha = 0.1f;
 		float tau = 10.0f;
 		float gamma = 0.2f;
 		int sigma0 = 1;
 		int sigma1 = 2;
-		
+
 		float scale = src.rows() / 100.0f;
-		
+
 		sigma0 = (int) (sigma0 * scale);
 		sigma1 = (int) (sigma1 * scale);
-		
+
 		Mat I = new Mat();
 
 		debugImg(src, "0.png", 1);
 
-		src.convertTo(I, CvType.CV_32FC1, 1.0/255);
-		
+		src.convertTo(I, CvType.CV_32FC1, 1.0 / 255);
+
 		// Start preprocessing:
 		Core.pow(I, gamma, I);
-		
+
 		debugImg(I, "1.png");
 
 		// Calculate the DOG Image:
@@ -453,7 +419,7 @@ public class EIMFaceRecognizer {
 			// Make them odd for OpenCV:
 			kernel_sz0 |= 1;
 			kernel_sz1 |= 1;
-		
+
 			Imgproc.GaussianBlur(I, gaussian0,
 					new Size(kernel_sz0, kernel_sz0), sigma0, sigma0,
 					Imgproc.BORDER_REPLICATE);
@@ -461,18 +427,17 @@ public class EIMFaceRecognizer {
 					new Size(kernel_sz1, kernel_sz1), sigma1, sigma1,
 					Imgproc.BORDER_REPLICATE);
 			Core.subtract(gaussian0, gaussian1, I);
-			
+
 			gaussian0.release();
 			gaussian1.release();
-			
+
 			// Normalize
 			MinMaxLocResult m = Core.minMaxLoc(I);
 			Core.subtract(I, new Scalar(m.minVal), I);
-			Core.multiply(I, new Scalar(1/(m.maxVal-m.minVal)), I);
+			Core.multiply(I, new Scalar(1 / (m.maxVal - m.minVal)), I);
 		}
-		
+
 		debugImg(I, "2.png");
-		
 
 		{
 			double meanI = 0.0;
@@ -488,7 +453,7 @@ public class EIMFaceRecognizer {
 			Core.multiply(I, new Scalar(1 / Math.pow(meanI, 1.0 / alpha)), I);
 
 		}
-		
+
 		debugImg(I, "3.png");
 
 		{
@@ -505,7 +470,7 @@ public class EIMFaceRecognizer {
 			}
 			Core.multiply(I, new Scalar(1 / Math.pow(meanI, 1.0 / alpha)), I);
 		}
-		
+
 		debugImg(I, "4.png");
 
 		// Squash into the tanh:
@@ -517,40 +482,41 @@ public class EIMFaceRecognizer {
 			}
 			Core.multiply(I, new Scalar(tau), I);
 		}
-		
+
 		debugImg(I, "5.png");
 
 		I.convertTo(dst, CvType.CV_8UC1, 255);
 		I.release();
 	}
-	
+
 	private void debugImg(Mat d, String name) {
 		debugImg(d, name, 255);
 	}
-	
+
 	private void debugImg(Mat d, String name, double s) {
 		return;
-//		Mat img = new Mat();
-//		
-//		d.convertTo(img, CvType.CV_8UC1, s);
-//		
-//		Bitmap debug = Bitmap.createBitmap(img.cols(),
-//				img.rows(), Bitmap.Config.ARGB_8888);
-//		Utils.matToBitmap(img, debug);
-//		
-//		img.release();
-//		
-//		String filename = mContext.getExternalFilesDir(null).getAbsolutePath()
-//				+ "/" + name;
-//
-//		try {
-//			FileOutputStream out;
-//			out = new FileOutputStream(filename);
-//			debug.compress(Bitmap.CompressFormat.PNG, 100, out);
-//			out.close();
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
+		// Mat img = new Mat();
+		//
+		// d.convertTo(img, CvType.CV_8UC1, s);
+		//
+		// Bitmap debug = Bitmap.createBitmap(img.cols(),
+		// img.rows(), Bitmap.Config.ARGB_8888);
+		// Utils.matToBitmap(img, debug);
+		//
+		// img.release();
+		//
+		// String filename =
+		// mContext.getExternalFilesDir(null).getAbsolutePath()
+		// + "/" + name;
+		//
+		// try {
+		// FileOutputStream out;
+		// out = new FileOutputStream(filename);
+		// debug.compress(Bitmap.CompressFormat.PNG, 100, out);
+		// out.close();
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
 
 	}
 

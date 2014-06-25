@@ -14,6 +14,11 @@
             android:inputType="number"
             android:key="@string/recognition_threshold"
             android:title="@string/recognition_threshold_title" />
+        <EditTextPreference
+            android:defaultValue="@string/recognition_face_size_default"
+            android:inputType="number"
+            android:key="@string/recognition_face_size"
+            android:title="@string/recognition_face_size_title" />
         <CheckBoxPreference
             android:defaultValue="@string/recognition_normalization_default"
             android:key="@string/recognition_normalization"
