@@ -36,7 +36,7 @@ import com.eim.utilities.Swipeable;
 
 public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		OnOpenCVLoaded, CvCameraViewListener2, SeekBar.OnSeekBarChangeListener {
-	private static final boolean multithread = false;
+
 	private static final String TAG = "FaceRecognitionFragment";
 	private static final Scalar FACE_RECT_COLOR = new Scalar(23, 150, 0, 255);
 	private static final Scalar FACE_UNKNOWN_RECT_COLOR = new Scalar(240, 44,
@@ -61,6 +61,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private SparseArray<Mat> thumbnails;
 	private int mThumbnailSize = 25;
 	private int mHeight;
+	public boolean mMultithread = true;
 
 	private FaceDetector mFaceDetector;
 	private EIMFaceRecognizer mFaceRecognizer;
@@ -194,7 +195,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private Runnable mRecognitionWorker = new Runnable() {
 		@Override
 		public void run() {
-			if (!multithread)
+			if (!mMultithread)
 				return;
 
 			while (!Thread.interrupted()) {
@@ -213,7 +214,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT)
 			Core.flip(mRgba, mRgba, 1);
 
-		if (!multithread) {
+		if (!mMultithread) {
 			Rect[] facesArray = mFaceDetector.detect(mSceneForRecognizer);
 			mLabelsForDrawer = recognizeFaces(facesArray);
 		}
@@ -236,8 +237,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				int[] predictedLabel = new int[1];
 				double[] distance = new double[1];
 				
-				
 				mFaceRecognizer.predict(face, predictedLabel, distance);
+				Log.v(TAG, "predictedLabel: " + predictedLabel[0] + " distance: " + distance[0]);
 				face.release();
 				
 				if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT)

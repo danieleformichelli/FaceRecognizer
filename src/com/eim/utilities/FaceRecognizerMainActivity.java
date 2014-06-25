@@ -69,7 +69,7 @@ public class FaceRecognizerMainActivity extends Activity {
 		currentPosition = 0;
 		
 		isMultithreadingEnabled = EIMPreferences.getInstance(this).multithreading();
-		// TODO do something
+		mFaceRecognitionFragment.mMultithread = isMultithreadingEnabled;
 	}
 
 	@Override
@@ -232,7 +232,7 @@ public class FaceRecognizerMainActivity extends Activity {
 
 	public void setMultithreading(boolean enable) {
 		isMultithreadingEnabled = enable;
-		// TODO do something
+		mFaceRecognitionFragment.mMultithread = isMultithreadingEnabled;
 		Log.e(TAG, (enable ? "Enable" : "Disable") + " multithreading");
 	}
 };

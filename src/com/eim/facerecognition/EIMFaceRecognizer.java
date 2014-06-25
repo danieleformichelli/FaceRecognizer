@@ -1,7 +1,6 @@
 package com.eim.facerecognition;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -387,8 +386,8 @@ public class EIMFaceRecognizer {
 	private void preprocessImage(Mat image) {
 		// Illuminance normalization
 		if (normalize) {
-			// Imgproc.equalizeHist(image, image);
-			illuminanceNormalization(image, image);
+			Imgproc.equalizeHist(image, image);
+			// illuminanceNormalization(image, image);
 		}
 		
 		// Resize
@@ -434,7 +433,7 @@ public class EIMFaceRecognizer {
 		sigma1 = (int) (sigma1 * scale);
 		
 		Mat I = new Mat();
-		Mat J = new Mat();
+
 		debugImg(src, "0.png", 1);
 
 		src.convertTo(I, CvType.CV_32FC1, 1.0/255);
@@ -468,12 +467,8 @@ public class EIMFaceRecognizer {
 			
 			// Normalize
 			MinMaxLocResult m = Core.minMaxLoc(I);
-			
 			Core.subtract(I, new Scalar(m.minVal), I);
 			Core.multiply(I, new Scalar(1/(m.maxVal-m.minVal)), I);
-			
-			// Core.subtract(Mat.ones(I.size(), CvType.CV_32FC1), I, I);
-			// Core.add(I, new Scalar(0.5), I);
 		}
 		
 		debugImg(I, "2.png");
@@ -534,28 +529,28 @@ public class EIMFaceRecognizer {
 	}
 	
 	private void debugImg(Mat d, String name, double s) {
-
-		Mat img = new Mat();
-		
-		d.convertTo(img, CvType.CV_8UC1, s);
-		
-		Bitmap debug = Bitmap.createBitmap(img.cols(),
-				img.rows(), Bitmap.Config.ARGB_8888);
-		Utils.matToBitmap(img, debug);
-		
-		img.release();
-		
-		String filename = mContext.getExternalFilesDir(null).getAbsolutePath()
-				+ "/" + name;
-
-		try {
-			FileOutputStream out;
-			out = new FileOutputStream(filename);
-			debug.compress(Bitmap.CompressFormat.PNG, 100, out);
-			out.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		return;
+//		Mat img = new Mat();
+//		
+//		d.convertTo(img, CvType.CV_8UC1, s);
+//		
+//		Bitmap debug = Bitmap.createBitmap(img.cols(),
+//				img.rows(), Bitmap.Config.ARGB_8888);
+//		Utils.matToBitmap(img, debug);
+//		
+//		img.release();
+//		
+//		String filename = mContext.getExternalFilesDir(null).getAbsolutePath()
+//				+ "/" + name;
+//
+//		try {
+//			FileOutputStream out;
+//			out = new FileOutputStream(filename);
+//			debug.compress(Bitmap.CompressFormat.PNG, 100, out);
+//			out.close();
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
 
 	}
 
