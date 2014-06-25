@@ -69,7 +69,6 @@ public class FaceDetectionActivity extends Activity {
 	private List<String> mFacesResults;
 
 	private ProgressDialog mProgressDialog;
-	private String savingFace;
 
 	private interface GenericCancelListener extends OnCancelListener,
 			OnDismissListener {
@@ -87,8 +86,6 @@ public class FaceDetectionActivity extends Activity {
 		personId = extras.getInt(PERSON_ID);
 		mLabelName = extras.getString(PERSON_NAME);
 
-		savingFace = getString(R.string.progress_dialog_saving_face);
-
 		showChooserDialog();
 	}
 
@@ -105,7 +102,7 @@ public class FaceDetectionActivity extends Activity {
 					public void onManagerConnected(int status) {
 						switch (status) {
 						case LoaderCallbackInterface.SUCCESS:
-							detectAndProcessFaces();
+							detectAndProcessFacesWithLoading();
 							break;
 						default:
 							Log.e(TAG, "OpenCV connection error: " + status);
@@ -244,18 +241,47 @@ public class FaceDetectionActivity extends Activity {
 
 	}
 
+	private void detectAndProcessFacesWithLoading() {
+		final String grabbingFaces = getString(R.string.progress_dialog_grabbing_face);
+
+		mProgressDialog = ProgressDialog.show(FaceDetectionActivity.this, "",
+				grabbingFaces, true);
+
+		(new Thread() {
+			public void run() {
+				detectAndProcessFaces();
+
+				runOnUiThread(new Runnable() {
+					public void run() {
+						mProgressDialog.dismiss();
+					}
+				});
+			}
+		}).start();
+	}
+
 	private void detectAndProcessFaces() {
 		setupFaceDetection();
 
-		Bitmap[] detectedFaces = detectFaces();
+		final Bitmap[] detectedFaces = detectFaces();
 		mSceneFile.delete();
 
+		Log.e(TAG, "detected " + detectedFaces.length + " faces");
+		
 		if (detectedFaces.length == 0) {
-			showChooserDialog(true);
+			runOnUiThread(new Runnable() {
+				public void run() {
+					showChooserDialog(true);
+				}
+			});
 			return;
 		}
 
-		displayFaceChooser(detectedFaces);
+		runOnUiThread(new Runnable() {
+			public void run() {
+				displayFaceChooser(detectedFaces);
+			}
+		});
 	}
 
 	private void setupFaceDetection() {
@@ -335,28 +361,41 @@ public class FaceDetectionActivity extends Activity {
 			@Override
 			public void onItemClick(AdapterView<?> parent, View v,
 					int position, long id) {
-				mChooserVisible = false;
-				mProgressDialog = ProgressDialog.show(
-						FaceDetectionActivity.this, "", savingFace, true);
-				processFace(detectedFaces[position]);
-				finishWithResults();
+				processFacesWithLoading(detectedFaces, position);
 			}
 		});
 
-		Button all = (Button) findViewById(R.id.choose_all);
-		all.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				mProgressDialog = ProgressDialog.show(
-						FaceDetectionActivity.this, "", savingFace, true);
+		((Button) findViewById(R.id.choose_all))
+				.setOnClickListener(new OnClickListener() {
+					@Override
+					public void onClick(View arg0) {
+						processFacesWithLoading(detectedFaces, -1);
+					}
+				});
+	}
 
-				for (Bitmap face : detectedFaces)
-					processFace(face);
+	private void processFacesWithLoading(final Bitmap[] detectedFaces,
+			final int index) {
+		final String savingFace = getString(R.string.progress_dialog_saving_face);
 
-				finishWithResults();
+		mProgressDialog = ProgressDialog.show(FaceDetectionActivity.this, "",
+				savingFace, true);
+
+		(new Thread() {
+			public void run() {
+				if (index != -1)
+					processFace(detectedFaces[index]);
+				else
+					for (Bitmap face : detectedFaces)
+						processFace(face);
+
+				runOnUiThread(new Runnable() {
+					public void run() {
+						finishWithResults();
+					}
+				});
 			}
-		});
-
+		}).start();
 	}
 
 	private void copyPickedPhoto(Intent data) {
@@ -384,9 +423,10 @@ public class FaceDetectionActivity extends Activity {
 	}
 
 	private Bitmap[] detectFaces() {
-		Mat scene = Highgui.imread(mSceneFile.getAbsolutePath(), Highgui.CV_LOAD_IMAGE_UNCHANGED);
+		Mat scene = Highgui.imread(mSceneFile.getAbsolutePath(),
+				Highgui.CV_LOAD_IMAGE_UNCHANGED);
 		Imgproc.cvtColor(scene, scene, Imgproc.COLOR_BGR2RGB);
-		
+
 		Mat gray = new Mat();
 
 		Imgproc.cvtColor(scene, gray, Imgproc.COLOR_RGB2GRAY);
@@ -407,7 +447,7 @@ public class FaceDetectionActivity extends Activity {
 		scene.release();
 		gray.release();
 		subRegion.release();
-		
+
 		return detectedFaces;
 	}
 }

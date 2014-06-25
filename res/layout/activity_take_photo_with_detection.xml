@@ -17,18 +17,21 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
         android:layout_marginRight="20dp"
-        android:layout_marginTop="20dp"
-        android:src="@android:drawable/ic_menu_camera" />
+        android:layout_marginBottom="20dp"
+        android:src="@android:drawable/ic_menu_camera"
+        android:contentDescription="take_photo" />
 
     <ImageButton
         android:id="@+id/switch_camera_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/take_photo_button"
+        android:layout_alignParentLeft="true"
         android:layout_alignParentBottom="true"
+        android:layout_marginLeft="20dp"
         android:layout_marginBottom="20dp"
-        android:src="@android:drawable/ic_menu_rotate" />
+        android:src="@android:drawable/ic_menu_rotate"
+        android:contentDescription="switch_camera"  />
 
 </RelativeLayout>

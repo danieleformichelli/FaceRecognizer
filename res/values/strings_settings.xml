@@ -25,10 +25,10 @@
     <string name="recognition_threshold_default">100</string>
     <string name="recognition_cutmode">recognition_cutmode</string>
     <string name="recognition_cutmode_title">Cut image</string>
-    <string name="recognition_cutmode_default">HORIZONTAL</string>
+    <string name="recognition_cutmode_default">NO_CUT</string>
     <string name="recognition_cutmode_percentage">recognition_cutmode_percentage</string>
     <string name="recognition_cutmode_percentage_title">Cut percentage</string>
-    <string name="recognition_cutmode_percentage_default">10</string>
+    <string name="recognition_cutmode_percentage_default">5</string>
 
     <!-- LBPH -->
 
