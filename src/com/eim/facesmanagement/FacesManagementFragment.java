@@ -237,6 +237,22 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 				mFaceRecognizer.trainWithLoading(activity,
 						mPeopleAdapter.getPeople());
 		}
+		
+		@Override
+		public void addPhoto(int personId, String[] photoUrls) {
+			
+			for(String url: photoUrls) {
+				int photoId = mPeopleDatabase.addPhoto(personId, url);
+				mPeopleAdapter.addPhoto(personId, photoId, new Photo(url, null));
+			}
+
+			// A photo has been added: incrementally train the network
+			if (mFaceRecognizer.getType().isIncrementable())
+				mFaceRecognizer.incrementalTrainWithLoading(activity, photoUrls,
+						personId);
+			else
+				mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
+		}
 
 		@Override
 		public void removePhoto(int personId, int photoId) {

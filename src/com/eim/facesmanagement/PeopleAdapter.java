@@ -407,6 +407,16 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		 *            url of the photo
 		 */
 		public void addPhoto(int personId, Photo photo);
+		
+		/**
+		 * Multiple photos have been added to a person
+		 * 
+		 * @param id
+		 *            id of the person
+		 * @param urls
+		 *            urls of the photos
+		 */
+		public void addPhoto(int personId, String[] urls);
 
 		/**
 		 * A photo has been deleted

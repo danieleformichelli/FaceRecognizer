@@ -191,35 +191,46 @@ public class EIMFaceRecognizer {
 	 *            the id of the person related to the new face
 	 */
 	public void incrementalTrain(String newFacePath, int label) {
+		incrementalTrain(new String[] {newFacePath}, label);
+	}
+
+	public void incrementalTrain(String[] newFacesPaths, int label) {
 		if (!mRecognizerType.isIncrementable())
 			throw new IllegalStateException("Face detector of type "
 					+ mRecognizerType.toString()
 					+ "cannot be trained incrementally");
 
 		List<Mat> newFaces = new ArrayList<Mat>();
-		Mat labels = new Mat(1, 1, CvType.CV_32SC1);
-		Mat newFaceMat = new Mat();
+		Mat labels = new Mat(newFacesPaths.length, 1, CvType.CV_32SC1);
 
-		Bitmap newFace = BitmapFactory.decodeFile(newFacePath);
-		if (newFace == null)
-			throw new IllegalArgumentException("Cannot load the image at "
-					+ newFacePath);
+		for (int i = 0; i < newFacesPaths.length; i++) {
+			String newFacePath = newFacesPaths[i];
+			Mat newFaceMat = new Mat();
 
-		Utils.bitmapToMat(newFace, newFaceMat);
+			Bitmap newFace = BitmapFactory.decodeFile(newFacePath);
+			if (newFace == null)
+				throw new IllegalArgumentException("Cannot load the image at "
+						+ newFacePath);
 
-		Imgproc.cvtColor(newFaceMat, newFaceMat, Imgproc.COLOR_RGB2GRAY);
+			Utils.bitmapToMat(newFace, newFaceMat);
 
-		preprocessImage(newFaceMat);
+			Imgproc.cvtColor(newFaceMat, newFaceMat, Imgproc.COLOR_RGB2GRAY);
 
-		newFaces.add(newFaceMat);
-		labels.put(0, 0, new int[] { label });
+			preprocessImage(newFaceMat);
+
+			newFaces.add(newFaceMat);
+			labels.put(i, 0, new int[] { label });
+		}
 
 		if (isTrained)
 			mFaceRecognizer.update(newFaces, labels);
 		else
 			mFaceRecognizer.train(newFaces, labels);
 
-		newFaceMat.release();
+		mFaceRecognizer.save(mModelPath);
+		
+		for (Mat newFaceMat: newFaces)
+			newFaceMat.release();
 		labels.release();
 
 		isTrained = true;
@@ -227,7 +238,12 @@ public class EIMFaceRecognizer {
 
 	public void incrementalTrainWithLoading(Activity activity,
 			String newFacePath, int label) {
-		final String mNewFacePath = newFacePath;
+		incrementalTrainWithLoading(activity, new String[] {newFacePath}, label);
+	}
+
+	public void incrementalTrainWithLoading(Activity activity,
+			String[] newFacesPaths, int label) {
+		final String[] mNewFacesPaths = newFacesPaths;
 		final int mLabel = label;
 		final ProgressDialog mProgressDialog = ProgressDialog.show(activity,
 				"", "Training...", true);
@@ -235,10 +251,9 @@ public class EIMFaceRecognizer {
 
 		(new Thread() {
 			public void run() {
-				incrementalTrain(mNewFacePath, mLabel);
+				incrementalTrain(mNewFacesPaths, mLabel);
 				mActivity.runOnUiThread(new Runnable() {
 					public void run() {
-						mFaceRecognizer.save(mModelPath);
 						mProgressDialog.dismiss();
 					}
 				});
