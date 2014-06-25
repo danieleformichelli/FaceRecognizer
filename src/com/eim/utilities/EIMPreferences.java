@@ -114,6 +114,14 @@ public class EIMPreferences {
 		return null;
 	}
 
+	private String recognitionNormalizationKey;
+	private boolean recognitionNormalizationDefault;
+
+	public boolean recognitionNormalization() {
+		return mSharedPreferences.getBoolean(recognitionNormalizationKey,
+				recognitionNormalizationDefault);
+	}
+
 	private String recognitionCutModeKey;
 	private String recognitionCutModeDefault;
 
@@ -245,11 +253,16 @@ public class EIMPreferences {
 		recognitionThresholdDefault = mContext
 				.getString(R.string.recognition_threshold_default);
 
+		recognitionNormalizationKey = mContext
+				.getString(R.string.recognition_normalization);
+		recognitionNormalizationDefault = Boolean.parseBoolean(mContext
+				.getString(R.string.recognition_normalization_default));
+
 		recognitionCutModeKey = mContext
 				.getString(R.string.recognition_cutmode);
 		recognitionCutModeDefault = mContext
 				.getString(R.string.recognition_cutmode_default);
-		
+
 		recognitionCutModePercentageKey = mContext
 				.getString(R.string.recognition_cutmode_percentage);
 		recognitionCutModePercentageDefault = mContext

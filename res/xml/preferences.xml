@@ -14,6 +14,11 @@
             android:inputType="number"
             android:key="@string/recognition_threshold"
             android:title="@string/recognition_threshold_title" />
+        <CheckBoxPreference
+            android:defaultValue="@string/recognition_normalization_default"
+            android:key="@string/recognition_normalization"
+            android:title="@string/recognition_normalization_title" />
+        
         <ListPreference
             android:defaultValue="@string/recognition_cutmode_default"
             android:entries="@array/recognition_cutmode_entries"

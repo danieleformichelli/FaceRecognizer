@@ -114,7 +114,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				SharedPreferences sharedPreferences, String key) {
 			Preference mPreference = findPreference(key);
 
-			if (mPreference instanceof ListPreference) {
+			if (!(mPreference instanceof EditTextPreference)) {
 				setPreferenceSummary(mPreference);
 				signalSettingsChange(key);
 				return;
@@ -207,7 +207,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 			if (mPreferences.recognitionCutModePercentage() < 0
 					|| mPreferences.recognitionCutModePercentage() > 25)
 				return Validity.NOT_VALID_CUTMODE_PERCENTAGE;
-			
+
 			if (mPreferences.LBPHRadius() < 1)
 				return Validity.NOT_VALID_LBPH_RADIUS;
 

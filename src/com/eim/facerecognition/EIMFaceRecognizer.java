@@ -67,6 +67,7 @@ public class EIMFaceRecognizer {
 	private Type mRecognizerType;
 	private FaceRecognizer mFaceRecognizer;
 	private SharedPreferences mSharedPreferences;
+	private boolean normalize;
 	private CutMode mCutMode;
 	private double mCutPercentage;
 	private int lbphRadius, lbphNeighbours, lbphGridX, lbphGridY;
@@ -75,15 +76,18 @@ public class EIMFaceRecognizer {
 
 	private Size size;
 
-	public EIMFaceRecognizer(Context mContext, Type mType, CutMode mCutMode,
+	public EIMFaceRecognizer(Context mContext, Type mRecognizerType, boolean normalize, CutMode mCutMode,
 			int mCutPercentage, Integer... params) {
 		if (mContext == null)
 			throw new IllegalArgumentException("mContext cannot be null");
-		if (mType == null)
-			throw new IllegalArgumentException("mType cannot be null");
+		if (mRecognizerType == null)
+			throw new IllegalArgumentException("mRecognizerType cannot be null");
+		if (mCutMode == null)
+			throw new IllegalArgumentException("mCutMode cannot be null");
 
 		this.mContext = mContext;
-		mRecognizerType = mType;
+		this.mRecognizerType = mRecognizerType;
+		this.normalize = normalize;
 		this.mCutMode = mCutMode;
 		this.mCutPercentage = (100 - mCutPercentage) / 100.0;
 
@@ -209,7 +213,7 @@ public class EIMFaceRecognizer {
 		if (mRecognizerType.needResize())
 			Imgproc.resize(newFaceMat, newFaceMat, size);
 
-		cutImage(newFaceMat);
+		preprocessImage(newFaceMat);
 
 		newFaces.add(newFaceMat);
 		labels.put(0, 0, new int[] { label });
@@ -308,7 +312,7 @@ public class EIMFaceRecognizer {
 		}
 
 		for (Mat face : faces)
-			cutImage(face);
+			preprocessImage(face);
 
 		Mat labelsMat = new Mat(labels.size(), 1, CvType.CV_32SC1);
 		int i = 0;
@@ -364,12 +368,17 @@ public class EIMFaceRecognizer {
 		if (isTrained) {
 			if (mRecognizerType.needResize())
 				Imgproc.resize(src, src, size);
-			cutImage(src);
+			preprocessImage(src);
 			mFaceRecognizer.predict(src, label, confidence);
 		}
 	}
 
-	private void cutImage(Mat image) {
+	private void preprocessImage(Mat image) {
+		// Illuminance normalization
+		if (normalize)
+			Imgproc.equalizeHist(image, image);
+
+		// Cut
 		Size imageSize = image.size();
 		Rect roi = new Rect();
 
