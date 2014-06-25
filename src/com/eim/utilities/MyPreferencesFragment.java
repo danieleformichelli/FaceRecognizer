@@ -23,7 +23,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	private String oldValue;
 
 	private String recognitionCategoryKey, detectionCategoryKey,
-			clearDatabaseKey, restorePreferencesKey;
+			clearDatabaseKey, restorePreferencesKey, multithreadingKey;
 
 	private enum Validity {
 		VALID, NOT_VALID_RECOGNITION_THRESHOLD, NOT_VALID_CUTMODE_PERCENTAGE, NOT_VALID_LBPH_RADIUS, NOT_VALID_LBPH_NEIGHBOURS, NOT_VALID_LBPH_GRID, NOT_VALID_EIGEN_COMPONENTS, NOT_VALID_FISHER_COMPONENTS, NOT_VALID_DETECTION_SCALE_FACTOR, NOT_VALID_DETECTION_MIN_NEIGHBORS, NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE
@@ -53,6 +53,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		clearDatabaseKey = activity.getString(R.string.general_clear_database);
 		restorePreferencesKey = activity
 				.getString(R.string.general_restore_default_preferences);
+		multithreadingKey = activity.getString(R.string.general_multithreading);
 	}
 
 	@Override
@@ -182,9 +183,14 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 			if (hasCategory(key, recognitionCategoryKey))
 				activity.getFacesManagementFragment()
 						.recognitionSettingsChanged();
-
-			if (hasCategory(key, detectionCategoryKey))
+			else if (hasCategory(key, detectionCategoryKey))
 				activity.recreateFaceDetector();
+			else if (key.equals(multithreadingKey)) {
+				final boolean isMultithreadingEnabled = mPreferenceScreen
+						.getSharedPreferences().getBoolean(multithreadingKey,
+								false);
+				activity.setMultithreading(isMultithreadingEnabled);
+			}
 		}
 
 		private boolean hasCategory(String preferenceKey, String categoryKey) {

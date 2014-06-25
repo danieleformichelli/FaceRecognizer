@@ -203,6 +203,14 @@ public class EIMPreferences {
 				FisherComponentsKey, FisherComponentsDefault));
 	}
 
+	private String multithreadingKey;
+	private boolean multithreadingDefault;
+
+	public boolean multithreading() {
+		return mSharedPreferences.getBoolean(multithreadingKey,
+				multithreadingDefault);
+	}
+
 	private void getKeysAndDefaultValues(Context mContext) {
 		detectionScaleFactorKey = mContext
 				.getString(R.string.detection_scale_factor);
@@ -299,5 +307,10 @@ public class EIMPreferences {
 				.getString(R.string.recognition_fisher_components);
 		FisherComponentsDefault = mContext
 				.getString(R.string.recognition_fisher_components_default);
+
+		multithreadingKey = mContext.getString(R.string.general_multithreading);
+		multithreadingDefault = Boolean.parseBoolean(mContext
+				.getString(R.string.general_multithreading_default));
+
 	}
 }

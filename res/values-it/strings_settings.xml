@@ -4,6 +4,7 @@
     <!-- General -->
 
     <string name="preference_general_title">Generali</string>
+    <string name="general_multithreading_title">Abilita multithreading (sperimentale)</string>
     <string name="general_clear_database_title">Svuota database</string>
     <string name="general_clear_database_confirmation">Tutte le persone sono state rimosse dal database</string>
     <string name="general_restore_default_preferences_title">Ripristina impostazioni predefinite</string>

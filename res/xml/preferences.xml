@@ -98,6 +98,10 @@
             android:title="@string/detection_max_relative_face_size_title" />
     </PreferenceCategory>
     <PreferenceCategory android:title="@string/preference_general_title" android:key="@string/preference_general" >
+        <CheckBoxPreference
+            android:defaultValue="@string/general_multithreading_default"
+            android:key="@string/general_multithreading"
+            android:title="@string/general_multithreading_title" />
         <EditTextPreference
             android:defaultValue="@string/management_number_of_gallery_columns_landscape_default"
             android:inputType="number"

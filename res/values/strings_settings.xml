@@ -5,6 +5,9 @@
 
     <string name="preference_general">preference_general</string>
     <string name="preference_general_title">General</string>
+    <string name="general_multithreading">general_multithreading</string>
+    <string name="general_multithreading_title">Enable multithreading (experimental)</string>
+    <string name="general_multithreading_default">false</string>
     <string name="general_clear_database">general_clear_data</string>
     <string name="general_clear_database_title">Clear database</string>
     <string name="general_clear_database_confirmation">All people have been removed from database</string>

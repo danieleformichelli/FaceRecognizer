@@ -38,6 +38,7 @@ public class FaceRecognizerMainActivity extends Activity {
 	private FaceDetector mFaceDetector;
 	private EIMFaceRecognizer mFaceRecognizer;
 	private boolean isOpenCVLoaded;
+	private boolean isMultithreadingEnabled;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +67,9 @@ public class FaceRecognizerMainActivity extends Activity {
 		mViewPager.setOnPageChangeListener(mOnPageChangeListener);
 
 		currentPosition = 0;
+		
+		isMultithreadingEnabled = EIMPreferences.getInstance(this).multithreading();
+		// TODO do something
 	}
 
 	@Override
@@ -224,5 +228,11 @@ public class FaceRecognizerMainActivity extends Activity {
 
 		mFaceDetector = new FaceDetector(this, type, classifier, scaleFactor,
 				minNeighbors, minRelativeFaceSize, maxRelativeFaceSize);
+	}
+
+	public void setMultithreading(boolean enable) {
+		isMultithreadingEnabled = enable;
+		// TODO do something
+		Log.e(TAG, (enable ? "Enable" : "Disable") + " multithreading");
 	}
 };
