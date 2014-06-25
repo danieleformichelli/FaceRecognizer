@@ -324,10 +324,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			int personId = extras.getInt(FaceDetectionActivity.PERSON_ID);
 			String[] photoPaths = data.getExtras().getStringArray(
 					FaceDetectionActivity.PHOTO_PATHS);
-
-			for (String photoPath : photoPaths)
-				mPeopleAdapterListener.addPhoto(personId, new Photo(photoPath,
-						null));
+			
+			mPeopleAdapterListener.addPhoto(personId, photoPaths);
 			break;
 		}
 	}

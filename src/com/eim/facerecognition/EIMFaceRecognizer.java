@@ -1,15 +1,18 @@
 package com.eim.facerecognition;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.opencv.android.Utils;
 import org.opencv.contrib.FaceRecognizer;
+import org.opencv.core.Core;
 import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
@@ -20,6 +23,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.preference.PreferenceManager;
+import android.util.Log;
 import android.util.SparseArray;
 
 import com.eim.facesmanagement.peopledb.Person;
@@ -191,7 +195,7 @@ public class EIMFaceRecognizer {
 	 *            the id of the person related to the new face
 	 */
 	public void incrementalTrain(String newFacePath, int label) {
-		incrementalTrain(new String[] {newFacePath}, label);
+		incrementalTrain(new String[] { newFacePath }, label);
 	}
 
 	public void incrementalTrain(String[] newFacesPaths, int label) {
@@ -228,8 +232,8 @@ public class EIMFaceRecognizer {
 			mFaceRecognizer.train(newFaces, labels);
 
 		mFaceRecognizer.save(mModelPath);
-		
-		for (Mat newFaceMat: newFaces)
+
+		for (Mat newFaceMat : newFaces)
 			newFaceMat.release();
 		labels.release();
 
@@ -238,7 +242,8 @@ public class EIMFaceRecognizer {
 
 	public void incrementalTrainWithLoading(Activity activity,
 			String newFacePath, int label) {
-		incrementalTrainWithLoading(activity, new String[] {newFacePath}, label);
+		incrementalTrainWithLoading(activity, new String[] { newFacePath },
+				label);
 	}
 
 	public void incrementalTrainWithLoading(Activity activity,
@@ -380,13 +385,15 @@ public class EIMFaceRecognizer {
 	}
 
 	private void preprocessImage(Mat image) {
+		// Illuminance normalization
+		if (normalize) {
+			// Imgproc.equalizeHist(image, image);
+			illuminanceNormalization(image, image);
+		}
+		
 		// Resize
 		if (mRecognizerType.needResize())
 			Imgproc.resize(image, image, size);
-
-		// Illuminance normalization
-		if (normalize)
-			Imgproc.equalizeHist(image, image);
 
 		// Cut
 		Size imageSize = image.size();
@@ -412,6 +419,135 @@ public class EIMFaceRecognizer {
 		roi.x = (image.cols() - roi.width) / 2;
 		roi.y = (image.rows() - roi.height) / 2;
 		image = image.submat(roi);
+	}
+
+	private void illuminanceNormalization(Mat src, Mat dst) {
+		float alpha = 0.1f;
+		float tau = 10.0f;
+		float gamma = 0.2f;
+		int sigma0 = 1;
+		int sigma1 = 2;
+		
+		float scale = src.rows() / 100;
+		
+		Mat I = new Mat();
+		debugImg(src, "0.png", 1);
+
+		src.convertTo(I, CvType.CV_32FC1, 1.0/255);
+		
+		// Start preprocessing:
+		Core.pow(I, gamma, I);
+		
+		debugImg(I, "1.png");
+
+		// Calculate the DOG Image:
+		{
+			Mat gaussian1 = new Mat();
+			Mat gaussian0 = new Mat();
+			// Kernel Size:
+			int kernel_sz0 = 3 * (int) (sigma0 * scale);
+			int kernel_sz1 = 3 * (int) (sigma1 * scale);
+			// Make them odd for OpenCV:
+			kernel_sz0 += ((kernel_sz0 % 2) == 0) ? 1 : 0;
+			kernel_sz1 += ((kernel_sz1 % 2) == 0) ? 1 : 0;
+
+			Imgproc.GaussianBlur(I, gaussian0,
+					new Size(kernel_sz0, kernel_sz0), sigma0, sigma0,
+					Imgproc.BORDER_CONSTANT);
+			Imgproc.GaussianBlur(I, gaussian1,
+					new Size(kernel_sz1, kernel_sz1), sigma1, sigma1,
+					Imgproc.BORDER_CONSTANT);
+			Core.subtract(gaussian0, gaussian1, I);
+			
+			gaussian0.release();
+			gaussian1.release();
+		}
+		
+		debugImg(I, "2.png");
+		
+
+		{
+			double meanI = 0.0;
+			{
+				Mat tmp = new Mat();
+				// trick to make abs(I), abs() is not in OpenCV4Android...
+				Core.absdiff(I, new Scalar(0), tmp);
+				Core.pow(tmp, alpha, tmp);
+				meanI = Core.mean(tmp).val[0];
+				tmp.release();
+			}
+			Mat ones = Mat.ones(I.size(), CvType.CV_32FC1);
+			I = I.mul(ones, 1 / Math.pow(meanI, 1.0 / alpha));
+			ones.release();
+		}
+		
+		debugImg(I, "3.png");
+
+		{
+			double meanI = 0.0;
+			{
+				Mat tmp = new Mat();
+				// trick to make abs(I), abs() is not in OpenCV4Android...
+				Core.absdiff(I, new Scalar(0), tmp);
+
+				Core.min(tmp, new Scalar(tau), tmp);
+				Core.pow(tmp, alpha, tmp);
+				meanI = Core.mean(tmp).val[0];
+				tmp.release();
+			}
+			Mat ones = Mat.ones(I.size(), CvType.CV_32FC1);
+			I = I.mul(ones, 1 / Math.pow(meanI, 1.0 / alpha));
+			ones.release();
+		}
+		
+		debugImg(I, "4.png");
+
+		// Squash into the tanh:
+		{
+			for (int r = 0, lr = I.rows(); r < lr; r++) {
+				for (int c = 0, lc = I.cols(); c < lc; c++) {
+					I.put(r, c, I.get(r, c)[0] / tau);
+				}
+			}
+			Mat ones = Mat.ones(I.size(), CvType.CV_32FC1);
+			I = I.mul(ones, tau);
+			ones.release();
+		}
+		
+		debugImg(I, "5.png");
+
+		I.convertTo(dst, CvType.CV_8UC1, 255);
+		I.release();
+	}
+	
+	private void debugImg(Mat d, String name) {
+		debugImg(d, name, 255);
+	}
+	
+	private void debugImg(Mat d, String name, double s) {
+
+		Mat img = new Mat();
+		
+		d.convertTo(img, CvType.CV_8UC1, s);
+		
+		Bitmap debug = Bitmap.createBitmap(img.cols(),
+				img.rows(), Bitmap.Config.ARGB_8888);
+		Utils.matToBitmap(img, debug);
+		
+		img.release();
+		
+		String filename = mContext.getExternalFilesDir(null).getAbsolutePath()
+				+ "/" + name;
+
+		try {
+			FileOutputStream out;
+			out = new FileOutputStream(filename);
+			debug.compress(Bitmap.CompressFormat.PNG, 100, out);
+			out.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	public Type getType() {
