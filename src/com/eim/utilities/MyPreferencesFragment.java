@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -22,8 +23,9 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	private PreferenceScreen mPreferenceScreen;
 	private String oldValue;
 
-	private String recognitionThresholdKey, recognitionCategoryKey, detectionCategoryKey,
-			clearDatabaseKey, restorePreferencesKey, multithreadingKey;
+	private String recognitionThresholdKey, recognitionCategoryKey,
+			detectionCategoryKey, clearDatabaseKey, restorePreferencesKey,
+			multithreadingKey;
 
 	private enum Validity {
 		VALID, NOT_VALID_RECOGNITION_THRESHOLD, NOT_VALID_CUTMODE_PERCENTAGE, NOT_VALID_LBPH_RADIUS, NOT_VALID_LBPH_NEIGHBOURS, NOT_VALID_LBPH_GRID, NOT_VALID_EIGEN_COMPONENTS, NOT_VALID_FISHER_COMPONENTS, NOT_VALID_DETECTION_SCALE_FACTOR, NOT_VALID_DETECTION_MIN_NEIGHBORS, NOT_VALID_DETECTION_MIN_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_MAX_RELATIVE_FACE_SIZE, NOT_VALID_DETECTION_RELATIVE_FACE_SIZE_RATIO, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_PORTRAIT, NOT_VALID_NUMBER_OF_GALLERY_COLUMNS_LANDSCAPE
@@ -300,6 +302,14 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				R.string.recognition_recognizer_type_default);
 		setPreference(R.string.recognition_threshold,
 				R.string.recognition_threshold_default);
+		setPreference(R.string.recognition_face_size,
+				R.string.recognition_face_size_default);
+		setPreference(R.string.recognition_normalization,
+				R.string.recognition_normalization_default);
+		setPreference(R.string.recognition_cutmode,
+				R.string.recognition_cutmode_default);
+		setPreference(R.string.recognition_cutmode_percentage,
+				R.string.recognition_cutmode_percentage_default);
 		setPreference(R.string.recognition_lbph_radius,
 				R.string.recognition_lbph_radius_default);
 		setPreference(R.string.recognition_lbph_neighbors,
@@ -314,6 +324,8 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				R.string.recognition_fisher_components_default);
 		setPreference(R.string.detection_detector_type,
 				R.string.detection_detector_type_default);
+		setPreference(R.string.detection_face_classifier,
+				R.string.detection_face_classifier_default);
 		setPreference(R.string.detection_scale_factor,
 				R.string.detection_scale_factor_default);
 		setPreference(R.string.detection_min_neighbors,
@@ -322,6 +334,8 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				R.string.detection_min_relative_face_size_default);
 		setPreference(R.string.detection_max_relative_face_size,
 				R.string.detection_max_relative_face_size_default);
+		setPreference(R.string.general_multithreading,
+				R.string.general_multithreading_default);
 		setPreference(R.string.management_number_of_gallery_columns_landscape,
 				R.string.management_number_of_gallery_columns_landscape_default);
 		setPreference(R.string.management_number_of_gallery_columns_portrait,
@@ -332,27 +346,29 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		String preferenceKey = activity.getString(preferenceId);
 		Preference mPreference = mPreferenceScreen
 				.findPreference(preferenceKey);
-		Editor mEditor;
 
+		if (mPreference instanceof CheckBoxPreference) {
+			boolean value = Boolean.valueOf(activity.getString(defaultValue));
+			((CheckBoxPreference) mPreference).setChecked(value);
+			mPreferenceScreen.getSharedPreferences().edit()
+					.putBoolean(mPreference.getKey(), value).commit();
+		}
 		if (mPreference instanceof EditTextPreference) {
 			String value = activity.getString(defaultValue);
 			((EditTextPreference) mPreference).setText(value);
-			mEditor = mPreferenceScreen.getSharedPreferences().edit();
-			mEditor.putString(mPreference.getKey(), value);
-			mEditor.commit();
+			mPreferenceScreen.getSharedPreferences().edit()
+					.putString(mPreference.getKey(), value).commit();
 		} else if (mPreference instanceof ListPreference) {
 			String value = activity.getString(defaultValue);
 			((ListPreference) mPreference).setValue(value);
-			mEditor = mPreferenceScreen.getSharedPreferences().edit();
-			mEditor.putString(mPreference.getKey(), value);
-			mEditor.commit();
+			mPreferenceScreen.getSharedPreferences().edit()
+					.putString(mPreference.getKey(), value).commit();
 		} else if (mPreference instanceof SwitchPreference) {
 			Boolean value = Boolean.parseBoolean(activity
 					.getString(defaultValue));
 			((SwitchPreference) mPreference).setChecked(value);
-			mEditor = mPreferenceScreen.getSharedPreferences().edit();
-			mEditor.putBoolean(mPreference.getKey(), value);
-			mEditor.commit();
+			mPreferenceScreen.getSharedPreferences().edit()
+					.putBoolean(mPreference.getKey(), value).commit();
 		}
 		setPreferenceSummary(mPreference);
 	}

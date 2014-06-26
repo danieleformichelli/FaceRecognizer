@@ -265,8 +265,6 @@ public class FaceDetectionActivity extends Activity {
 
 		final Bitmap[] detectedFaces = detectFaces();
 		mSceneFile.delete();
-
-		Log.e(TAG, "detected " + detectedFaces.length + " faces");
 		
 		if (detectedFaces.length == 0) {
 			runOnUiThread(new Runnable() {
