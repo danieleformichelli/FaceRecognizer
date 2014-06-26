@@ -27,7 +27,7 @@
     <string name="recognition_threshold_title">Recognition threshold</string>
     <string name="recognition_threshold_default">100</string>
     <string name="recognition_face_size">recognition_face_size</string>
-    <string name="recognition_face_size_title">Face size</string>
+    <string name="recognition_face_size_title">Face size (0 for no resize)</string>
     <string name="recognition_face_size_default">150</string>
     <string name="recognition_normalization">recognition_normalization</string>
     <string name="recognition_normalization_title">Perform normalization</string>

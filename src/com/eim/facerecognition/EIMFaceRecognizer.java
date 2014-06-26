@@ -28,12 +28,17 @@ import com.eim.facesmanagement.peopledb.Photo;
 
 public class EIMFaceRecognizer {
 	private static final String MODEL_FILE_NAME = "trainedModel.xml";
+	private static final Size defaultFaceSize = new Size(150, 150);
 
 	public enum Type {
 		LBPH, EIGEN, FISHER;
 
 		public boolean isIncrementable() {
 			return this == LBPH;
+		}
+
+		public boolean needResize() {
+			return this != LBPH;
 		}
 
 		public int numberOfNeededClasses() {
@@ -379,7 +384,10 @@ public class EIMFaceRecognizer {
 		// illuminanceNormalization(image, image);
 
 		// Resize
-		Imgproc.resize(image, image, faceSize);
+		if (faceSize.width != 0)
+			Imgproc.resize(image, image, faceSize);
+		else if (mRecognizerType.needResize())
+			Imgproc.resize(image, image, defaultFaceSize);
 
 		// Cut
 		image = image.submat(cutRect);
