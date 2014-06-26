@@ -14,13 +14,12 @@ import org.opencv.core.Mat;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.util.SparseArray;
 
 import com.eim.facesmanagement.peopledb.Person;
@@ -220,17 +219,16 @@ public class EIMFaceRecognizer {
 
 		for (int i = 0; i < newFacesPaths.length; i++) {
 			String newFacePath = newFacesPaths[i];
-			Mat newFaceMat = new Mat();
-
-			Bitmap newFace = BitmapFactory.decodeFile(newFacePath);
-			if (newFace == null)
+			
+			Mat newFaceMat = Highgui.imread(newFacePath,
+					Highgui.CV_LOAD_IMAGE_UNCHANGED);
+			
+			if (newFaceMat.empty())
 				throw new IllegalArgumentException("Cannot load the image at "
 						+ newFacePath);
 
-			Utils.bitmapToMat(newFace, newFaceMat);
-
-			Imgproc.cvtColor(newFaceMat, newFaceMat, Imgproc.COLOR_RGB2GRAY);
-
+			Imgproc.cvtColor(newFaceMat, newFaceMat, Imgproc.COLOR_BGR2GRAY);
+			
 			preprocessImage(newFaceMat);
 
 			newFaces.add(newFaceMat);
