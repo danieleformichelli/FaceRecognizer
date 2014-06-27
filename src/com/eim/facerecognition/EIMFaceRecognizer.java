@@ -396,14 +396,13 @@ public class EIMFaceRecognizer {
 
 		// Cut
 		if (mCutMode == CutMode.EYES)
-			cutEyes();
+			cutToEyes(image, image);
 		else
 			image = image.submat(cutRect);
 	}
 
-	private void cutEyes() {
-		// TODO Auto-generated method stub
-
+	private void cutToEyes(Mat src, Mat dst) {
+		
 	}
 
 	@SuppressWarnings("unused")
