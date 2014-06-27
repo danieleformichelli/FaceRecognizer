@@ -66,7 +66,7 @@ public class EIMFaceRecognizer {
 	private Type mRecognizerType;
 	private FaceRecognizer mFaceRecognizer;
 	private Size faceSize;
-	// private boolean normalize;
+	private boolean normalize;
 	private CutMode mCutMode;
 	private double mCutPercentage;
 	private Rect cutRect;
@@ -87,7 +87,7 @@ public class EIMFaceRecognizer {
 		this.mContext = mContext;
 		this.mRecognizerType = mRecognizerType;
 		this.faceSize = new Size(faceSize, faceSize);
-		// this.normalize = normalize;
+		this.normalize = normalize;
 		this.mCutMode = mCutMode;
 		this.mCutPercentage = (100 - mCutPercentage) / 100.0;
 		computeCutRect();
@@ -247,13 +247,13 @@ public class EIMFaceRecognizer {
 		else
 			mFaceRecognizer.train(newFaces, labels);
 
-		// mFaceRecognizer.save(mModelPath);
+		mFaceRecognizer.save(mModelPath);
+		isTrained = true;
 
 		for (Mat newFaceMat : newFaces)
 			newFaceMat.release();
 		labels.release();
 
-		isTrained = true;
 	}
 
 	public void incrementalTrainWithLoading(Activity activity,
@@ -275,7 +275,6 @@ public class EIMFaceRecognizer {
 				incrementalTrain(mNewFacesPaths, mLabel);
 				mActivity.runOnUiThread(new Runnable() {
 					public void run() {
-						mFaceRecognizer.save(mModelPath);
 						mProgressDialog.dismiss();
 					}
 				});
@@ -327,7 +326,7 @@ public class EIMFaceRecognizer {
 			labelsMat.put(i++, 0, new int[] { label });
 
 		mFaceRecognizer.train(faces, labelsMat);
-		// mFaceRecognizer.save(mModelPath);
+		mFaceRecognizer.save(mModelPath);
 		isTrained = true;
 
 		for (Mat face : faces)
@@ -345,12 +344,9 @@ public class EIMFaceRecognizer {
 
 		(new Thread() {
 			public void run() {
-				final boolean trained = train(mPeople);
+				train(mPeople);
 				mActivity.runOnUiThread(new Runnable() {
 					public void run() {
-						if (trained)
-							mFaceRecognizer.save(mModelPath);
-
 						mProgressDialog.dismiss();
 					}
 				});
@@ -386,10 +382,8 @@ public class EIMFaceRecognizer {
 	private void preprocessImage(Mat image) {
 		
 		// Illuminance normalization
-		// if (normalize) {
-		// Imgproc.equalizeHist(image, image);
-		// illuminanceNormalization(image, image);
-		// }
+		if (normalize)
+			Imgproc.equalizeHist(image, image);
 
 		// Resize
 		if (faceSize.width != 0)
@@ -405,7 +399,7 @@ public class EIMFaceRecognizer {
 	}
 
 	private void cutToEyes(Mat src, Mat dst) {
-		
+
 		Point eyeLeft = new Point();
 		Point eyeRight = new Point();
 		detectEye(src, eyeLeft, eyeRight);
@@ -414,6 +408,7 @@ public class EIMFaceRecognizer {
 		Point offs = new Point(0.1,0.1);
 		
 		cropFace(src, dst, eyeLeft, eyeRight, offs);
+
 	}
 
 	private void detectEye(Mat img, Point left, Point right) {
@@ -584,70 +579,68 @@ public class EIMFaceRecognizer {
 		// }
 
 	}
-	
-	private void rotate(Mat src, Mat dst, double angle)
-	{
-	    Point pt = new Point(src.cols()/2., src.rows()/2.);    
-	    Mat r = Imgproc.getRotationMatrix2D(pt, angle, 1.0);
-	    Imgproc.warpAffine(src, dst, r, new Size(src.cols(), src.rows()));
+
+	private void rotate(Mat src, Mat dst, double angle) {
+		Point pt = new Point(src.cols() / 2., src.rows() / 2.);
+		Mat r = Imgproc.getRotationMatrix2D(pt, angle, 1.0);
+		Imgproc.warpAffine(src, dst, r, new Size(src.cols(), src.rows()));
 	}
-	
+
 	private Mat crop(Mat uncropped, Point p, Size s) {
-		Rect roi = new Rect(p,s);
+		Rect roi = new Rect(p, s);
 		Mat cropped = new Mat(uncropped, roi);
 		return cropped;
 	}
-	
 
 	private void ScaleRotateTranslate(Mat img, double angle, Point center,
 			Point nCenter, double scale /* resample = Image.BICUBIC ? */) {
-		
+
 		if (scale == -1 || center == null) {
 			rotate(img, img, angle);
 			return;
 		}
-		
-		double x, nx, y ,ny;
+
+		double x, nx, y, ny;
 		x = nx = center.x;
-		y = ny = center.y;	
-		
+		y = ny = center.y;
+
 		if (nCenter != null) {
 			nx = nCenter.x;
 			ny = nCenter.y;
 		}
-		
+
 		double sx, sy;
 		sx = sy = 1.0;
-		
+
 		if (0.0 <= scale && scale <= 1.0) {
 			sx = sy = scale;
 		}
-		
+
 		double cos = Math.cos(angle);
 		double sin = Math.sin(angle);
-		
-		double a,b,c,d,e,f;
-		
-		a = cos/sx;
-		b = sin/sx;
+
+		double a, b, c, d, e, f;
+
+		a = cos / sx;
+		b = sin / sx;
 		c = x - (nx * a) - (ny * b);
-		d = - sin/sy;
-		e = cos/sy;
+		d = -sin / sy;
+		e = cos / sy;
 		f = y - (nx * d) - (ny * e);
-		
+
 		// Matrix
 		// [ a d ]
 		// [ b e ]
 		// [ c f ]
-		
-		Mat transMat = new Mat(2,3, CvType.CV_64F);
+
+		Mat transMat = new Mat(2, 3, CvType.CV_64F);
 		transMat.put(0, 0, a);
 		transMat.put(1, 0, b);
 		transMat.put(2, 0, c);
 		transMat.put(0, 1, d);
 		transMat.put(1, 1, e);
 		transMat.put(2, 1, f);
-		
+
 		Core.transform(img, img, transMat /*, resample*/);
 		
 	}
@@ -668,40 +661,41 @@ public class EIMFaceRecognizer {
 			Point offs) {
 
 		Size dsize = dst.size();
-		
+
 		// Compute offsets in original image
-		int offsetH = (int) Math.floor(((float)(offs.x))*dsize.width);
-		int offsetV = (int) Math.floor(((float)(offs.y))*dsize.height);
-		
+		int offsetH = (int) Math.floor(((float) (offs.x)) * dsize.width);
+		int offsetV = (int) Math.floor(((float) (offs.y)) * dsize.height);
+
 		// Get the direction
-		Point eyeDir = new Point(eyeRight.x - eyeLeft.x,eyeRight.y - eyeLeft.y);
-		
+		Point eyeDir = new Point(eyeRight.x - eyeLeft.x, eyeRight.y - eyeLeft.y);
+
 		// Calc rotation angle in radians
-		double rotation = - Math.atan2((float)(eyeDir.y),(float)(eyeDir.x));
-		
+		double rotation = -Math.atan2((float) (eyeDir.y), (float) (eyeDir.x));
+
 		// Distance between them
-		
-		double dist = Math.sqrt(eyeDir.x*eyeDir.x + eyeDir.y*eyeDir.y);
-		
+
+		double dist = Math.sqrt(eyeDir.x * eyeDir.x + eyeDir.y * eyeDir.y);
+
 		// Calculate the reference eye-width
-		double reference = dsize.width - 2.0* offsetH;
-		
+		double reference = dsize.width - 2.0 * offsetH;
+
 		// Scale factor
-		double scale = ((float)(dist))/((float)(reference));
-		
+		double scale = ((float) (dist)) / ((float) (reference));
+
 		// Rotate original around the left eye
 		ScaleRotateTranslate(src, rotation, eyeLeft, null, -1);
-		
+
 		// crop the rotated image
-		Point crop = new Point (eyeLeft.x - scale*offsetH, 
-				eyeLeft.x - scale*offsetV);
-		
+		Point crop = new Point(eyeLeft.x - scale * offsetH, eyeLeft.x - scale
+				* offsetV);
+
 		Size cropSize = new Size(dsize.width * scale, dsize.height * scale);
 		
 		dst = crop(src, crop, cropSize);
 		
-		Imgproc.resize(dst, dst, dsize);
 		
+		Imgproc.resize(dst, dst, dsize);
+
 	}
 
 	public Type getType() {
