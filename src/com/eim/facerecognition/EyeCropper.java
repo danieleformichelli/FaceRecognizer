@@ -1,4 +1,4 @@
-package com.eim.facedetection;
+package com.eim.facerecognition;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,7 +20,7 @@ import com.eim.R;
 import android.content.Context;
 import android.util.Log;
 
-public class EyeDetector {
+public class EyeCropper {
 	
 	/** Global variables */
 	
@@ -30,6 +30,10 @@ public class EyeDetector {
     
     private static final double EYE_MIN_SIZE_PERCENTAGE = 0.05;
     private static final double EYE_MAX_SIZE_PERCENTAGE = 0.5;
+    
+    private final int FLAGS = 0;
+    private final double SCALE_FACTOR = 1.1;
+    private final int MIN_NEIGHBOURS = 2;
     
     public enum Type {
     	LEFT, RIGHT
@@ -42,14 +46,19 @@ public class EyeDetector {
 	
 	private Point[] eyes;
 	private int[] radius;
+	
+	Point offs;
 		
-	public EyeDetector(Context context) { 
+	public EyeCropper(Context context) { 
 		
 		if (context == null)
 			throw new IllegalArgumentException("context cannot be null");
 		
 		mContext = context;
 		eyesCascade = new CascadeClassifier();
+		
+		// TODO: Verify the best parameters
+		offs = new Point(0.1,0.1);
 		
 		loadCascadeFile();
 		
@@ -84,6 +93,12 @@ public class EyeDetector {
 		}
 	}
 	
+	public void cropEyes(Mat src, Mat dst/*, Point offs*/) {
+
+		detectEye(src);
+		cropFace(src, dst, offs);
+
+	}
 	/**
 	 * An accurate alignment of your image data is especially important in 
 	 * tasks like emotion detection, were you need as much detail as possible.
@@ -96,8 +111,13 @@ public class EyeDetector {
 	 * 					to the eyes (horizontal, vertical direction)
 	 * @param dsize the size of the output image
 	 */
-	public void cropFace(Mat src, Mat dst, Point offs) {
-
+	private void cropFace(Mat src, Mat dst, Point offs) {
+		
+		if (eyes.length != 2) 
+        	return;
+        
+        Log.d(TAG,"Crop Face");
+        
 		Size dsize = dst.size();
 		Point eyeLeft, eyeRight;
 		
@@ -109,9 +129,7 @@ public class EyeDetector {
          *  x small    x big                      
          *  Left       Right
          */
-        if (eyes.length != 2) 
-        	return;
-        
+       
         if (eyes[0].x < eyes[1].x) {
         	eyeLeft = eyes[0];
         	eyeRight = eyes[1];
@@ -120,9 +138,7 @@ public class EyeDetector {
         	eyeRight = eyes[0];
         	eyeLeft = eyes[1];
         }
-        
 		
-		Log.d(TAG,"Crop Face");
 		// Compute offsets in original image
 		int offsetH = (int) Math.floor(((float) (offs.x)) * dsize.width);
 		int offsetV = (int) Math.floor(((float) (offs.y)) * dsize.height);
@@ -152,6 +168,9 @@ public class EyeDetector {
 
 		Size cropSize = new Size(dsize.width * scale, dsize.height * scale);
 		
+		Log.d(TAG,"Parameters: Crop(" + crop.x + ";" + crop.y +"), Size [Width "
+				+ "= " + cropSize.width + ", Height = " + cropSize.height +"]");
+		
 		dst = crop(src, crop, cropSize);
 		
 		Imgproc.resize(dst, dst, dsize);
@@ -162,7 +181,7 @@ public class EyeDetector {
 	 * N.B. We suppose the argument is a gray image 
 	 * @param img
 	 */
-	public void detectEye(Mat img) {
+	private void detectEye(Mat img) {
 	
 		/*
 		Mat gray = new Mat();
@@ -172,20 +191,23 @@ public class EyeDetector {
 		
         Rect face = new Rect(new Point(0,0), new Point(img.width(),img.height()));
         MatOfRect matEyes = new MatOfRect();
-        Size minSize = new Size(img.size().width*EYE_MIN_SIZE_PERCENTAGE,
-        		img.size().height*EYE_MIN_SIZE_PERCENTAGE);
-        eyesCascade.detectMultiScale(img, matEyes, 1.1, 2, 0, minSize, new Size());
         
+        double h = img.size().height;
+        double w = img.size().width;
+        
+        Size minSize = new Size(w*EYE_MIN_SIZE_PERCENTAGE, h*EYE_MIN_SIZE_PERCENTAGE);
+        Size maxSize = new Size(w*EYE_MAX_SIZE_PERCENTAGE, h*EYE_MAX_SIZE_PERCENTAGE); 
+        
+        eyesCascade.detectMultiScale(img, matEyes, SCALE_FACTOR, 
+        		MIN_NEIGHBOURS, FLAGS, minSize, maxSize);
+
         Rect[] eyesArray = matEyes.toArray();
         int len = eyesArray.length;
         
         // The input is a face. I should recognize two eyes.
         
         Log.i(TAG,"Detected eye(s) = " + len);
-        
-        if(len!=2)
-        	return;
-        
+             
         eyes = new Point[len];
         radius = new int[len];
         
@@ -211,7 +233,7 @@ public class EyeDetector {
 
 	private void scaleRotateTranslate(Mat img, double angle, Point center,
 			Point nCenter, double scale /* resample = Image.BICUBIC ? */) {
-
+		Log.d(TAG,"Scale Rotate and Translate");
 		if (scale == -1 || center == null) {
 			rotate(img, img, angle);
 			return;

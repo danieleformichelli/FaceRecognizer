@@ -1,6 +1,7 @@
 package com.eim.facerecognition;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,9 +23,9 @@ import org.opencv.imgproc.Imgproc;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.SparseArray;
 
-import com.eim.facedetection.EyeDetector;
 import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;
 
@@ -65,7 +66,7 @@ public class EIMFaceRecognizer {
 	private String mModelPath;
 	private Context mContext;
 	private Type mRecognizerType;
-	private EyeDetector mEyeDetector;
+	private EyeCropper mEyeDetector;
 	private FaceRecognizer mFaceRecognizer;
 	private Size faceSize;
 	private boolean normalize;
@@ -75,7 +76,7 @@ public class EIMFaceRecognizer {
 	private int lbphRadius, lbphNeighbours, lbphGridX, lbphGridY;
 	private int eigenComponents;
 	private int fisherComponents;
-
+	
 	public EIMFaceRecognizer(Context mContext, Type mRecognizerType,
 			int faceSize, boolean normalize, CutMode mCutMode,
 			int mCutPercentage, Integer... params) {
@@ -92,7 +93,7 @@ public class EIMFaceRecognizer {
 		this.normalize = normalize;
 		this.mCutMode = mCutMode;
 		this.mCutPercentage = (100 - mCutPercentage) / 100.0;
-		this.mEyeDetector = new EyeDetector(mContext);
+		this.mEyeDetector = new EyeCropper(mContext);
 		computeCutRect();
 
 		mModelPath = mContext.getExternalFilesDir(null).getAbsolutePath() + "/"
@@ -396,19 +397,14 @@ public class EIMFaceRecognizer {
 
 		// Cut
 		if (mCutMode == CutMode.EYES)
-			cutToEyes(image, image);
+			mEyeDetector.cropEyes(image, image);
 		else
 			image = image.submat(cutRect);
+		
+		debugImg(image, i++ + ".png");
 	}
 	
-	private void cutToEyes(Mat src, Mat dst/*, Point offs*/) {
-
-		mEyeDetector.detectEye(src);
-		// TODO: Verify the best parameters
-		Point offs = new Point(0.1,0.1);
-		mEyeDetector.cropFace(src, dst, offs);
-
-	}
+	private static int i = 0;
 	
 	@SuppressWarnings("unused")
 	private void illuminanceNormalization(Mat src, Mat dst) {
@@ -519,29 +515,29 @@ public class EIMFaceRecognizer {
 	}
 
 	private void debugImg(Mat d, String name, double s) {
-		return;
-		// Mat img = new Mat();
-		//
-		// d.convertTo(img, CvType.CV_8UC1, s);
-		//
-		// Bitmap debug = Bitmap.createBitmap(img.cols(),
-		// img.rows(), Bitmap.Config.ARGB_8888);
-		// Utils.matToBitmap(img, debug);
-		//
-		// img.release();
-		//
-		// String filename =
-		// mContext.getExternalFilesDir(null).getAbsolutePath()
-		// + "/" + name;
-		//
-		// try {
-		// FileOutputStream out;
-		// out = new FileOutputStream(filename);
-		// debug.compress(Bitmap.CompressFormat.PNG, 100, out);
-		// out.close();
-		// } catch (Exception e) {
-		// e.printStackTrace();
-		// }
+		
+		 Mat img = new Mat();
+		
+		 d.convertTo(img, CvType.CV_8UC1, s);
+		
+		 Bitmap debug = Bitmap.createBitmap(img.cols(),
+		 img.rows(), Bitmap.Config.ARGB_8888);
+		 Utils.matToBitmap(img, debug);
+		
+		 img.release();
+		
+		 String filename =
+		 mContext.getExternalFilesDir(null).getAbsolutePath()
+		 + "/" + name;
+		
+		 try {
+			 FileOutputStream out;
+			 out = new FileOutputStream(filename);
+			 debug.compress(Bitmap.CompressFormat.PNG, 100, out);
+			 out.close();
+		 } catch (Exception e) {
+			 e.printStackTrace();
+		 }
 
 	}
 

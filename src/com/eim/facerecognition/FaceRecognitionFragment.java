@@ -64,6 +64,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	public boolean mMultithread = true;
 
 	private FaceDetector mFaceDetector;
+	private EyeCropper mEyeDetector;
 	private EIMFaceRecognizer mFaceRecognizer;
 	private PeopleDatabase mPeopleDatabase;
 
@@ -220,8 +221,9 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 			mLabelsForDrawer = recognizeFaces(mSceneForRecognizer, facesArray);
 		}
 		
-		for (LabelledRect faceAndLabel : mLabelsForDrawer)
+		for (LabelledRect faceAndLabel : mLabelsForDrawer) {
 			drawLabel(mRgba, faceAndLabel);
+		}
 
 		return mRgba;
 	}
@@ -269,7 +271,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 		return recognizedPeople;
 	}
-
+	
 	private void drawLabel(Mat frame, LabelledRect info) {
 		if (info == null)
 			return;
@@ -282,7 +284,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 		if (info.text == null)
 			return;
-
+		
 		// Text...
 		int fontFace = Core.FONT_HERSHEY_PLAIN;
 		double fontScale = 4;
@@ -297,7 +299,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				/ 2;
 		textOrigin.y = info.rect.br().y + textSize.height + 20;
 
-		// ... with semi-transparent white background rectngle
+		// ... with semi-transparent white background rectangle
 		double padding = 20;
 		Point rectangleTL = new Point(textOrigin.x, textOrigin.y
 				- textSize.height);
