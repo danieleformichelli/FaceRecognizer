@@ -9,7 +9,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
 public class EIMPreferences {
-	
+
 	private static EIMPreferences instance;
 
 	private SharedPreferences mSharedPreferences;
@@ -113,7 +113,15 @@ public class EIMPreferences {
 
 		return null;
 	}
-	
+
+	private String recognitionNormalizationKey;
+	private boolean recognitionNormalizationDefault;
+
+	public boolean recognitionNormalization() {
+		return mSharedPreferences.getBoolean(recognitionNormalizationKey,
+				recognitionNormalizationDefault);
+	}
+
 	private String recognitionCutModeKey;
 	private String recognitionCutModeDefault;
 
@@ -130,20 +138,29 @@ public class EIMPreferences {
 		return null;
 	}
 
-	private String recognitionCutmodePercentageKey;
-	private String recognitionCutmodePercentageDefault;
+	private String recognitionCutModePercentageKey;
+	private String recognitionCutModePercentageDefault;
 
-	public double recognitionCutmodePercentage() {
-		return Double.parseDouble(mSharedPreferences.getString(
-				recognitionCutmodePercentageKey, recognitionCutmodePercentageDefault));
+	public int recognitionCutModePercentage() {
+		return Integer.parseInt(mSharedPreferences.getString(
+				recognitionCutModePercentageKey,
+				recognitionCutModePercentageDefault));
 	}
-	
+
 	private String recognitionThresholdKey;
 	private String recognitionThresholdDefault;
 
 	public int recognitionThreshold() {
 		return Integer.parseInt(mSharedPreferences.getString(
 				recognitionThresholdKey, recognitionThresholdDefault));
+	}
+
+	private String recognitionFaceSizeKey;
+	private String recognitionFaceSizeDefault;
+
+	public int recognitionFaceSize() {
+		return Integer.parseInt(mSharedPreferences.getString(
+				recognitionFaceSizeKey, recognitionFaceSizeDefault));
 	}
 
 	private String LBPHRadiusKey;
@@ -193,7 +210,14 @@ public class EIMPreferences {
 		return Integer.parseInt(mSharedPreferences.getString(
 				FisherComponentsKey, FisherComponentsDefault));
 	}
-	
+
+	private String multithreadingKey;
+	private boolean multithreadingDefault;
+
+	public boolean multithreading() {
+		return mSharedPreferences.getBoolean(multithreadingKey,
+				multithreadingDefault);
+	}
 
 	private void getKeysAndDefaultValues(Context mContext) {
 		detectionScaleFactorKey = mContext
@@ -240,21 +264,36 @@ public class EIMPreferences {
 		recognitionTypeDefault = mContext
 				.getString(R.string.recognition_recognizer_type_default);
 
+		recognitionFaceSizeKey = mContext
+				.getString(R.string.recognition_face_size);
+		recognitionFaceSizeDefault = mContext
+				.getString(R.string.recognition_face_size_default);
+		
 		recognitionThresholdKey = mContext
 				.getString(R.string.recognition_threshold);
 		recognitionThresholdDefault = mContext
 				.getString(R.string.recognition_threshold_default);
-		
+
+		recognitionNormalizationKey = mContext
+				.getString(R.string.recognition_normalization);
+		recognitionNormalizationDefault = Boolean.parseBoolean(mContext
+				.getString(R.string.recognition_normalization_default));
+
 		recognitionCutModeKey = mContext
 				.getString(R.string.recognition_cutmode);
 		recognitionCutModeDefault = mContext
 				.getString(R.string.recognition_cutmode_default);
 
+		recognitionCutModePercentageKey = mContext
+				.getString(R.string.recognition_cutmode_percentage);
+		recognitionCutModePercentageDefault = mContext
+				.getString(R.string.recognition_cutmode_percentage_default);
+
 		recognitionThresholdKey = mContext
 				.getString(R.string.recognition_cutmode_percentage);
-		recognitionThresholdDefault = mContext.
-				getString(R.string.recognition_cutmode_percentage_default);
-		
+		recognitionThresholdDefault = mContext
+				.getString(R.string.recognition_cutmode_percentage_default);
+
 		LBPHRadiusKey = mContext.getString(R.string.recognition_lbph_radius);
 		LBPHRadiusDefault = mContext
 				.getString(R.string.recognition_lbph_radius_default);
@@ -281,5 +320,10 @@ public class EIMPreferences {
 				.getString(R.string.recognition_fisher_components);
 		FisherComponentsDefault = mContext
 				.getString(R.string.recognition_fisher_components_default);
+
+		multithreadingKey = mContext.getString(R.string.general_multithreading);
+		multithreadingDefault = Boolean.parseBoolean(mContext
+				.getString(R.string.general_multithreading_default));
+
 	}
 }

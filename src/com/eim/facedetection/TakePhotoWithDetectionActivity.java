@@ -34,7 +34,7 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 	private static final Scalar FACE_RECT_COLOR = new Scalar(255, 192, 100, 255);
 
 	private ControlledJavaCameraView mCameraView;
-	private ImageButton mButton;
+	private ImageButton mTakePhotoButton;
 
 	private Mat mGray;
 	private Mat mRgba;
@@ -67,8 +67,8 @@ public class TakePhotoWithDetectionActivity extends Activity implements
 		mCameraView.setCvCameraViewListener(this);
 		mCameraView.setCameraIndex(mCurrentCameraIndex);
 
-		mButton = (ImageButton) findViewById(R.id.take_photo_button);
-		mButton.setOnClickListener(new OnClickListener() {
+		mTakePhotoButton = (ImageButton) findViewById(R.id.take_photo_button);
+		mTakePhotoButton.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				mTakePhotoNow = true;

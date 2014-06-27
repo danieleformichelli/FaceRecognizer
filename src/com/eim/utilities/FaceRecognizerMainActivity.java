@@ -38,6 +38,7 @@ public class FaceRecognizerMainActivity extends Activity {
 	private FaceDetector mFaceDetector;
 	private EIMFaceRecognizer mFaceRecognizer;
 	private boolean isOpenCVLoaded;
+	private boolean isMultithreadingEnabled;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +67,10 @@ public class FaceRecognizerMainActivity extends Activity {
 		mViewPager.setOnPageChangeListener(mOnPageChangeListener);
 
 		currentPosition = 0;
+
+		isMultithreadingEnabled = EIMPreferences.getInstance(this)
+				.multithreading();
+		mFaceRecognitionFragment.mMultithread = isMultithreadingEnabled;
 	}
 
 	@Override
@@ -160,9 +165,13 @@ public class FaceRecognizerMainActivity extends Activity {
 		final EIMPreferences mPreferences = EIMPreferences.getInstance(this);
 		final EIMFaceRecognizer.Type mRecognitionType = mPreferences
 				.recognitionType();
-		final EIMFaceRecognizer.CutMode mCutMode = mPreferences.
-				recognitionCutMode();
-		
+		final int faceSize = mPreferences.recognitionFaceSize();
+		final boolean normalize = mPreferences.recognitionNormalization();
+		final EIMFaceRecognizer.CutMode mCutMode = mPreferences
+				.recognitionCutMode();
+		final int mCutModePercentage = mPreferences
+				.recognitionCutModePercentage();
+
 		switch (mRecognitionType) {
 		case LBPH:
 			final int radius = mPreferences.LBPHRadius();
@@ -170,22 +179,23 @@ public class FaceRecognizerMainActivity extends Activity {
 			final int gridX = mPreferences.LBPHGridX();
 			final int gridY = mPreferences.LBPHGridY();
 			mFaceRecognizer = new EIMFaceRecognizer(this, mRecognitionType,
-					radius, neighbours, gridX, gridY);
+					faceSize, normalize, mCutMode, mCutModePercentage, radius,
+					neighbours, gridX, gridY);
 			break;
 		case EIGEN:
 			final int eigenComponents = mPreferences.EigenComponents();
 			mFaceRecognizer = new EIMFaceRecognizer(this, mRecognitionType,
+					faceSize, normalize, mCutMode, mCutModePercentage,
 					eigenComponents);
 		case FISHER:
 			final int fisherComponents = mPreferences.FisherComponents();
 			mFaceRecognizer = new EIMFaceRecognizer(this, mRecognitionType,
+					faceSize, normalize, mCutMode, mCutModePercentage,
 					fisherComponents);
 			break;
 		default:
 			throw new IllegalArgumentException("invalid recognition type");
 		}
-		
-		mFaceRecognizer.setCutMode(mCutMode);
 	}
 
 	public EIMFaceRecognizer getFaceRecognizer() {
@@ -222,5 +232,10 @@ public class FaceRecognizerMainActivity extends Activity {
 
 		mFaceDetector = new FaceDetector(this, type, classifier, scaleFactor,
 				minNeighbors, minRelativeFaceSize, maxRelativeFaceSize);
+	}
+
+	public void setMultithreading(boolean enable) {
+		isMultithreadingEnabled = enable;
+		mFaceRecognitionFragment.mMultithread = isMultithreadingEnabled;
 	}
 };

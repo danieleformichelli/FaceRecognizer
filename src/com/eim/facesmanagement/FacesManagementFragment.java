@@ -31,7 +31,7 @@ import com.eim.utilities.PhotoAdapter;
 import com.eim.utilities.Swipeable;
 
 public class FacesManagementFragment extends Fragment implements Swipeable,
-		OnOpenCVLoaded {
+		OnOpenCVLoaded, PeopleAdapterListener {
 	private static final String TAG = "FacesManagementFragment";
 	private static final int FACE_DETECTION_AND_EXTRACTION = 1;
 
@@ -73,8 +73,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 		mPeopleList = (ExpandableListView) mainLayout
 				.findViewById(R.id.faces_management_people_list);
 		mPeopleAdapter = new PeopleAdapter(activity, R.layout.person_list_item,
-				R.layout.person_view, mPeopleDatabase.getPeople(),
-				mPeopleAdapterListener, mPhotoGalleryListener);
+				R.layout.person_view, mPeopleDatabase.getPeople(), this,
+				mPhotoGalleryListener);
 
 		mPeopleList.setAdapter(mPeopleAdapter);
 		if (mPeopleAdapter.getGroupCount() == 0)
@@ -128,8 +128,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			public void onClick(DialogInterface dialog, int which) {
 				switch (which) {
 				case DialogInterface.BUTTON_POSITIVE:
-					mPeopleAdapterListener.addPerson(mEditPersonDialog
-							.getInsertedName());
+					addPerson(mEditPersonDialog.getInsertedName());
 					break;
 				default:
 					break;
@@ -144,7 +143,13 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 	public void clearPeople() {
 		SparseArray<Person> people = mPeopleAdapter.getPeople();
 		for (int i = 0, l = people.size(); i < l; i++)
-			mPeopleAdapterListener.removePerson(people.keyAt(i));
+			mPeopleDatabase.removePerson(people.keyAt(i));
+
+		mPeopleAdapter.setPeople(null);
+		noPeopleMessage.setVisibility(View.VISIBLE);
+
+		// All person have been removed: reset the network
+		mFaceRecognizer.resetModel();
 	}
 
 	/**
@@ -158,82 +163,87 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			retrainModel = true;
 	}
 
-	PeopleAdapterListener mPeopleAdapterListener = new PeopleAdapterListener() {
-
-		@Override
-		public void addPerson(String name) {
-			if (name == null || name.length() == 0) {
-				Toast.makeText(
-						activity,
-						activity.getString(R.string.error_person_name_not_valid),
-						Toast.LENGTH_SHORT).show();
-				return;
-			}
-
-			int id = mPeopleDatabase.addPerson(name);
-
-			if (id == -1) {
-				Toast.makeText(
-						activity,
-						activity.getString(R.string.error_person_already_present),
-						Toast.LENGTH_SHORT).show();
-				return;
-			}
-
-			mPeopleAdapter.addPerson(id, new Person(name));
-
-			if (mPeopleAdapter.getGroupCount() != 0)
-				noPeopleMessage.setVisibility(View.GONE);
+	public void addPerson(String name) {
+		if (name == null || name.length() == 0) {
+			Toast.makeText(activity,
+					activity.getString(R.string.error_person_name_not_valid),
+					Toast.LENGTH_SHORT).show();
+			return;
 		}
 
-		@Override
-		public void editPersonName(int id, String newName) {
-			if (mPeopleAdapter.editPersonName(id, newName) == false) {
-				Toast.makeText(
-						activity,
-						activity.getString(R.string.error_person_already_present),
-						Toast.LENGTH_SHORT).show();
-				return;
-			}
+		int id = mPeopleDatabase.addPerson(name);
 
-			mPeopleDatabase.editPersonName(id, newName);
+		if (id == -1) {
+			Toast.makeText(activity,
+					activity.getString(R.string.error_person_already_present),
+					Toast.LENGTH_SHORT).show();
+			return;
 		}
 
-		@Override
-		public void removePerson(int id) {
-			mPeopleAdapter.removePerson(id);
-			if (mPeopleAdapter.getGroupCount() == 0)
-				noPeopleMessage.setVisibility(View.VISIBLE);
+		mPeopleAdapter.addPerson(id, new Person(name));
 
-			mPeopleDatabase.removePerson(id);
-	
-			// A person has been removed: retrain the entire network
-			mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
+		if (mPeopleAdapter.getGroupCount() != 0)
+			noPeopleMessage.setVisibility(View.GONE);
+	}
+
+	// PeopleAdapterListener
+	@Override
+	public void editPersonName(int id, String newName) {
+		if (mPeopleAdapter.editPersonName(id, newName) == false) {
+			Toast.makeText(activity,
+					activity.getString(R.string.error_person_already_present),
+					Toast.LENGTH_SHORT).show();
+			return;
 		}
 
-		@Override
-		public void addPhoto(int personId, Photo photo) {
-			int photoId = mPeopleDatabase.addPhoto(personId, photo.getUrl());
+		mPeopleDatabase.editPersonName(id, newName);
+	}
 
-			mPeopleAdapter.addPhoto(personId, photoId, photo);
+	@Override
+	public void removePerson(int id) {
+		mPeopleAdapter.removePerson(id);
+		if (mPeopleAdapter.getGroupCount() == 0)
+			noPeopleMessage.setVisibility(View.VISIBLE);
 
-			// A photo has been added: incrementally train the network
-			if (mFaceRecognizer.getType().isIncrementable())
-				mFaceRecognizer.incrementalTrainWithLoading(activity, photo.getUrl(),
-						personId);
-			else
-				mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
+		mPeopleDatabase.removePerson(id);
+
+		// A person has been removed: retrain the entire network
+		mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
+	}
+
+	public void addPhotos(int personId, String[] photoUrls) {
+
+		for (String url : photoUrls) {
+			int photoId = mPeopleDatabase.addPhoto(personId, url);
+			mPeopleAdapter.addPhoto(personId, photoId, new Photo(url));
 		}
 
-		@Override
-		public void removePhoto(int personId, int photoId) {
+		// A photo has been added: incrementally train the network
+		if (mFaceRecognizer.getType().isIncrementable())
+			mFaceRecognizer.incrementalTrainWithLoading(activity, photoUrls,
+					personId);
+		else
+			mFaceRecognizer.trainWithLoading(activity,
+					mPeopleAdapter.getPeople());
+	}
+
+	public void removePhoto(int personId, int photoId) {
+		mPeopleAdapter.removePhoto(personId, photoId);
+		mPeopleDatabase.removePhoto(personId, photoId);
+
+		// A photo has been removed: retrain the entire network
+		mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
+	}
+
+	public void removePhotos(int personId, List<Integer> toBeDeleted) {
+		for (Integer photoId : toBeDeleted) {
 			mPeopleAdapter.removePhoto(personId, photoId);
 			mPeopleDatabase.removePhoto(personId, photoId);
-		
-			// A photo has been removed: retrain the entire network
-			mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
 		}
-	};
+
+		// A photo has been removed: retrain the entire network
+		mFaceRecognizer.trainWithLoading(activity, mPeopleAdapter.getPeople());
+	}
 
 	PhotoGalleryListener mPhotoGalleryListener = new PhotoGalleryListener() {
 
@@ -262,8 +272,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 				if (mPhotoAdapter.isSelected(i))
 					toBeDeleted.add(photos.keyAt(i - 1));
 
-			for (Integer i : toBeDeleted)
-				mPeopleAdapterListener.removePhoto(personId, i);
+			removePhotos(personId, toBeDeleted);
 		}
 
 	};
@@ -283,9 +292,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			String[] photoPaths = data.getExtras().getStringArray(
 					FaceDetectionActivity.PHOTO_PATHS);
 
-			for (String photoPath : photoPaths)
-				mPeopleAdapterListener.addPhoto(personId, new Photo(photoPath,
-						null));
+			addPhotos(personId, photoPaths);
 			break;
 		}
 	}

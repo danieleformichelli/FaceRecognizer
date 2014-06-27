@@ -6,30 +6,29 @@ import java.util.List;
 
 import org.opencv.android.Utils;
 import org.opencv.contrib.FaceRecognizer;
+import org.opencv.core.Core;
+import org.opencv.core.Core.MinMaxLocResult;
 import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
 import org.opencv.core.Size;
+import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.preference.PreferenceManager;
-import android.util.Log;
 import android.util.SparseArray;
 
 import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;
 
 public class EIMFaceRecognizer {
-	private static final String TAG = "EIMFaceRecognizer";
 	private static final String MODEL_FILE_NAME = "trainedModel.xml";
-	private static final String WIDTH = "width";
-	private static final String HEIGHT = "height";
+	private static final Size defaultFaceSize = new Size(150, 150);
 
 	public enum Type {
 		LBPH, EIGEN, FISHER;
@@ -55,10 +54,9 @@ public class EIMFaceRecognizer {
 			return -1;
 		}
 	}
-	
-	public enum CutMode {
-		NO_CUT, HORIZONTAL, VERTICAL, TOTAL
 
+	public enum CutMode {
+		NO_CUT, EYES, HORIZONTAL, VERTICAL, TOTAL
 	}
 
 	private boolean isTrained;
@@ -66,38 +64,37 @@ public class EIMFaceRecognizer {
 	private Context mContext;
 	private Type mRecognizerType;
 	private FaceRecognizer mFaceRecognizer;
-	private SharedPreferences mSharedPreferences;
+	private Size faceSize;
+	// private boolean normalize;
 	private CutMode mCutMode;
-	private double mPercentage;
+	private double mCutPercentage;
+	private Rect cutRect;
 	private int lbphRadius, lbphNeighbours, lbphGridX, lbphGridY;
 	private int eigenComponents;
 	private int fisherComponents;
 
-	private Size size;
-
-	public EIMFaceRecognizer(Context mContext, Type mType, Integer... params) {
+	public EIMFaceRecognizer(Context mContext, Type mRecognizerType,
+			int faceSize, boolean normalize, CutMode mCutMode,
+			int mCutPercentage, Integer... params) {
 		if (mContext == null)
 			throw new IllegalArgumentException("mContext cannot be null");
-		if (mType == null)
-			throw new IllegalArgumentException("mType cannot be null");
+		if (mRecognizerType == null)
+			throw new IllegalArgumentException("mRecognizerType cannot be null");
+		if (mCutMode == null)
+			throw new IllegalArgumentException("mCutMode cannot be null");
 
 		this.mContext = mContext;
-		mRecognizerType = mType;
-
-		mSharedPreferences = PreferenceManager
-				.getDefaultSharedPreferences(mContext);
+		this.mRecognizerType = mRecognizerType;
+		this.faceSize = new Size(faceSize, faceSize);
+		// this.normalize = normalize;
+		this.mCutMode = mCutMode;
+		this.mCutPercentage = (100 - mCutPercentage) / 100.0;
+		computeCutRect();
 
 		mModelPath = mContext.getExternalFilesDir(null).getAbsolutePath() + "/"
 				+ MODEL_FILE_NAME;
 
 		instantiateFaceRecognizer(params);
-
-		size = new Size(mSharedPreferences.getInt(WIDTH, -1),
-				mSharedPreferences.getInt(HEIGHT, -1));
-		if (size.width == -1)
-			size.width = Double.MAX_VALUE;
-		if (size.height == -1)
-			size.height = Double.MAX_VALUE;
 
 		if (new File(mModelPath).exists()) {
 			try {
@@ -109,6 +106,35 @@ public class EIMFaceRecognizer {
 			isTrained = true;
 		} else
 			isTrained = false;
+	}
+
+	private void computeCutRect() {
+		if (mCutMode == CutMode.EYES)
+			return;
+
+		cutRect = new Rect();
+
+		switch (mCutMode) {
+		case NO_CUT:
+			return;
+		case HORIZONTAL:
+			cutRect.width = (int) (faceSize.width * mCutPercentage);
+			cutRect.height = (int) faceSize.height;
+			break;
+		case VERTICAL:
+			cutRect.width = (int) faceSize.width;
+			cutRect.height = (int) (faceSize.height * mCutPercentage);
+			break;
+		case TOTAL:
+			cutRect.width = (int) (faceSize.width * mCutPercentage);
+			cutRect.height = (int) (faceSize.height * mCutPercentage);
+			break;
+		default:
+			break;
+		}
+
+		cutRect.x = (int) (faceSize.width - cutRect.width) / 2;
+		cutRect.y = (int) (faceSize.height - cutRect.height) / 2;
 	}
 
 	private void instantiateFaceRecognizer(Integer... params) {
@@ -185,45 +211,59 @@ public class EIMFaceRecognizer {
 	 *            the id of the person related to the new face
 	 */
 	public void incrementalTrain(String newFacePath, int label) {
+		incrementalTrain(new String[] { newFacePath }, label);
+	}
+
+	public void incrementalTrain(String[] newFacesPaths, int label) {
 		if (!mRecognizerType.isIncrementable())
 			throw new IllegalStateException("Face detector of type "
 					+ mRecognizerType.toString()
 					+ "cannot be trained incrementally");
 
 		List<Mat> newFaces = new ArrayList<Mat>();
-		Mat labels = new Mat(1, 1, CvType.CV_32SC1);
-		Mat newFaceMat = new Mat();
+		Mat labels = new Mat(newFacesPaths.length, 1, CvType.CV_32SC1);
 
-		Bitmap newFace = BitmapFactory.decodeFile(newFacePath);
-		if (newFace == null)
-			throw new IllegalArgumentException("Cannot load the image at "
-					+ newFacePath);
+		for (int i = 0; i < newFacesPaths.length; i++) {
+			String newFacePath = newFacesPaths[i];
 
-		Utils.bitmapToMat(newFace, newFaceMat);
+			Mat newFaceMat = Highgui.imread(newFacePath,
+					Highgui.CV_LOAD_IMAGE_UNCHANGED);
 
-		Imgproc.cvtColor(newFaceMat, newFaceMat, Imgproc.COLOR_RGB2GRAY);
+			if (newFaceMat.empty())
+				throw new IllegalArgumentException("Cannot load the image at "
+						+ newFacePath);
 
-		if (mRecognizerType.needResize())
-			Imgproc.resize(newFaceMat, newFaceMat, size);
+			Imgproc.cvtColor(newFaceMat, newFaceMat, Imgproc.COLOR_BGR2GRAY);
 
-		newFaces.add(newFaceMat);
-		labels.put(0, 0, new int[] { label });
+			preprocessImage(newFaceMat);
+
+			newFaces.add(newFaceMat);
+			labels.put(i, 0, new int[] { label });
+		}
 
 		if (isTrained)
 			mFaceRecognizer.update(newFaces, labels);
 		else
 			mFaceRecognizer.train(newFaces, labels);
 
-		mFaceRecognizer.save(mModelPath);
-		isTrained = true;
+		// mFaceRecognizer.save(mModelPath);
 
-		newFaceMat.release();
+		for (Mat newFaceMat : newFaces)
+			newFaceMat.release();
 		labels.release();
+
+		isTrained = true;
 	}
 
-	public void incrementalTrainWithLoading(Activity activity, String newFacePath,
-			int label) {
-		final String mNewFacePath = newFacePath;
+	public void incrementalTrainWithLoading(Activity activity,
+			String newFacePath, int label) {
+		incrementalTrainWithLoading(activity, new String[] { newFacePath },
+				label);
+	}
+
+	public void incrementalTrainWithLoading(Activity activity,
+			String[] newFacesPaths, int label) {
+		final String[] mNewFacesPaths = newFacesPaths;
 		final int mLabel = label;
 		final ProgressDialog mProgressDialog = ProgressDialog.show(activity,
 				"", "Training...", true);
@@ -231,9 +271,10 @@ public class EIMFaceRecognizer {
 
 		(new Thread() {
 			public void run() {
-				incrementalTrain(mNewFacePath, mLabel);
+				incrementalTrain(mNewFacesPaths, mLabel);
 				mActivity.runOnUiThread(new Runnable() {
 					public void run() {
+						mFaceRecognizer.save(mModelPath);
 						mProgressDialog.dismiss();
 					}
 				});
@@ -249,15 +290,11 @@ public class EIMFaceRecognizer {
 	 *            faces dataset, keys are the labels and faces are contained in
 	 *            the field Photos of the value
 	 */
-	public void train(SparseArray<Person> people) {
+	public boolean train(SparseArray<Person> people) {
 		if (!isDatasetValid(people)) {
 			resetModel();
-			return;
+			return false;
 		}
-
-		int images = 0;
-		double height = 0.0;
-		double width = 0.0;
 		List<Mat> faces = new ArrayList<Mat>();
 		List<Integer> labels = new ArrayList<Integer>();
 
@@ -277,30 +314,11 @@ public class EIMFaceRecognizer {
 				labels.add(label);
 				faces.add(mMat);
 
-				if (mRecognizerType.needResize()) {
-					Size s = mMat.size();
-					height += s.height;
-					width += s.width;
-					images++;
-				}
 			}
 		}
 
-		if (mRecognizerType.needResize()) {
-			size.height = height / images;
-			size.width = width / images;
-		}
-
-		mSharedPreferences.edit().putInt(WIDTH, (int) size.width)
-				.putInt(HEIGHT, (int) size.height).apply();
-
-		if (mRecognizerType.needResize()) {
-			Log.i(TAG, "Set size of all faces to " + size.width + "x"
-					+ size.height);
-
-			for (Mat face : faces)
-				Imgproc.resize(face, face, size);
-		}
+		for (Mat face : faces)
+			preprocessImage(face);
 
 		Mat labelsMat = new Mat(labels.size(), 1, CvType.CV_32SC1);
 		int i = 0;
@@ -308,12 +326,14 @@ public class EIMFaceRecognizer {
 			labelsMat.put(i++, 0, new int[] { label });
 
 		mFaceRecognizer.train(faces, labelsMat);
-		mFaceRecognizer.save(mModelPath);
+		// mFaceRecognizer.save(mModelPath);
 		isTrained = true;
 
 		for (Mat face : faces)
 			face.release();
 		labelsMat.release();
+
+		return true;
 	}
 
 	public void trainWithLoading(Activity activity, SparseArray<Person> people) {
@@ -324,9 +344,12 @@ public class EIMFaceRecognizer {
 
 		(new Thread() {
 			public void run() {
-				train(mPeople);
+				final boolean trained = train(mPeople);
 				mActivity.runOnUiThread(new Runnable() {
 					public void run() {
+						if (trained)
+							mFaceRecognizer.save(mModelPath);
+
 						mProgressDialog.dismiss();
 					}
 				});
@@ -354,74 +377,249 @@ public class EIMFaceRecognizer {
 
 	public void predict(Mat src, int[] label, double[] confidence) {
 		if (isTrained) {
-			// cutImage(src);
-			Mat resized = new Mat();
-			if (mRecognizerType.needResize()) {
-				Imgproc.resize(src, resized, size);
-				mFaceRecognizer.predict(resized, label, confidence);
-				
-			} else
-				mFaceRecognizer.predict(src, label, confidence);
-			resized.release();
+			preprocessImage(src);
+			mFaceRecognizer.predict(src, label, confidence);
 		}
 	}
 
-	private void cutImage(Mat image) {
+	private void preprocessImage(Mat image) {
+		// Illuminance normalization
+		// if (normalize) {
+		// Imgproc.equalizeHist(image, image);
+		// illuminanceNormalization(image, image);
+		// }
+
+		// Resize
+		if (faceSize.width != 0)
+			Imgproc.resize(image, image, faceSize);
+		else if (mRecognizerType.needResize())
+			Imgproc.resize(image, image, defaultFaceSize);
+
+		// Cut
+		if (mCutMode == CutMode.EYES)
+			cutToEyes(image, image);
+		else
+			image = image.submat(cutRect);
+	}
+
+	private void cutToEyes(Mat src, Mat dst) {
 		
-		Size s = new Size();
+	}
+
+	@SuppressWarnings("unused")
+	private void illuminanceNormalization(Mat src, Mat dst) {
+		float alpha = 0.1f;
+		float tau = 10.0f;
+		float gamma = 0.2f;
+		int sigma0 = 1;
+		int sigma1 = 2;
+
+		float scale = src.rows() / 100.0f;
+
+		sigma0 = (int) (sigma0 * scale);
+		sigma1 = (int) (sigma1 * scale);
+
+		Mat I = new Mat();
+
+		debugImg(src, "0.png", 1);
+
+		src.convertTo(I, CvType.CV_32FC1, 1.0 / 255);
+
+		// Start preprocessing:
+		Core.pow(I, gamma, I);
+
+		debugImg(I, "1.png");
+
+		// Calculate the DOG Image:
+		{
+			Mat gaussian1 = new Mat();
+			Mat gaussian0 = new Mat();
+			// Kernel Size:
+			int kernel_sz0 = (3 * sigma0);
+			int kernel_sz1 = (3 * sigma1);
+			// Make them odd for OpenCV:
+			kernel_sz0 |= 1;
+			kernel_sz1 |= 1;
+
+			Imgproc.GaussianBlur(I, gaussian0,
+					new Size(kernel_sz0, kernel_sz0), sigma0, sigma0,
+					Imgproc.BORDER_REPLICATE);
+			Imgproc.GaussianBlur(I, gaussian1,
+					new Size(kernel_sz1, kernel_sz1), sigma1, sigma1,
+					Imgproc.BORDER_REPLICATE);
+			Core.subtract(gaussian0, gaussian1, I);
+
+			gaussian0.release();
+			gaussian1.release();
+
+			// Normalize
+			MinMaxLocResult m = Core.minMaxLoc(I);
+			Core.subtract(I, new Scalar(m.minVal), I);
+			Core.multiply(I, new Scalar(1 / (m.maxVal - m.minVal)), I);
+		}
+
+		debugImg(I, "2.png");
+
+		{
+			double meanI = 0.0;
+			{
+				Mat tmp = new Mat();
+				// trick to make abs(I), abs() is not in OpenCV4Android...
+				Core.absdiff(I, new Scalar(0), tmp);
+				Core.pow(tmp, alpha, tmp);
+				meanI = Core.mean(tmp).val[0];
+				tmp.release();
+			}
+
+			Core.multiply(I, new Scalar(1 / Math.pow(meanI, 1.0 / alpha)), I);
+
+		}
+
+		debugImg(I, "3.png");
+
+		{
+			double meanI = 0.0;
+			{
+				Mat tmp = new Mat();
+				// trick to make abs(I), abs() is not in OpenCV4Android...
+				Core.absdiff(I, new Scalar(0), tmp);
+
+				Core.min(tmp, new Scalar(tau), tmp);
+				Core.pow(tmp, alpha, tmp);
+				meanI = Core.mean(tmp).val[0];
+				tmp.release();
+			}
+			Core.multiply(I, new Scalar(1 / Math.pow(meanI, 1.0 / alpha)), I);
+		}
+
+		debugImg(I, "4.png");
+
+		// Squash into the tanh:
+		{
+			for (int r = 0, lr = I.rows(); r < lr; r++) {
+				for (int c = 0, lc = I.cols(); c < lc; c++) {
+					I.put(r, c, I.get(r, c)[0] / tau);
+				}
+			}
+			Core.multiply(I, new Scalar(tau), I);
+		}
+
+		debugImg(I, "5.png");
+
+		I.convertTo(dst, CvType.CV_8UC1, 255);
+		I.release();
+	}
+
+	private void debugImg(Mat d, String name) {
+		debugImg(d, name, 255);
+	}
+
+	private void debugImg(Mat d, String name, double s) {
+		return;
+		// Mat img = new Mat();
+		//
+		// d.convertTo(img, CvType.CV_8UC1, s);
+		//
+		// Bitmap debug = Bitmap.createBitmap(img.cols(),
+		// img.rows(), Bitmap.Config.ARGB_8888);
+		// Utils.matToBitmap(img, debug);
+		//
+		// img.release();
+		//
+		// String filename =
+		// mContext.getExternalFilesDir(null).getAbsolutePath()
+		// + "/" + name;
+		//
+		// try {
+		// FileOutputStream out;
+		// out = new FileOutputStream(filename);
+		// debug.compress(Bitmap.CompressFormat.PNG, 100, out);
+		// out.close();
+		// } catch (Exception e) {
+		// e.printStackTrace();
+		// }
+
+	}
+	
+	private void ScaleRotateTranslate(Mat img, double angle, Point center,
+			Point nCenter, double scale) {
 		
-		Log.i(TAG,"Cut Mode: " + mCutMode.name());
+		if (scale == -1 || center == null) {
+			Mat dst = new Mat();
+			// rotate(src,angle,dst)
+			return;
+		}
 		
-		switch(mCutMode) {
-			case NO_CUT:
-				return;
-			case HORIZONTAL: {
-				Mat tmp = new Mat();
-				s.width = image.size().width * mPercentage;
-				Imgproc.resize(image, tmp, s);
-				image = tmp;
-				tmp.release();
-				return;
-			}
-			case VERTICAL: {
-				Mat tmp = new Mat();
-				s.height = image.size().height * mPercentage;
-				Imgproc.resize(image, tmp, s);
-				image = tmp;
-				tmp.release();
-				return;
-			}
-				
-			case TOTAL: {
-				Mat tmp = new Mat();
-				s.width = image.size().width * mPercentage;
-				s.height = image.size().height * mPercentage;
-				Imgproc.resize(image, tmp, s);
-				image = tmp;
-				tmp.release();
-				return;
-			}
+		double x, nx, y ,ny;
+		x = nx = center.x;
+		y = ny = center.y;	
+		
+		if (nCenter != null) {
+			nx = nCenter.x;
+			ny = nCenter.y;
+		}
+		
+		double sx, sy;
+		sx = sy = 1.0;
+		
+		if (0.0 <= scale && scale <= 1.0) {
+			sx = sy = scale;
+		}
+		
+		double cos = Math.cos(angle);
+		double sin = Math.sin(angle);
+		double a,b,c,d,e,f;
+		
+		a = cos/sx;
+		b = sin/sx;
+		c = x - (nx * a) - (ny * b);
+		d = - sin/sy;
+		e = cos/sy;
+		f = y - (nx * d) - (ny * e);
+		
+		// trasform (size,type, 67-tuple, resample)
 		
 	}
 	
+	private void cropFace(Mat img, Point eyeLeft, Point eyeRight, Point offs,
+			Point dst) {
+		
+		// Compute offsets in original image
+		int offsetH = (int) Math.floor(((float)(offs.x))*dst.x);
+		int offsetV = (int) Math.floor(((float)(offs.y))*dst.y);
+		
+		// Get the direction
+		Point eyeDir = new Point(eyeRight.x - eyeLeft.x,eyeRight.y - eyeLeft.y);
+		
+		// Calc rotation angle in radians
+		double rotation = - Math.atan2((float)(eyeDir.y),(float)(eyeDir.x));
+		
+		// Distance between them
+		
+		double dist = Math.sqrt(eyeDir.x*eyeDir.x + eyeDir.y*eyeDir.y);
+		
+		// Calculate the reference eye-width
+		double reference = dst.x - 2.0* offsetH;
+		
+		// Scale factor
+		double scale = ((float)(dist))/((float)(reference));
+		
+		// Rotate original around the left eye
+		//image = ScaleRotateTranslate(image, center=eye_left, angle=rotation)
+		
+		// crop the rotated image
+		Point crop = new Point (eyeLeft.x - scale*offsetH, 
+				eyeLeft.x - scale*offsetV);
+		
+		Point cropSize = newPoint(dst.x * scale, dst.y * scale);
+		
+		//image = image.crop((int(crop_xy[0]), int(crop_xy[1]), int(crop_xy[0]+crop_size[0]), int(crop_xy[1]+crop_size[1])))
+		// resize it
+		//image = image.resize(dest_sz, Image.ANTIALIAS)
+
+	}
+
 	public Type getType() {
 		return mRecognizerType;
 	}
-	
-	public void setCutMode(CutMode cutMode) {
-		mCutMode = cutMode;
-	}
-	
-	public CutMode getCutMode() {
-		return mCutMode;
-	}
-	
-	public void setPercentage(double p) {
-		mPercentage = p/100;
-	}
-	
-	public double getPercentage() {
-		return mPercentage;
-	}
-	
 }
