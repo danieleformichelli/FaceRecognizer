@@ -1,21 +1,15 @@
 package com.eim.facerecognition;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.opencv.android.Utils;
 import org.opencv.contrib.FaceRecognizer;
-import org.opencv.core.Core;
-import org.opencv.core.Core.MinMaxLocResult;
 import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfRect;
-import org.opencv.core.Point;
 import org.opencv.core.Rect;
-import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.highgui.Highgui;
 import org.opencv.imgproc.Imgproc;
@@ -23,7 +17,6 @@ import org.opencv.imgproc.Imgproc;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.util.SparseArray;
 
 import com.eim.facesmanagement.peopledb.Person;
@@ -66,7 +59,7 @@ public class EIMFaceRecognizer {
 	private String mModelPath;
 	private Context mContext;
 	private Type mRecognizerType;
-	private EyeCropper mEyeDetector;
+	private EyeCropper mEyeCropper;
 	private FaceRecognizer mFaceRecognizer;
 	private Size faceSize;
 	private boolean normalize;
@@ -76,7 +69,7 @@ public class EIMFaceRecognizer {
 	private int lbphRadius, lbphNeighbours, lbphGridX, lbphGridY;
 	private int eigenComponents;
 	private int fisherComponents;
-	
+
 	public EIMFaceRecognizer(Context mContext, Type mRecognizerType,
 			int faceSize, boolean normalize, CutMode mCutMode,
 			int mCutPercentage, Integer... params) {
@@ -93,8 +86,10 @@ public class EIMFaceRecognizer {
 		this.normalize = normalize;
 		this.mCutMode = mCutMode;
 		this.mCutPercentage = (100 - mCutPercentage) / 100.0;
-		this.mEyeDetector = new EyeCropper(mContext);
-		computeCutRect();
+		if (mCutMode == CutMode.EYES)
+			this.mEyeCropper = new EyeCropper(mContext);
+		else
+			computeCutRect();
 
 		mModelPath = mContext.getExternalFilesDir(null).getAbsolutePath() + "/"
 				+ MODEL_FILE_NAME;
@@ -114,9 +109,6 @@ public class EIMFaceRecognizer {
 	}
 
 	private void computeCutRect() {
-		if (mCutMode == CutMode.EYES)
-			return;
-
 		cutRect = new Rect();
 
 		switch (mCutMode) {
@@ -135,7 +127,7 @@ public class EIMFaceRecognizer {
 			cutRect.height = (int) (faceSize.height * mCutPercentage);
 			break;
 		default:
-			break;
+			return;
 		}
 
 		cutRect.x = (int) (faceSize.width - cutRect.width) / 2;
@@ -384,7 +376,6 @@ public class EIMFaceRecognizer {
 	}
 
 	private void preprocessImage(Mat image) {
-		
 		// Illuminance normalization
 		if (normalize)
 			Imgproc.equalizeHist(image, image);
@@ -396,150 +387,149 @@ public class EIMFaceRecognizer {
 			Imgproc.resize(image, image, defaultFaceSize);
 
 		// Cut
-		if (mCutMode == CutMode.EYES)
-			mEyeDetector.cropEyes(image, image);
-		else
+		switch (mCutMode) {
+		case NO_CUT:
+			return;
+		case EYES:
+			image = mEyeCropper.cropEyes(image);
+			break;
+		default:
 			image = image.submat(cutRect);
-		
-		debugImg(image, i++ + ".png");
-	}
-	
-	private static int i = 0;
-	
-	@SuppressWarnings("unused")
-	private void illuminanceNormalization(Mat src, Mat dst) {
-		float alpha = 0.1f;
-		float tau = 10.0f;
-		float gamma = 0.2f;
-		int sigma0 = 1;
-		int sigma1 = 2;
-
-		float scale = src.rows() / 100.0f;
-
-		sigma0 = (int) (sigma0 * scale);
-		sigma1 = (int) (sigma1 * scale);
-
-		Mat I = new Mat();
-
-		debugImg(src, "0.png", 1);
-
-		src.convertTo(I, CvType.CV_32FC1, 1.0 / 255);
-
-		// Start preprocessing:
-		Core.pow(I, gamma, I);
-
-		debugImg(I, "1.png");
-
-		// Calculate the DOG Image:
-		{
-			Mat gaussian1 = new Mat();
-			Mat gaussian0 = new Mat();
-			// Kernel Size:
-			int kernel_sz0 = (3 * sigma0);
-			int kernel_sz1 = (3 * sigma1);
-			// Make them odd for OpenCV:
-			kernel_sz0 |= 1;
-			kernel_sz1 |= 1;
-
-			Imgproc.GaussianBlur(I, gaussian0,
-					new Size(kernel_sz0, kernel_sz0), sigma0, sigma0,
-					Imgproc.BORDER_REPLICATE);
-			Imgproc.GaussianBlur(I, gaussian1,
-					new Size(kernel_sz1, kernel_sz1), sigma1, sigma1,
-					Imgproc.BORDER_REPLICATE);
-			Core.subtract(gaussian0, gaussian1, I);
-
-			gaussian0.release();
-			gaussian1.release();
-
-			// Normalize
-			MinMaxLocResult m = Core.minMaxLoc(I);
-			Core.subtract(I, new Scalar(m.minVal), I);
-			Core.multiply(I, new Scalar(1 / (m.maxVal - m.minVal)), I);
 		}
-
-		debugImg(I, "2.png");
-
-		{
-			double meanI = 0.0;
-			{
-				Mat tmp = new Mat();
-				// trick to make abs(I), abs() is not in OpenCV4Android...
-				Core.absdiff(I, new Scalar(0), tmp);
-				Core.pow(tmp, alpha, tmp);
-				meanI = Core.mean(tmp).val[0];
-				tmp.release();
-			}
-
-			Core.multiply(I, new Scalar(1 / Math.pow(meanI, 1.0 / alpha)), I);
-
-		}
-
-		debugImg(I, "3.png");
-
-		{
-			double meanI = 0.0;
-			{
-				Mat tmp = new Mat();
-				// trick to make abs(I), abs() is not in OpenCV4Android...
-				Core.absdiff(I, new Scalar(0), tmp);
-
-				Core.min(tmp, new Scalar(tau), tmp);
-				Core.pow(tmp, alpha, tmp);
-				meanI = Core.mean(tmp).val[0];
-				tmp.release();
-			}
-			Core.multiply(I, new Scalar(1 / Math.pow(meanI, 1.0 / alpha)), I);
-		}
-
-		debugImg(I, "4.png");
-
-		// Squash into the tanh:
-		{
-			for (int r = 0, lr = I.rows(); r < lr; r++) {
-				for (int c = 0, lc = I.cols(); c < lc; c++) {
-					I.put(r, c, I.get(r, c)[0] / tau);
-				}
-			}
-			Core.multiply(I, new Scalar(tau), I);
-		}
-
-		debugImg(I, "5.png");
-
-		I.convertTo(dst, CvType.CV_8UC1, 255);
-		I.release();
 	}
 
-	private void debugImg(Mat d, String name) {
-		debugImg(d, name, 255);
-	}
+	// private void illuminanceNormalization(Mat src, Mat dst) {
+	// float alpha = 0.1f;
+	// float tau = 10.0f;
+	// float gamma = 0.2f;
+	// int sigma0 = 1;
+	// int sigma1 = 2;
+	//
+	// float scale = src.rows() / 100.0f;
+	//
+	// sigma0 = (int) (sigma0 * scale);
+	// sigma1 = (int) (sigma1 * scale);
+	//
+	// Mat I = new Mat();
+	//
+	// debugImg(src, "0.png", 1);
+	//
+	// src.convertTo(I, CvType.CV_32FC1, 1.0 / 255);
+	//
+	// // Start preprocessing:
+	// Core.pow(I, gamma, I);
+	//
+	// debugImg(I, "1.png");
+	//
+	// // Calculate the DOG Image:
+	// {
+	// Mat gaussian1 = new Mat();
+	// Mat gaussian0 = new Mat();
+	// // Kernel Size:
+	// int kernel_sz0 = (3 * sigma0);
+	// int kernel_sz1 = (3 * sigma1);
+	// // Make them odd for OpenCV:
+	// kernel_sz0 |= 1;
+	// kernel_sz1 |= 1;
+	//
+	// Imgproc.GaussianBlur(I, gaussian0,
+	// new Size(kernel_sz0, kernel_sz0), sigma0, sigma0,
+	// Imgproc.BORDER_REPLICATE);
+	// Imgproc.GaussianBlur(I, gaussian1,
+	// new Size(kernel_sz1, kernel_sz1), sigma1, sigma1,
+	// Imgproc.BORDER_REPLICATE);
+	// Core.subtract(gaussian0, gaussian1, I);
+	//
+	// gaussian0.release();
+	// gaussian1.release();
+	//
+	// // Normalize
+	// MinMaxLocResult m = Core.minMaxLoc(I);
+	// Core.subtract(I, new Scalar(m.minVal), I);
+	// Core.multiply(I, new Scalar(1 / (m.maxVal - m.minVal)), I);
+	// }
+	//
+	// debugImg(I, "2.png");
+	//
+	// {
+	// double meanI = 0.0;
+	// {
+	// Mat tmp = new Mat();
+	// // trick to make abs(I), abs() is not in OpenCV4Android...
+	// Core.absdiff(I, new Scalar(0), tmp);
+	// Core.pow(tmp, alpha, tmp);
+	// meanI = Core.mean(tmp).val[0];
+	// tmp.release();
+	// }
+	//
+	// Core.multiply(I, new Scalar(1 / Math.pow(meanI, 1.0 / alpha)), I);
+	//
+	// }
+	//
+	// debugImg(I, "3.png");
+	//
+	// {
+	// double meanI = 0.0;
+	// {
+	// Mat tmp = new Mat();
+	// // trick to make abs(I), abs() is not in OpenCV4Android...
+	// Core.absdiff(I, new Scalar(0), tmp);
+	//
+	// Core.min(tmp, new Scalar(tau), tmp);
+	// Core.pow(tmp, alpha, tmp);
+	// meanI = Core.mean(tmp).val[0];
+	// tmp.release();
+	// }
+	// Core.multiply(I, new Scalar(1 / Math.pow(meanI, 1.0 / alpha)), I);
+	// }
+	//
+	// debugImg(I, "4.png");
+	//
+	// // Squash into the tanh:
+	// {
+	// for (int r = 0, lr = I.rows(); r < lr; r++) {
+	// for (int c = 0, lc = I.cols(); c < lc; c++) {
+	// I.put(r, c, I.get(r, c)[0] / tau);
+	// }
+	// }
+	// Core.multiply(I, new Scalar(tau), I);
+	// }
+	//
+	// debugImg(I, "5.png");
+	//
+	// I.convertTo(dst, CvType.CV_8UC1, 255);
+	// I.release();
+	// }
 
-	private void debugImg(Mat d, String name, double s) {
-		
-		 Mat img = new Mat();
-		
-		 d.convertTo(img, CvType.CV_8UC1, s);
-		
-		 Bitmap debug = Bitmap.createBitmap(img.cols(),
-		 img.rows(), Bitmap.Config.ARGB_8888);
-		 Utils.matToBitmap(img, debug);
-		
-		 img.release();
-		
-		 String filename =
-		 mContext.getExternalFilesDir(null).getAbsolutePath()
-		 + "/" + name;
-		
-		 try {
-			 FileOutputStream out;
-			 out = new FileOutputStream(filename);
-			 debug.compress(Bitmap.CompressFormat.PNG, 100, out);
-			 out.close();
-		 } catch (Exception e) {
-			 e.printStackTrace();
-		 }
-
-	}
+	// private void debugImg(Mat d, String name) {
+	// debugImg(d, name, 255);
+	// }
+	//
+	// private void debugImg(Mat d, String name, double s) {
+	//
+	// Mat img = new Mat();
+	//
+	// d.convertTo(img, CvType.CV_8UC1, s);
+	//
+	// Bitmap debug = Bitmap.createBitmap(img.cols(), img.rows(),
+	// Bitmap.Config.ARGB_8888);
+	// Utils.matToBitmap(img, debug);
+	//
+	// img.release();
+	//
+	// String filename = mContext.getExternalFilesDir(null).getAbsolutePath()
+	// + "/" + name;
+	//
+	// try {
+	// FileOutputStream out;
+	// out = new FileOutputStream(filename);
+	// debug.compress(Bitmap.CompressFormat.PNG, 100, out);
+	// out.close();
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// }
+	//
+	// }
 
 	public Type getType() {
 		return mRecognizerType;

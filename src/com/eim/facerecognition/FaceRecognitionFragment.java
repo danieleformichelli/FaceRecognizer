@@ -64,7 +64,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	public boolean mMultithread = true;
 
 	private FaceDetector mFaceDetector;
-	private EyeCropper mEyeDetector;
 	private EIMFaceRecognizer mFaceRecognizer;
 	private PeopleDatabase mPeopleDatabase;
 
@@ -220,7 +219,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 			Rect[] facesArray = mFaceDetector.detect(mSceneForRecognizer);
 			mLabelsForDrawer = recognizeFaces(mSceneForRecognizer, facesArray);
 		}
-		
+
 		for (LabelledRect faceAndLabel : mLabelsForDrawer) {
 			drawLabel(mRgba, faceAndLabel);
 		}
@@ -239,11 +238,12 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				Mat face = scene.submat(faceRect);
 				int[] predictedLabel = new int[1];
 				double[] distance = new double[1];
-				
+
 				mFaceRecognizer.predict(face, predictedLabel, distance);
-				Log.v(TAG, "predictedLabel: " + predictedLabel[0] + " distance: " + distance[0]);
+				Log.v(TAG, "predictedLabel: " + predictedLabel[0]
+						+ " distance: " + distance[0]);
 				face.release();
-				
+
 				if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT)
 					faceRect.x = scene.cols() - (faceRect.x + faceRect.width);
 
@@ -271,7 +271,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 		return recognizedPeople;
 	}
-	
+
 	private void drawLabel(Mat frame, LabelledRect info) {
 		if (info == null)
 			return;
@@ -284,7 +284,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 		if (info.text == null)
 			return;
-		
+
 		// Text...
 		int fontFace = Core.FONT_HERSHEY_PLAIN;
 		double fontScale = 4;
@@ -370,7 +370,6 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		public String text;
 		public Mat thumbnail;
 	}
-	
 
 	@Override
 	public void onProgressChanged(SeekBar arg0, int arg1, boolean arg2) {

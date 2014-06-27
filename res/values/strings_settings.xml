@@ -34,10 +34,10 @@
     <string name="recognition_normalization_default">false</string>
     <string name="recognition_cutmode">recognition_cutmode</string>
     <string name="recognition_cutmode_title">Cut image</string>
-    <string name="recognition_cutmode_default">EYES</string>
+    <string name="recognition_cutmode_default">NO_CUT</string>
     <string name="recognition_cutmode_percentage">recognition_cutmode_percentage</string>
     <string name="recognition_cutmode_percentage_title">Cut percentage</string>
-    <string name="recognition_cutmode_percentage_default">5</string>
+    <string name="recognition_cutmode_percentage_default">10</string>
 
     <!-- LBPH -->
 
