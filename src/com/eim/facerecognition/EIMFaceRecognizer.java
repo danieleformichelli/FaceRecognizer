@@ -554,8 +554,9 @@ public class EIMFaceRecognizer {
 		return cropped;
 	}
 	
+
 	private void ScaleRotateTranslate(Mat img, double angle, Point center,
-			Point nCenter, double scale) {
+			Point nCenter, double scale /* resample = Image.BICUBIC ? */) {
 		
 		Mat dst = new Mat();
 		if (scale == -1 || center == null) {
@@ -582,6 +583,7 @@ public class EIMFaceRecognizer {
 		
 		double cos = Math.cos(angle);
 		double sin = Math.sin(angle);
+		
 		double a,b,c,d,e,f;
 		
 		a = cos/sx;
@@ -591,7 +593,20 @@ public class EIMFaceRecognizer {
 		e = cos/sy;
 		f = y - (nx * d) - (ny * e);
 		
-		// trasform (size,type, 67-tuple, resample)
+		// Matrix
+		// [ a d ]
+		// [ b e ]
+		// [ c f ]
+		
+		Mat transMat = new Mat(2,3, CvType.CV_64F);
+		transMat.put(0, 0, a);
+		transMat.put(1, 0, b);
+		transMat.put(2, 0, c);
+		transMat.put(0, 1, d);
+		transMat.put(1, 1, e);
+		transMat.put(2, 1, f);
+		
+		Core.transform(img, dst, transMat /*, resample*/);
 		
 		img = dst;
 		
