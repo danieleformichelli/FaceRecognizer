@@ -31,7 +31,7 @@
     <string name="recognition_face_size_default">150</string>
     <string name="recognition_normalization">recognition_normalization</string>
     <string name="recognition_normalization_title">Perform normalization</string>
-    <string name="recognition_normalization_default">false</string>
+    <string name="recognition_normalization_default">true</string>
     <string name="recognition_cutmode">recognition_cutmode</string>
     <string name="recognition_cutmode_title">Cut image</string>
     <string name="recognition_cutmode_default">NO_CUT</string>
@@ -91,14 +91,14 @@
 
     <string-array name="recognition_cutmode_entries">
         <item>No Cut</item>
-        <item>Eeyes Cut</item>
+        <!-- <item>Eeyes Cut</item> -->
         <item>Horizontal Cut</item>
         <item>Vertical Cut</item>
         <item>Total Cut</item>
     </string-array>
     <string-array name="recognition_cutmode_values">
         <item>NO_CUT</item>
-        <item>EYES</item>
+        <!-- <item>EYES</item> -->
         <item>HORIZONTAL</item>
         <item>VERTICAL</item>
         <item>TOTAL</item>

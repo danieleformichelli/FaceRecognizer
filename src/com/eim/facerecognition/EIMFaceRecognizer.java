@@ -24,7 +24,8 @@ import com.eim.facesmanagement.peopledb.Photo;
 
 public class EIMFaceRecognizer {
 	private static final String MODEL_FILE_NAME = "trainedModel.xml";
-	private static final Size defaultFaceSize = new Size(150, 150);
+
+	// private static final Size defaultFaceSize = new Size(150, 150);
 
 	public enum Type {
 		LBPH, EIGEN, FISHER;
@@ -59,7 +60,7 @@ public class EIMFaceRecognizer {
 	private String mModelPath;
 	private Context mContext;
 	private Type mRecognizerType;
-	private EyeCropper mEyeCropper;
+	// private EyeCropper mEyeCropper;
 	private FaceRecognizer mFaceRecognizer;
 	private Size faceSize;
 	private boolean normalize;
@@ -86,10 +87,10 @@ public class EIMFaceRecognizer {
 		this.normalize = normalize;
 		this.mCutMode = mCutMode;
 		this.mCutPercentage = (100 - mCutPercentage) / 100.0;
-		if (mCutMode == CutMode.EYES)
-			this.mEyeCropper = new EyeCropper(mContext);
-		else
-			computeCutRect();
+		// if (mCutMode == CutMode.EYES)
+		// this.mEyeCropper = new EyeCropper(mContext);
+		// else
+		computeCutRect();
 
 		mModelPath = mContext.getExternalFilesDir(null).getAbsolutePath() + "/"
 				+ MODEL_FILE_NAME;
@@ -309,7 +310,6 @@ public class EIMFaceRecognizer {
 
 				labels.add(label);
 				faces.add(mMat);
-
 			}
 		}
 
@@ -383,19 +383,21 @@ public class EIMFaceRecognizer {
 		// Resize
 		if (faceSize.width != 0)
 			Imgproc.resize(image, image, faceSize);
-		else if (mRecognizerType.needResize())
-			Imgproc.resize(image, image, defaultFaceSize);
+		// else if (mRecognizerType.needResize())
+		// Imgproc.resize(image, image, defaultFaceSize);
 
 		// Cut
-		switch (mCutMode) {
-		case NO_CUT:
-			return;
-		case EYES:
-			image = mEyeCropper.cropEyes(image);
-			break;
-		default:
+		// switch (mCutMode) {
+		// case NO_CUT:
+		// return;
+		// case EYES:
+		// image = mEyeCropper.cropEyes(image);
+		// break;
+		// default:
+		// image = image.submat(cutRect);
+		// }
+		if (mCutMode != CutMode.NO_CUT)
 			image = image.submat(cutRect);
-		}
 	}
 
 	// private void illuminanceNormalization(Mat src, Mat dst) {

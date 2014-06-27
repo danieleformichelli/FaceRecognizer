@@ -28,18 +28,11 @@ public class EyeCropper {
 	private final int MIN_NEIGHBOURS = 2;
 	private final int FLAGS = 0;
 
-	public enum Type {
-		LEFT, RIGHT
-	}
-
 	private Context mContext;
-
 	private File mCascadeFile;
 	private CascadeClassifier eyesCascade;
-
 	private Rect leftEye, rightEye;
-
-	double offset;
+	private double offset;
 
 	public EyeCropper(Context context) {
 
@@ -134,6 +127,7 @@ public class EyeCropper {
 
 	/**
 	 * Crop a face horizontally near the eyes
+	 * 
 	 * @param src
 	 *            the source image
 	 */

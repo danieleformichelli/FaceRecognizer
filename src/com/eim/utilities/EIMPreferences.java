@@ -98,20 +98,21 @@ public class EIMPreferences {
 		return FaceDetector.Classifier.valueOf(mClassifier);
 	}
 
-	private String recognitionTypeKey;
-	private String recognitionTypeDefault;
+	// private String recognitionTypeKey;
+	// private String recognitionTypeDefault;
 
 	public EIMFaceRecognizer.Type recognitionType() {
-		String mType = mSharedPreferences.getString(recognitionTypeKey,
-				recognitionTypeDefault);
-		EIMFaceRecognizer.Type[] recognitionTypes = EIMFaceRecognizer.Type
-				.values();
-
-		for (int i = 0; i < recognitionTypes.length; i++)
-			if (recognitionTypes[i].toString().equals(mType))
-				return recognitionTypes[i];
-
-		return null;
+		return EIMFaceRecognizer.Type.LBPH;
+		// String mType = mSharedPreferences.getString(recognitionTypeKey,
+		// recognitionTypeDefault);
+		// EIMFaceRecognizer.Type[] recognitionTypes = EIMFaceRecognizer.Type
+		// .values();
+		//
+		// for (int i = 0; i < recognitionTypes.length; i++)
+		// if (recognitionTypes[i].toString().equals(mType))
+		// return recognitionTypes[i];
+		//
+		// return null;
 	}
 
 	private String recognitionNormalizationKey;
@@ -195,20 +196,22 @@ public class EIMPreferences {
 				LBPHGridYDefault));
 	}
 
-	private String EigenComponentsKey;
-	private String EigenComponentsDefault;
-
+	// private String EigenComponentsKey;
+	// private String EigenComponentsDefault;
+	//
 	public int EigenComponents() {
-		return Integer.parseInt(mSharedPreferences.getString(
-				EigenComponentsKey, EigenComponentsDefault));
+		return 0;
+		// return Integer.parseInt(mSharedPreferences.getString(
+		// EigenComponentsKey, EigenComponentsDefault));
 	}
 
-	private String FisherComponentsKey;
-	private String FisherComponentsDefault;
-
+	// private String FisherComponentsKey;
+	// private String FisherComponentsDefault;
+	//
 	public int FisherComponents() {
-		return Integer.parseInt(mSharedPreferences.getString(
-				FisherComponentsKey, FisherComponentsDefault));
+		return 0;
+		// return Integer.parseInt(mSharedPreferences.getString(
+		// FisherComponentsKey, FisherComponentsDefault));
 	}
 
 	private String multithreadingKey;
@@ -259,16 +262,16 @@ public class EIMPreferences {
 		numberOfGalleryColumnsPortraitDefault = mContext
 				.getString(R.string.management_number_of_gallery_columns_portrait_default);
 
-		recognitionTypeKey = mContext
-				.getString(R.string.recognition_recognizer_type);
-		recognitionTypeDefault = mContext
-				.getString(R.string.recognition_recognizer_type_default);
+		// recognitionTypeKey = mContext
+		// .getString(R.string.recognition_recognizer_type);
+		// recognitionTypeDefault = mContext
+		// .getString(R.string.recognition_recognizer_type_default);
 
 		recognitionFaceSizeKey = mContext
 				.getString(R.string.recognition_face_size);
 		recognitionFaceSizeDefault = mContext
 				.getString(R.string.recognition_face_size_default);
-		
+
 		recognitionThresholdKey = mContext
 				.getString(R.string.recognition_threshold);
 		recognitionThresholdDefault = mContext
@@ -311,15 +314,15 @@ public class EIMPreferences {
 		LBPHGridYDefault = mContext
 				.getString(R.string.recognition_lbph_grid_y_default);
 
-		EigenComponentsKey = mContext
-				.getString(R.string.recognition_eigen_components);
-		EigenComponentsDefault = mContext
-				.getString(R.string.recognition_eigen_components_default);
-
-		FisherComponentsKey = mContext
-				.getString(R.string.recognition_fisher_components);
-		FisherComponentsDefault = mContext
-				.getString(R.string.recognition_fisher_components_default);
+		// EigenComponentsKey = mContext
+		// .getString(R.string.recognition_eigen_components);
+		// EigenComponentsDefault = mContext
+		// .getString(R.string.recognition_eigen_components_default);
+		//
+		// FisherComponentsKey = mContext
+		// .getString(R.string.recognition_fisher_components);
+		// FisherComponentsDefault = mContext
+		// .getString(R.string.recognition_fisher_components_default);
 
 		multithreadingKey = mContext.getString(R.string.general_multithreading);
 		multithreadingDefault = Boolean.parseBoolean(mContext
