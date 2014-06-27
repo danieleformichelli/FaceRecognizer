@@ -265,7 +265,6 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 			mEditor.putString(key, oldValue);
 			oldValue = null;
 			mEditor.commit();
-
 		}
 	};
 

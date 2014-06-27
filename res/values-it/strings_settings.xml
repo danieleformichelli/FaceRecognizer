@@ -23,6 +23,7 @@
 
     <string-array name="recognition_cutmode_entries">
         <item>Nessun taglio</item>
+        <item>Taglio occhi</item>
         <item>Taglio orizzontale</item>
         <item>Taglio verticale</item>
         <item>Taglio completo</item>

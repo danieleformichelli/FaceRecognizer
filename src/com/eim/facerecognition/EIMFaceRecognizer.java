@@ -55,7 +55,7 @@ public class EIMFaceRecognizer {
 	}
 
 	public enum CutMode {
-		NO_CUT, HORIZONTAL, VERTICAL, TOTAL
+		NO_CUT, EYES, HORIZONTAL, VERTICAL, TOTAL
 	}
 
 	private boolean isTrained;
@@ -64,7 +64,7 @@ public class EIMFaceRecognizer {
 	private Type mRecognizerType;
 	private FaceRecognizer mFaceRecognizer;
 	private Size faceSize;
-	private boolean normalize;
+	// private boolean normalize;
 	private CutMode mCutMode;
 	private double mCutPercentage;
 	private Rect cutRect;
@@ -85,7 +85,7 @@ public class EIMFaceRecognizer {
 		this.mContext = mContext;
 		this.mRecognizerType = mRecognizerType;
 		this.faceSize = new Size(faceSize, faceSize);
-		this.normalize = normalize;
+		// this.normalize = normalize;
 		this.mCutMode = mCutMode;
 		this.mCutPercentage = (100 - mCutPercentage) / 100.0;
 		computeCutRect();
@@ -108,6 +108,9 @@ public class EIMFaceRecognizer {
 	}
 
 	private void computeCutRect() {
+		if (mCutMode == CutMode.EYES)
+			return;
+
 		cutRect = new Rect();
 
 		switch (mCutMode) {
@@ -124,6 +127,8 @@ public class EIMFaceRecognizer {
 		case TOTAL:
 			cutRect.width = (int) (faceSize.width * mCutPercentage);
 			cutRect.height = (int) (faceSize.height * mCutPercentage);
+			break;
+		default:
 			break;
 		}
 
@@ -213,9 +218,6 @@ public class EIMFaceRecognizer {
 			throw new IllegalStateException("Face detector of type "
 					+ mRecognizerType.toString()
 					+ "cannot be trained incrementally");
-
-		for (String newFacePath : newFacesPaths)
-			android.util.Log.e("TAG", newFacePath + " " + label);
 
 		List<Mat> newFaces = new ArrayList<Mat>();
 		Mat labels = new Mat(newFacesPaths.length, 1, CvType.CV_32SC1);
@@ -381,9 +383,10 @@ public class EIMFaceRecognizer {
 
 	private void preprocessImage(Mat image) {
 		// Illuminance normalization
-		if (normalize)
-			Imgproc.equalizeHist(image, image);
+		// if (normalize) {
+		// Imgproc.equalizeHist(image, image);
 		// illuminanceNormalization(image, image);
+		// }
 
 		// Resize
 		if (faceSize.width != 0)
@@ -392,7 +395,15 @@ public class EIMFaceRecognizer {
 			Imgproc.resize(image, image, defaultFaceSize);
 
 		// Cut
-		image = image.submat(cutRect);
+		if (mCutMode == CutMode.EYES)
+			cutEyes();
+		else
+			image = image.submat(cutRect);
+	}
+
+	private void cutEyes() {
+		// TODO Auto-generated method stub
+
 	}
 
 	@SuppressWarnings("unused")

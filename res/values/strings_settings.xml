@@ -34,7 +34,7 @@
     <string name="recognition_normalization_default">false</string>
     <string name="recognition_cutmode">recognition_cutmode</string>
     <string name="recognition_cutmode_title">Cut image</string>
-    <string name="recognition_cutmode_default">NO_CUT</string>
+    <string name="recognition_cutmode_default">EYES</string>
     <string name="recognition_cutmode_percentage">recognition_cutmode_percentage</string>
     <string name="recognition_cutmode_percentage_title">Cut percentage</string>
     <string name="recognition_cutmode_percentage_default">5</string>
@@ -91,12 +91,14 @@
 
     <string-array name="recognition_cutmode_entries">
         <item>No Cut</item>
+        <item>Eeyes Cut</item>
         <item>Horizontal Cut</item>
         <item>Vertical Cut</item>
         <item>Total Cut</item>
     </string-array>
     <string-array name="recognition_cutmode_values">
         <item>NO_CUT</item>
+        <item>EYES</item>
         <item>HORIZONTAL</item>
         <item>VERTICAL</item>
         <item>TOTAL</item>
