@@ -541,12 +541,26 @@ public class EIMFaceRecognizer {
 
 	}
 	
+	private void rotate(Mat src, Mat dst, double angle)
+	{
+	    Point pt = new Point(src.cols()/2., src.rows()/2.);    
+	    Mat r = Imgproc.getRotationMatrix2D(pt, angle, 1.0);
+	    Imgproc.warpAffine(src, dst, r, new Size(src.cols(), src.rows()));
+	}
+	
+	private Mat crop(Mat uncropped, Point p, Size s) {
+		Rect roi = new Rect(p,s);
+		Mat cropped = new Mat(uncropped, roi);
+		return cropped;
+	}
+	
 	private void ScaleRotateTranslate(Mat img, double angle, Point center,
 			Point nCenter, double scale) {
 		
+		Mat dst = new Mat();
 		if (scale == -1 || center == null) {
-			Mat dst = new Mat();
-			// rotate(src,angle,dst)
+			rotate(img, dst, angle);
+			img = dst;
 			return;
 		}
 		
@@ -579,14 +593,18 @@ public class EIMFaceRecognizer {
 		
 		// trasform (size,type, 67-tuple, resample)
 		
+		img = dst;
+		
 	}
 	
-	private void cropFace(Mat img, Point eyeLeft, Point eyeRight, Point offs,
-			Point dst) {
+	private Mat cropFace(Mat img, Point eyeLeft, Point eyeRight, Point offs,
+			Size dsize) {
+		
+		Mat tmp = new Mat();
 		
 		// Compute offsets in original image
-		int offsetH = (int) Math.floor(((float)(offs.x))*dst.x);
-		int offsetV = (int) Math.floor(((float)(offs.y))*dst.y);
+		int offsetH = (int) Math.floor(((float)(offs.x))*dsize.width);
+		int offsetV = (int) Math.floor(((float)(offs.y))*dsize.height);
 		
 		// Get the direction
 		Point eyeDir = new Point(eyeRight.x - eyeLeft.x,eyeRight.y - eyeLeft.y);
@@ -599,24 +617,25 @@ public class EIMFaceRecognizer {
 		double dist = Math.sqrt(eyeDir.x*eyeDir.x + eyeDir.y*eyeDir.y);
 		
 		// Calculate the reference eye-width
-		double reference = dst.x - 2.0* offsetH;
+		double reference = dsize.width - 2.0* offsetH;
 		
 		// Scale factor
 		double scale = ((float)(dist))/((float)(reference));
 		
 		// Rotate original around the left eye
-		//image = ScaleRotateTranslate(image, center=eye_left, angle=rotation)
+		ScaleRotateTranslate(img, rotation, eyeLeft, null, -1);
 		
 		// crop the rotated image
 		Point crop = new Point (eyeLeft.x - scale*offsetH, 
 				eyeLeft.x - scale*offsetV);
 		
-		Point cropSize = newPoint(dst.x * scale, dst.y * scale);
+		Size cropSize = new Size(dsize.width * scale, dsize.height * scale);
 		
-		//image = image.crop((int(crop_xy[0]), int(crop_xy[1]), int(crop_xy[0]+crop_size[0]), int(crop_xy[1]+crop_size[1])))
-		// resize it
-		//image = image.resize(dest_sz, Image.ANTIALIAS)
-
+		tmp = crop(img, crop, cropSize);
+		
+		Imgproc.resize(tmp, img, dsize);
+		
+		return img;
 	}
 
 	public Type getType() {
