@@ -8,6 +8,7 @@ import android.app.Fragment;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -43,6 +44,7 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 	private TextView addPerson, noPeopleMessage;
 	private View mainLayout;
 	private EIMFaceRecognizer mFaceRecognizer;
+	private Pair<Integer, String[]> photosToBeAdded;
 
 	private PeopleDatabase mPeopleDatabase;
 
@@ -90,6 +92,10 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			setupFaceRecognizer();
 			if (retrainModel)
 				retrainRecognizer();
+			if (photosToBeAdded != null) {
+				addPhotos(photosToBeAdded.first, photosToBeAdded.second);
+				photosToBeAdded = null;
+			}
 		}
 	}
 
@@ -292,7 +298,8 @@ public class FacesManagementFragment extends Fragment implements Swipeable,
 			String[] photoPaths = data.getExtras().getStringArray(
 					FaceDetectionActivity.PHOTO_PATHS);
 
-			addPhotos(personId, photoPaths);
+			// photos cannot be loaded until opencv loaded
+			photosToBeAdded = new Pair<Integer, String[]>(personId, photoPaths);
 			break;
 		}
 	}
