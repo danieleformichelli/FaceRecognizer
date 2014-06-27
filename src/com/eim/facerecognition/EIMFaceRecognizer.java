@@ -354,7 +354,7 @@ public class EIMFaceRecognizer {
 
 	public void predict(Mat src, int[] label, double[] confidence) {
 		if (isTrained) {
-			cutImage(src);
+			// cutImage(src);
 			Mat resized = new Mat();
 			if (mRecognizerType.needResize()) {
 				Imgproc.resize(src, resized, size);
@@ -371,7 +371,7 @@ public class EIMFaceRecognizer {
 		Size s = new Size();
 		
 		Log.i(TAG,"Cut Mode: " + mCutMode.name());
-		/*
+		
 		switch(mCutMode) {
 			case NO_CUT:
 				return;
@@ -401,7 +401,6 @@ public class EIMFaceRecognizer {
 				tmp.release();
 				return;
 			}
-		}*/
 		
 	}
 	
