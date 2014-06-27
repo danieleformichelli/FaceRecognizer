@@ -24,6 +24,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.util.SparseArray;
 
+import com.eim.facedetection.EyeDetector;
 import com.eim.facesmanagement.peopledb.Person;
 import com.eim.facesmanagement.peopledb.Photo;
 
@@ -91,7 +92,7 @@ public class EIMFaceRecognizer {
 		this.normalize = normalize;
 		this.mCutMode = mCutMode;
 		this.mCutPercentage = (100 - mCutPercentage) / 100.0;
-		this.mEyeDetector = new EyeDetector();
+		this.mEyeDetector = new EyeDetector(mContext);
 		computeCutRect();
 
 		mModelPath = mContext.getExternalFilesDir(null).getAbsolutePath() + "/"

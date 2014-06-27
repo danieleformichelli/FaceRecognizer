@@ -1,4 +1,9 @@
-package com.eim.facerecognition;
+package com.eim.facedetection;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
@@ -10,6 +15,9 @@ import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
+import com.eim.R;
+
+import android.content.Context;
 import android.util.Log;
 
 public class EyeDetector {
@@ -18,18 +26,55 @@ public class EyeDetector {
 	
 	private static final String TAG = "EyeDetector";
 	
-    private static String eyes_cascade_name = "haarcascade_eye_tree_eyeglasses.xml";
-    private static CascadeClassifier eyes_cascade = new CascadeClassifier();
-    private static String window_name = "Capture - Face detection";
+    private static String eyesCascadeXML = "haarcascade_eye_tree_eyeglasses.xml";
+    
+    private Context mContext;
 
+	private File mCascadeFile;
+	private CascadeClassifier eyesCascade;
+	
 	private Point eyeLeft;
 	private Point eyeRight;
 	
-	public EyeDetector() { 
+	public EyeDetector(Context context) { 
 		
-		if (!eyes_cascade.load(eyes_cascade_name)) {
+		if (context == null)
+			throw new IllegalArgumentException("context cannot be null");
+		
+		mContext = context;
+		eyesCascade = new CascadeClassifier();
+		
+		loadCascadeFile();
+		
+		if (!eyesCascade.load(eyesCascadeXML)) {
 			Log.w(TAG,"Error loading eyes cascade");
 	    }
+	}
+	
+	private void loadCascadeFile() {
+		File cascadeDir = mContext.getDir("cascade", Context.MODE_PRIVATE);
+		mCascadeFile = new File(cascadeDir,eyesCascadeXML);
+
+		if (!mCascadeFile.exists()) {
+			// load cascade file from application resources
+			try {
+				int resId = R.raw.haarcascade_eye_tree_eyeglasses;
+				InputStream is = mContext.getResources().openRawResource(resId);
+				FileOutputStream os = new FileOutputStream(mCascadeFile);
+
+				byte[] buffer = new byte[4096];
+				int bytesRead;
+				while ((bytesRead = is.read(buffer)) != -1)
+					os.write(buffer, 0, bytesRead);
+
+				is.close();
+				os.close();
+			} catch (IOException e) {
+				mCascadeFile.delete();
+				mCascadeFile = null;
+				e.printStackTrace();
+			}
+		}
 	}
 	
 	/**
@@ -100,7 +145,7 @@ public class EyeDetector {
         Rect[] eyesArray = eyes.toArray();
         Rect face = new Rect(new Point(0,0), new Point(img.width(),img.height()));
         
-        eyes_cascade.detectMultiScale(img, eyes, 1.1, 2, 0, new Size(30, 30), new Size());
+        eyesCascade.detectMultiScale(img, eyes, 1.1, 2, 0, new Size(30, 30), new Size());
 
         int len = eyesArray.length;
         
