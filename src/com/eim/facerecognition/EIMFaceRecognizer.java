@@ -11,6 +11,7 @@ import org.opencv.core.Core.MinMaxLocResult;
 import org.opencv.core.CvException;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfRect;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -383,6 +384,7 @@ public class EIMFaceRecognizer {
 	}
 
 	private void preprocessImage(Mat image) {
+		
 		// Illuminance normalization
 		// if (normalize) {
 		// Imgproc.equalizeHist(image, image);
@@ -404,8 +406,50 @@ public class EIMFaceRecognizer {
 
 	private void cutToEyes(Mat src, Mat dst) {
 		
+		Point eyeLeft = new Point();
+		Point eyeRight = new Point();
+		detectEye(src, eyeLeft, eyeRight);
+		
+		// TODO: find best value by test
+		Point offs = new Point(0.1,0.1);
+		
+		cropFace(src, dst, eyeLeft, eyeRight, offs);
 	}
 
+	private void detectEye(Mat img, Point left, Point right) {
+		
+		MatOfRect eyes = new MatOfRect();
+        Rect[] eyesArray = eyes.toArray();
+        Rect face = new Rect(new Point(0,0), new Point(img.width(),img.height()));
+        
+        // eyes_cascade.detectMultiScale(img, eyes, 1.1, 2, 0, new Size(30, 30), new Size());
+
+        int len = eyesArray.length;
+        
+        // The input is a face. I should recognize two eyes.
+        if(len!=2)
+        	return;
+        
+        Point[] mEyes = new Point[len];
+        
+        for (int j = 0; j < len; j++) {
+           mEyes[j] = new Point(face.x + eyesArray[j].x + eyesArray[j].width * 0.5, 
+        		   face.y + eyesArray[j].y + eyesArray[j].height * 0.5);
+
+        }
+        
+        // Return the right place
+        
+        if (mEyes[0].x < mEyes[1].x) {
+        	left = mEyes[0];
+        	right = mEyes[1];
+        }
+        else {
+        	right = mEyes[0];
+        	left = mEyes[1];
+        }
+	}
+	
 	@SuppressWarnings("unused")
 	private void illuminanceNormalization(Mat src, Mat dst) {
 		float alpha = 0.1f;
@@ -558,10 +602,8 @@ public class EIMFaceRecognizer {
 	private void ScaleRotateTranslate(Mat img, double angle, Point center,
 			Point nCenter, double scale /* resample = Image.BICUBIC ? */) {
 		
-		Mat dst = new Mat();
 		if (scale == -1 || center == null) {
-			rotate(img, dst, angle);
-			img = dst;
+			rotate(img, img, angle);
 			return;
 		}
 		
@@ -606,16 +648,26 @@ public class EIMFaceRecognizer {
 		transMat.put(1, 1, e);
 		transMat.put(2, 1, f);
 		
-		Core.transform(img, dst, transMat /*, resample*/);
-		
-		img = dst;
+		Core.transform(img, img, transMat /*, resample*/);
 		
 	}
 	
-	private Mat cropFace(Mat img, Point eyeLeft, Point eyeRight, Point offs,
-			Size dsize) {
-		
-		Mat tmp = new Mat();
+	/**
+	 * An accurate alignment of your image data is especially important in 
+	 * tasks like emotion detection, were you need as much detail as possible.
+	 * 
+	 * @param src the source image
+	 * @param src the destination image
+	 * @param eyeLeft is the position of the left eye
+	 * @param eyeRight is the position of the right eye
+	 * @param offs is the percent of the image you want to keep next 
+	 * 					to the eyes (horizontal, vertical direction)
+	 * @param dsize the size of the output image
+	 */
+	private void cropFace(Mat src, Mat dst, Point eyeLeft, Point eyeRight, 
+			Point offs) {
+
+		Size dsize = dst.size();
 		
 		// Compute offsets in original image
 		int offsetH = (int) Math.floor(((float)(offs.x))*dsize.width);
@@ -638,7 +690,7 @@ public class EIMFaceRecognizer {
 		double scale = ((float)(dist))/((float)(reference));
 		
 		// Rotate original around the left eye
-		ScaleRotateTranslate(img, rotation, eyeLeft, null, -1);
+		ScaleRotateTranslate(src, rotation, eyeLeft, null, -1);
 		
 		// crop the rotated image
 		Point crop = new Point (eyeLeft.x - scale*offsetH, 
@@ -646,11 +698,10 @@ public class EIMFaceRecognizer {
 		
 		Size cropSize = new Size(dsize.width * scale, dsize.height * scale);
 		
-		tmp = crop(img, crop, cropSize);
+		dst = crop(src, crop, cropSize);
 		
-		Imgproc.resize(tmp, img, dsize);
+		Imgproc.resize(dst, dst, dsize);
 		
-		return img;
 	}
 
 	public Type getType() {
