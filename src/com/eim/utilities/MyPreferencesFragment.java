@@ -21,6 +21,7 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		Swipeable {
 	private FaceRecognizerMainActivity activity;
 	private PreferenceScreen mPreferenceScreen;
+	private boolean restoring;
 	private String oldValue;
 
 	private String recognitionThresholdKey, recognitionCategoryKey,
@@ -118,6 +119,12 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		public void onSharedPreferenceChanged(
 				SharedPreferences sharedPreferences, String key) {
 			Preference mPreference = findPreference(key);
+
+			if (restoring) {
+				// other actions will be taken after restoring all preferences
+				setPreferenceSummary(mPreference);
+				return;
+			}
 
 			if (!(mPreference instanceof EditTextPreference)) {
 				setPreferenceSummary(mPreference);
@@ -340,6 +347,11 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				R.string.management_number_of_gallery_columns_landscape_default);
 		setPreference(R.string.management_number_of_gallery_columns_portrait,
 				R.string.management_number_of_gallery_columns_portrait_default);
+
+		activity.getFacesManagementFragment().recognitionSettingsChanged();
+		activity.recreateFaceDetector();
+		activity.setMultithreading(mPreferenceScreen.getSharedPreferences()
+				.getBoolean(multithreadingKey, false));
 	}
 
 	private void setPreference(int preferenceId, int defaultValue) {

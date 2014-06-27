@@ -214,21 +214,24 @@ public class EIMFaceRecognizer {
 					+ mRecognizerType.toString()
 					+ "cannot be trained incrementally");
 
+		for (String newFacePath : newFacesPaths)
+			android.util.Log.e("TAG", newFacePath + " " + label);
+
 		List<Mat> newFaces = new ArrayList<Mat>();
 		Mat labels = new Mat(newFacesPaths.length, 1, CvType.CV_32SC1);
 
 		for (int i = 0; i < newFacesPaths.length; i++) {
 			String newFacePath = newFacesPaths[i];
-			
+
 			Mat newFaceMat = Highgui.imread(newFacePath,
 					Highgui.CV_LOAD_IMAGE_UNCHANGED);
-			
+
 			if (newFaceMat.empty())
 				throw new IllegalArgumentException("Cannot load the image at "
 						+ newFacePath);
 
 			Imgproc.cvtColor(newFaceMat, newFaceMat, Imgproc.COLOR_BGR2GRAY);
-			
+
 			preprocessImage(newFaceMat);
 
 			newFaces.add(newFaceMat);
@@ -240,7 +243,7 @@ public class EIMFaceRecognizer {
 		else
 			mFaceRecognizer.train(newFaces, labels);
 
-		mFaceRecognizer.save(mModelPath);
+		// mFaceRecognizer.save(mModelPath);
 
 		for (Mat newFaceMat : newFaces)
 			newFaceMat.release();
@@ -268,6 +271,7 @@ public class EIMFaceRecognizer {
 				incrementalTrain(mNewFacesPaths, mLabel);
 				mActivity.runOnUiThread(new Runnable() {
 					public void run() {
+						mFaceRecognizer.save(mModelPath);
 						mProgressDialog.dismiss();
 					}
 				});
@@ -319,7 +323,7 @@ public class EIMFaceRecognizer {
 			labelsMat.put(i++, 0, new int[] { label });
 
 		mFaceRecognizer.train(faces, labelsMat);
-		mFaceRecognizer.save(mModelPath);
+		// mFaceRecognizer.save(mModelPath);
 		isTrained = true;
 
 		for (Mat face : faces)

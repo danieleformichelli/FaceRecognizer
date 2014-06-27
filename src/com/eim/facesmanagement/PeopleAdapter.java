@@ -1,7 +1,5 @@
 package com.eim.facesmanagement;
 
-import java.util.List;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -371,15 +369,6 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 	};
 
 	public interface PeopleAdapterListener {
-
-		/**
-		 * A person has been added to the list
-		 * 
-		 * @param name
-		 *            name of the added person
-		 */
-		public void addPerson(String name);
-
 		/**
 		 * The name of a person has been edited
 		 * 
@@ -397,37 +386,5 @@ public class PeopleAdapter extends BaseExpandableListAdapter {
 		 *            name of the removed person
 		 */
 		public void removePerson(int id);
-
-		/**
-		 * A photo has been added to a person
-		 * 
-		 * @param id
-		 *            id of the person
-		 * @param photo
-		 *            url of the photo
-		 */
-		public void addPhoto(int personId, Photo photo);
-		
-		/**
-		 * Multiple photos have been added to a person
-		 * 
-		 * @param id
-		 *            id of the person
-		 * @param urls
-		 *            urls of the photos
-		 */
-		public void addPhoto(int personId, String[] urls);
-
-		/**
-		 * A photo has been deleted
-		 * 
-		 * @param photoId
-		 */
-		public void removePhoto(int personId, int photoId);
-
-		void removePhotos(int personId, List<Integer> toBeDeleted);
-
-		void removePeople();
 	}
-
 }
