@@ -28,14 +28,21 @@ public class EyeDetector {
 	
     private static String eyesCascadeXML = "haarcascade_eye_tree_eyeglasses.xml";
     
+    private static final double EYE_MIN_SIZE_PERCENTAGE = 0.05;
+    private static final double EYE_MAX_SIZE_PERCENTAGE = 0.5;
+    
+    public enum Type {
+    	LEFT, RIGHT
+    }
+    
     private Context mContext;
 
 	private File mCascadeFile;
 	private CascadeClassifier eyesCascade;
 	
-	private Point eyeLeft;
-	private Point eyeRight;
-	
+	private Point[] eyes;
+	private int[] radius;
+		
 	public EyeDetector(Context context) { 
 		
 		if (context == null)
@@ -46,7 +53,7 @@ public class EyeDetector {
 		
 		loadCascadeFile();
 		
-		if (!eyesCascade.load(eyesCascadeXML)) {
+		if (!eyesCascade.load(mCascadeFile.getAbsolutePath())) {
 			Log.w(TAG,"Error loading eyes cascade");
 	    }
 	}
@@ -92,7 +99,29 @@ public class EyeDetector {
 	public void cropFace(Mat src, Mat dst, Point offs) {
 
 		Size dsize = dst.size();
-
+		Point eyeLeft, eyeRight;
+		
+        /*
+         * |
+         * |
+         * |______________________\
+         *                        /
+         *  x small    x big                      
+         *  Left       Right
+         */
+        if (eyes.length != 2) 
+        	return;
+        
+        if (eyes[0].x < eyes[1].x) {
+        	eyeLeft = eyes[0];
+        	eyeRight = eyes[1];
+        }
+        else {
+        	eyeRight = eyes[0];
+        	eyeLeft = eyes[1];
+        }
+        
+		
 		Log.d(TAG,"Crop Face");
 		// Compute offsets in original image
 		int offsetH = (int) Math.floor(((float) (offs.x)) * dsize.width);
@@ -115,7 +144,7 @@ public class EyeDetector {
 		double scale = ((float) (dist)) / ((float) (reference));
 
 		// Rotate original around the left eye
-		ScaleRotateTranslate(src, rotation, eyeLeft, null, -1);
+		scaleRotateTranslate(src, rotation, eyeLeft, null, -1);
 
 		// crop the rotated image
 		Point crop = new Point(eyeLeft.x - scale * offsetH, eyeLeft.x - scale
@@ -141,12 +170,13 @@ public class EyeDetector {
 	    Imgproc.equalizeHist(gray, gray);
 		*/
 		
-		MatOfRect eyes = new MatOfRect();
-        Rect[] eyesArray = eyes.toArray();
         Rect face = new Rect(new Point(0,0), new Point(img.width(),img.height()));
+        MatOfRect matEyes = new MatOfRect();
+        Size minSize = new Size(img.size().width*EYE_MIN_SIZE_PERCENTAGE,
+        		img.size().height*EYE_MIN_SIZE_PERCENTAGE);
+        eyesCascade.detectMultiScale(img, matEyes, 1.1, 2, 0, minSize, new Size());
         
-        eyesCascade.detectMultiScale(img, eyes, 1.1, 2, 0, new Size(30, 30), new Size());
-
+        Rect[] eyesArray = matEyes.toArray();
         int len = eyesArray.length;
         
         // The input is a face. I should recognize two eyes.
@@ -156,24 +186,15 @@ public class EyeDetector {
         if(len!=2)
         	return;
         
-        Point[] mEyes = new Point[len];
+        eyes = new Point[len];
+        radius = new int[len];
         
         for (int j = 0; j < len; j++) {
-           mEyes[j] = new Point(face.x + eyesArray[j].x + eyesArray[j].width * 0.5, 
+           eyes[j] = new Point(face.x + eyesArray[j].x + eyesArray[j].width * 0.5, 
         		   face.y + eyesArray[j].y + eyesArray[j].height * 0.5);
-
+           radius[j] = (int) Math.round((eyesArray[j].width + eyesArray[j].height) * 0.25);
         }
         
-        // Return the right place
-        
-        if (mEyes[0].x < mEyes[1].x) {
-        	eyeLeft = mEyes[0];
-        	eyeRight = mEyes[1];
-        }
-        else {
-        	eyeRight = mEyes[0];
-        	eyeLeft = mEyes[1];
-        }
 	}
 	
 	private void rotate(Mat src, Mat dst, double angle) {
@@ -188,7 +209,7 @@ public class EyeDetector {
 		return cropped;
 	}
 
-	private void ScaleRotateTranslate(Mat img, double angle, Point center,
+	private void scaleRotateTranslate(Mat img, double angle, Point center,
 			Point nCenter, double scale /* resample = Image.BICUBIC ? */) {
 
 		if (scale == -1 || center == null) {
@@ -241,5 +262,11 @@ public class EyeDetector {
 		
 	}
 	
+	public Point[] getPoints() {
+		return eyes;
+	}
 	
+	public int[] radius() {
+		return radius;
+	}
 }
