@@ -292,11 +292,6 @@ public class EIMPreferences {
 		recognitionCutModePercentageDefault = mContext
 				.getString(R.string.recognition_cutmode_percentage_default);
 
-		recognitionThresholdKey = mContext
-				.getString(R.string.recognition_cutmode_percentage);
-		recognitionThresholdDefault = mContext
-				.getString(R.string.recognition_cutmode_percentage_default);
-
 		LBPHRadiusKey = mContext.getString(R.string.recognition_lbph_radius);
 		LBPHRadiusDefault = mContext
 				.getString(R.string.recognition_lbph_radius_default);
