@@ -135,18 +135,18 @@ public class FaceDetector {
 		if (mMinAbsoluteFaceSize == null) {
 			final double minSize = (scene.cols() <= scene.rows() ? scene.cols()
 					: scene.rows());
-			final double minRelativeSize = minSize * mMinRelativeFaceSize;
-			final double maxRelativeSize = minSize * mMaxRelativeFaceSize;
+			final double minAbsoluteSize = minSize * mMinRelativeFaceSize;
+			mMinAbsoluteFaceSize = new Size(minAbsoluteSize,
+					minAbsoluteSize);
 
 			switch (mDetectorType) {
 			case JAVA:
-				mMinAbsoluteFaceSize = new Size(minRelativeSize,
-						minRelativeSize);
-				mMaxAbsoluteFaceSize = new Size(maxRelativeSize,
-						maxRelativeSize);
+				final double maxAbsoluteSize = minSize * mMaxRelativeFaceSize;
+				mMaxAbsoluteFaceSize = new Size(maxAbsoluteSize,
+						maxAbsoluteSize);
 				break;
 			case NATIVE:
-				mNativeDetector.setMinFaceSize((int) minRelativeSize);
+				mNativeDetector.setMinFaceSize((int) minAbsoluteSize);
 				break;
 			}
 		}
