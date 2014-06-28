@@ -13,13 +13,10 @@ import org.opencv.core.Size;
 import org.opencv.objdetect.CascadeClassifier;
 
 import android.content.Context;
-import android.util.Log;
 
 import com.eim.R;
 
 public class FaceDetector {
-	private static final String TAG = "FaceDetector";
-
 	public enum Type {
 		JAVA, NATIVE
 	}
@@ -110,7 +107,6 @@ public class FaceDetector {
 					resId = R.raw.lbpcascade_frontalface;
 					break;
 				default:
-					Log.e(TAG, "classifier is null!");
 					return;
 				}
 

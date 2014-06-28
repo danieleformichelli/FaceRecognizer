@@ -185,18 +185,18 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 		}
 
 		private void signalSettingsChange(String key) {
-			if (hasCategory(key, recognitionCategoryKey))
+			if (hasCategory(key, recognitionCategoryKey)) {
 				if (!key.equals(recognitionThresholdKey))
 					activity.getFacesManagementFragment()
 							.recognitionSettingsChanged();
-				else if (hasCategory(key, detectionCategoryKey))
-					activity.recreateFaceDetector();
-				else if (key.equals(multithreadingKey)) {
-					final boolean isMultithreadingEnabled = mPreferenceScreen
-							.getSharedPreferences().getBoolean(
-									multithreadingKey, false);
-					activity.setMultithreading(isMultithreadingEnabled);
-				}
+			} else if (hasCategory(key, detectionCategoryKey)) {
+				activity.recreateFaceDetector();
+			} else if (key.equals(multithreadingKey)) {
+				final boolean isMultithreadingEnabled = mPreferenceScreen
+						.getSharedPreferences().getBoolean(multithreadingKey,
+								false);
+				activity.setMultithreading(isMultithreadingEnabled);
+			}
 		}
 
 		private boolean hasCategory(String preferenceKey, String categoryKey) {
@@ -304,8 +304,8 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 	};
 
 	private void restorePreferences() {
-//		setPreference(R.string.recognition_recognizer_type,
-//				R.string.recognition_recognizer_type_default);
+		// setPreference(R.string.recognition_recognizer_type,
+		// R.string.recognition_recognizer_type_default);
 		setPreference(R.string.recognition_threshold,
 				R.string.recognition_threshold_default);
 		setPreference(R.string.recognition_face_size,
@@ -324,10 +324,10 @@ public class MyPreferencesFragment extends PreferenceFragment implements
 				R.string.recognition_lbph_grid_x_default);
 		setPreference(R.string.recognition_lbph_grid_y,
 				R.string.recognition_lbph_grid_y_default);
-//		setPreference(R.string.recognition_eigen_components,
-//				R.string.recognition_eigen_components_default);
-//		setPreference(R.string.recognition_fisher_components,
-//				R.string.recognition_fisher_components_default);
+		// setPreference(R.string.recognition_eigen_components,
+		// R.string.recognition_eigen_components_default);
+		// setPreference(R.string.recognition_fisher_components,
+		// R.string.recognition_fisher_components_default);
 		setPreference(R.string.detection_detector_type,
 				R.string.detection_detector_type_default);
 		setPreference(R.string.detection_face_classifier,
