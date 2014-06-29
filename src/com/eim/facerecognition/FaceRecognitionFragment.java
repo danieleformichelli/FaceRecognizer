@@ -298,6 +298,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		int meterYStop = meterYEnd - info.confidence * info.rect.height / 100;
 		int meterYThreshold = meterYEnd - (int) ((1 - (double) mDistanceThreshold / mMaxThreshold) * info.rect.height);
 		
+		meterYThreshold = (meterYEnd < meterYThreshold) ? meterYEnd : meterYThreshold;
+		
 		Point emptyStart = new Point(meterXStart, meterYStart);
 		Point emptyEnd = new Point(meterXEnd - borderWidth/2, meterYStop);
 		
