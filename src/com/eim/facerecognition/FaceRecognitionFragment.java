@@ -70,6 +70,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	private SeekBar mThresholdBar;
 	private TextView mThresholdTextView;
 	private ImageButton mSwitchButton;
+	private int mMaxThreshold;
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -115,6 +116,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mThresholdBar = (SeekBar) activity.findViewById(R.id.threshold_bar);
 		mThresholdBar.setOnSeekBarChangeListener(this);
 		mThresholdBar.setProgress(mDistanceThreshold);
+		mMaxThreshold = mThresholdBar.getMax();
 
 		thumbnails = new SparseArray<Mat>();
 	}
@@ -247,21 +249,24 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				if (mCurrentCameraIndex == ControlledJavaCameraView.CAMERA_ID_FRONT)
 					faceRect.x = scene.cols() - (faceRect.x + faceRect.width);
 
-				Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);
+				int confidence = (int) (100 * (1 - distance[0] / mMaxThreshold));
+				
+				Person guess = mPeopleDatabase.getPerson(predictedLabel[0]);				
 				if (guess == null) {
-					recognizedPeople[i] = new LabelledRect(faceRect, null, null);
+					recognizedPeople[i] = new LabelledRect(faceRect, null, null, confidence);
 					continue;
 				}
-
+				
+				
 				if (distance[0] < mDistanceThreshold)
 					recognizedPeople[i] = new LabelledRect(faceRect,
-							guess.getName(), getThumbnail(predictedLabel[0]));
+							guess.getName(), getThumbnail(predictedLabel[0]), confidence);
 				else
 					recognizedPeople[i] = new LabelledRect(faceRect,
 							guess.getName()
 									+ " "
 									+ String.valueOf(((Double) distance[0])
-											.intValue()), null);
+											.intValue()), null, confidence);
 			} catch (CvException e) {
 				Log.e(TAG, "faceRect in " + faceRect.x + ", " + faceRect.y
 						+ " " + faceRect.width + "x" + faceRect.height);
@@ -278,10 +283,34 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 		Scalar color = (info.thumbnail == null) ? FACE_UNKNOWN_RECT_COLOR
 				: FACE_RECT_COLOR;
+		
+		int borderWidth = 4;
 
 		// Bounding box
 		Core.rectangle(frame, info.rect.tl(), info.rect.br(), color, 3);
-
+		
+		// Confidence Level
+		int meterXStart = info.rect.x + info.rect.width;
+		int meterXEnd = (int) (info.rect.x + info.rect.width*1.05);
+		int meterYStart = info.rect.y;
+		int meterYEnd = info.rect.y + info.rect.height;
+		
+		int meterYStop = meterYEnd - info.confidence * info.rect.height / 100;
+		int meterYThreshold = meterYEnd - (int) ((1 - (double) mDistanceThreshold / mMaxThreshold) * info.rect.height);
+		
+		Point emptyStart = new Point(meterXStart, meterYStart);
+		Point emptyEnd = new Point(meterXEnd - borderWidth/2, meterYStop);
+		
+		Point thresholdStart = new Point(meterXStart, meterYThreshold);
+		Point thresholdEnd = new Point(meterXEnd, meterYThreshold);
+		
+		Point fillStart = new Point(meterXStart, meterYStop);
+		Point fillEnd = new Point(meterXEnd, meterYEnd);
+		
+		Core.rectangle(frame, emptyStart, emptyEnd, color, borderWidth);
+		Core.rectangle(frame, fillStart, fillEnd, color, Core.FILLED);
+		Core.line(frame, thresholdStart, thresholdEnd, Scalar.all(0), borderWidth);
+		
 		if (info.text == null)
 			return;
 
@@ -359,16 +388,18 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 	}
 
 	public class LabelledRect {
-		public LabelledRect(Rect rect, String text, Mat thumbnail) {
+		public LabelledRect(Rect rect, String text, Mat thumbnail, int confidence) {
 			super();
 			this.rect = rect;
 			this.text = text;
 			this.thumbnail = thumbnail;
+			this.confidence = confidence;
 		}
 
 		public Rect rect;
 		public String text;
 		public Mat thumbnail;
+		public int confidence;
 	}
 
 	@Override
