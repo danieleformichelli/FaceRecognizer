@@ -31,7 +31,7 @@
         android:layout_toLeftOf="@+id/switch_camera_button"
         android:layout_toRightOf="@+id/threshold_text"
         android:indeterminate="false"
-        android:max="5000" />
+        android:max="@string/recognition_threshold_max_value" />
 
     <ImageButton
         android:id="@+id/switch_camera_button"

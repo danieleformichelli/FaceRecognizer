@@ -26,6 +26,7 @@
     <string name="recognition_threshold">recognition_threshold</string>
     <string name="recognition_threshold_title">Recognition threshold</string>
     <string name="recognition_threshold_default">100</string>
+    <string name="recognition_threshold_max_value">500</string>
     <string name="recognition_face_size">recognition_face_size</string>
     <string name="recognition_face_size_title">Face size (0 for no resize)</string>
     <string name="recognition_face_size_default">150</string>
@@ -68,7 +69,7 @@
 
     <!-- Invalid input handler -->
 
-    <string name="recognition_invalid_threshold">The threshold must be in the range [0,5000]</string>
+    <string name="recognition_invalid_threshold">The threshold must be in the range [0,500]</string>
     <string name="recognition_invalid_cutmode_percentage">The cut percentage must be in the range [0,25]</string>
     <string name="recognition_lbph_invalid_radius">The radius must be greater than zero</string>
     <string name="recognition_lbph_invalid_neighbours">The neighbours number must be greater than zero</string>
