@@ -56,7 +56,7 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 
 	private Mat mRgba;
 	private Mat mSceneForRecognizer;
-	private LabelledRect[] mLabelsForDrawer;
+	private LabelledRect[] mLabelsForDrawer = new LabelledRect[0];
 
 	private SparseArray<Mat> thumbnails;
 	private int mThumbnailSize = 25;
@@ -182,10 +182,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 		mSwitchButton.setEnabled(false);
 		mThresholdBar.setEnabled(false);
 
-		if (mRecognitionThread != null) {
+		if (mRecognitionThread != null)
 			mRecognitionThread.interrupt();
-			mRecognitionThread = null;
-		}
 
 		mSceneForRecognizer.release();
 		mRgba.release();
@@ -203,6 +201,8 @@ public class FaceRecognitionFragment extends Fragment implements Swipeable,
 				Rect[] facesArray = mFaceDetector.detect(mSceneForRecognizer);
 				mLabelsForDrawer = recognizeFaces(myMat, facesArray);
 			}
+			myMat.release();
+			mRecognitionThread = null;
 		}
 	};
 
